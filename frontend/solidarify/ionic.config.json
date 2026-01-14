@@ -1,0 +1,7 @@
+{
+  "name": "solidarify",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
