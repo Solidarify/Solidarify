@@ -35,3 +35,21 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+// variables.scss
+:root {
+  --solidarify-primary: #10b981;
+  --solidarify-primary-dark: #059669;
+  --solidarify-primary-light: #d1fae5;
+  --solidarify-primary-lighter: #ecfdf5;
+  --solidarify-accent: #6ee7b7;
+  --solidarify-text: #064e3b;
+  --solidarify-text-secondary: #059669;
+  
+  --ion-color-primary: #10b981;
+  --ion-color-primary-rgb: 16, 185, 129;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #059669;
+  --ion-color-primary-tint: #6ee7b7;
+}
