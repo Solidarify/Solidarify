@@ -8,10 +8,11 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class HomePage {
-  
-  constructor(private router: Router) {}
+
+  constructor(private router: Router) { }
 
   navigateTo(route: string) {
     this.router.navigate([route]);
   }
 }
+// Hola
