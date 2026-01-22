@@ -1,69 +1,212 @@
+<ion-header class="app-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <ion-icon name="heart-circle" class="header-logo"></ion-icon>
+      <span class="app-name-header">Solidarify</span>
+    </div>
+
+    <!-- Botones auth (solo si NO hay formularios) -->
+    <div class="header-right" *ngIf="authMode === 'none' && !isLoggedIn">
+      <div class="auth-buttons">
+        <ion-button fill="clear" color="primary" size="small" (click)="showLogin()">
+          Iniciar sesión
+        </ion-button>
+        <ion-button color="primary" size="small" (click)="showRegister()">
+          Registrarse
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Usuario logueado -->
+    <div class="user-section" *ngIf="isLoggedIn && authMode === 'none'">
+      <ion-avatar class="user-avatar">
+        <ion-icon name="person-circle"></ion-icon>
+      </ion-avatar>
+      <span class="user-name">{{ currentUser?.nombre }}</span>
+      <ion-button fill="clear" size="small" color="danger" (click)="logout()">
+        Salir
+      </ion-button>
+    </div>
+  </div>
+</ion-header>
+
 <ion-content [fullscreen]="true" class="home-content">
   <div class="container">
     
-    <div class="hero-section">
-      <div class="logo-container">
-        <ion-icon name="heart-circle" class="logo-icon"></ion-icon>
-        <h1 class="app-name">Solidarify</h1>
-      </div>
-      <p class="tagline">Conectando solidaridad con quienes más lo necesitan</p>
-    </div>
-
-    <div class="actions-grid">
-      
-      <ion-card class="action-card" (click)="navigateTo('/organizador')">
+    <!-- FORMULARIO LOGIN (deshabilita TODO) -->
+    <div *ngIf="authMode === 'login'" class="auth-overlay">
+      <ion-card class="auth-card">
+        <ion-card-header>
+          <ion-card-title class="login-title">Iniciar sesión</ion-card-title>
+          <ion-card-subtitle>Selecciona tu rol</ion-card-subtitle>
+        </ion-card-header>
         <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="megaphone" class="card-icon"></ion-icon>
+          <ion-item class="role-select-item">
+            <ion-label>Rol</ion-label>
+            <ion-select [(ngModel)]="selectedRole" (ionChange)="onRoleChange($event)">
+              <ion-select-option value="ORGANIZADOR">Organizador</ion-select-option>
+              <ion-select-option value="ONG">ONG</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <form *ngIf="selectedRole" (ngSubmit)="submitLogin()">
+            <ion-item>
+              <ion-label position="floating">Email <span class="required">*</span></ion-label>
+              <ion-input type="email" [(ngModel)]="loginForm.email" name="email" maxlength="150" required></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="floating">Contraseña <span class="required">*</span></ion-label>
+              <ion-input type="password" [(ngModel)]="loginForm.password" name="password" required></ion-input>
+            </ion-item>
+            <div class="auth-actions">
+              <ion-button expand="block" color="primary" type="submit" [disabled]="!loginForm.email || !loginForm.password">
+                Entrar como {{ selectedRole === 'ONG' ? 'ONG' : 'Organizador' }}
+              </ion-button>
+              <ion-button expand="block" fill="clear" color="medium" (click)="closeForm()">Cancelar</ion-button>
+            </div>
+          </form>
+          <div *ngIf="!selectedRole" class="role-hint">
+            <ion-icon name="arrow-down-circle"></ion-icon>
+            <p>Selecciona tu rol para continuar</p>
           </div>
-          <h2>Organizar campaña</h2>
-          <p>Crea propuestas solidarias para tu comunidad</p>
         </ion-card-content>
       </ion-card>
+    </div>
 
-      <ion-card class="action-card" (click)="navigateTo('/ong')">
+    <!-- FORMULARIO REGISTER (mapeado a BD) -->
+    <div *ngIf="authMode === 'register'" class="auth-overlay">
+      <ion-card class="auth-card">
+        <ion-card-header>
+          <ion-card-title class="register-title">Crear cuenta</ion-card-title>
+          <ion-card-subtitle>Selecciona tu rol</ion-card-subtitle>
+        </ion-card-header>
         <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="people" class="card-icon"></ion-icon>
+          <ion-item class="role-select-item">
+            <ion-label>Rol</ion-label>
+            <ion-select [(ngModel)]="selectedRole" (ionChange)="onRoleChange($event)">
+              <ion-select-option value="ORGANIZADOR">Organizador</ion-select-option>
+              <ion-select-option value="ONG">ONG</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <form *ngIf="selectedRole" (ngSubmit)="submitRegister()">
+            <!-- Usuario (campos comunes) -->
+            <ion-item>
+              <ion-label position="floating">Nombre <span class="required">*</span></ion-label>
+              <ion-input [(ngModel)]="registerForm.nombre" name="nombre" maxlength="100" required></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="floating">Email <span class="required">*</span></ion-label>
+              <ion-input type="email" [(ngModel)]="registerForm.email" name="email" maxlength="150" required></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="floating">Contraseña <span class="required">*</span></ion-label>
+              <ion-input type="password" [(ngModel)]="registerForm.password" name="password" minlength="6" required></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="floating">Teléfono</ion-label>
+              <ion-input type="tel" [(ngModel)]="registerForm.telefono" name="telefono" maxlength="20"></ion-input>
+            </ion-item>
+
+            <!-- ORGANIZADOR - Tabla Organizador -->
+            <div *ngIf="selectedRole === 'ORGANIZADOR'" class="role-section">
+              <h3 class="role-title">Datos Organizador</h3>
+              <ion-item><ion-label position="floating">Nombre entidad <span class="required">*</span></ion-label><ion-input [(ngModel)]="registerForm.orgNombre" name="orgNombre" maxlength="150" required></ion-input></ion-item>
+              <ion-item><ion-label position="floating">CIF <span class="required">*</span></ion-label><ion-input [(ngModel)]="registerForm.orgCif" name="orgCif" maxlength="20" required></ion-input></ion-item>
+              <ion-item><ion-label position="floating">Email entidad <span class="required">*</span></ion-label><ion-input type="email" [(ngModel)]="registerForm.orgEmail" name="orgEmail" maxlength="150" required></ion-input></ion-item>
+              <ion-item><ion-label position="floating">Cargo</ion-label><ion-input [(ngModel)]="registerForm.orgCargo" name="orgCargo" maxlength="100"></ion-input></ion-item>
+              <ion-item><ion-label position="floating">Zona responsable</ion-label><ion-input [(ngModel)]="registerForm.orgZona" name="orgZona" maxlength="100"></ion-input></ion-item>
+            </div>
+
+            <!-- ONG - Tabla PerfilONG -->
+            <div *ngIf="selectedRole === 'ONG'" class="role-section">
+              <h3 class="role-title">Datos ONG</h3>
+              <ion-item><ion-label position="floating">Nombre legal <span class="required">*</span></ion-label><ion-input [(ngModel)]="registerForm.ongNombreLegal" name="ongNombreLegal" maxlength="150" required></ion-input></ion-item>
+              <ion-item><ion-label position="floating">CIF <span class="required">*</span></ion-label><ion-input [(ngModel)]="registerForm.ongCif" name="ongCif" maxlength="20" required></ion-input></ion-item>
+              <ion-item><ion-label position="floating">Web</ion-label><ion-input type="url" [(ngModel)]="registerForm.ongWeb" name="ongWeb" maxlength="200"></ion-input></ion-item>
+            </div>
+
+            <div class="auth-actions">
+              <ion-button expand="block" color="primary" type="submit" [disabled]="!registerForm.nombre || !registerForm.email || !registerForm.password">
+                Crear cuenta {{ selectedRole === 'ONG' ? 'ONG' : 'Organizador' }}
+              </ion-button>
+              <ion-button expand="block" fill="clear" color="medium" (click)="closeForm()">Cancelar</ion-button>
+            </div>
+          </form>
+          <div *ngIf="!selectedRole" class="role-hint">
+            <ion-icon name="arrow-down-circle"></ion-icon>
+            <p>Selecciona tu rol para continuar</p>
           </div>
-          <h2>Soy una ONG</h2>
-          <p>Recibe donaciones para tu organización</p>
         </ion-card-content>
       </ion-card>
-
-      <ion-card class="action-card" (click)="navigateTo('/propuestas')">
-        <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="list" class="card-icon"></ion-icon>
-          </div>
-          <h2>Ver propuestas</h2>
-          <p>Descubre las campañas activas disponibles</p>
-        </ion-card-content>
-      </ion-card>
-
     </div>
 
-    <div class="stats-section">
-      <div class="stat-item">
-        <ion-icon name="gift" class="stat-icon"></ion-icon>
-        <h3>120+</h3>
-        <p>Propuestas activas</p>
+    <ng-container *ngIf="authMode === 'none'">
+      <div class="hero-section">
+        <div class="logo-container">
+          <ion-icon name="heart-circle" class="logo-icon"></ion-icon>
+          <h1 class="app-name">Solidarify</h1>
+        </div>
+        <p class="tagline">Conectando solidaridad con quienes más lo necesitan</p>
       </div>
-      <div class="stat-item">
-        <ion-icon name="heart" class="stat-icon"></ion-icon>
-        <h3>50+</h3>
-        <p>ONGs colaboradoras</p>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="people-circle" class="stat-icon"></ion-icon>
-        <h3>1000+</h3>
-        <p>Personas ayudadas</p>
-      </div>
-    </div>
 
-    <div class="footer">
-      <p>¿Ya tienes cuenta? <a (click)="navigateTo('/login')">Iniciar sesión</a></p>
-    </div>
+      <div class="actions-grid">
+        <ion-card class="action-card" (click)="navigateTo('/organizador')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="megaphone" class="card-icon"></ion-icon>
+            </div>
+            <h2>Organizar campaña</h2>
+            <p>Crea propuestas solidarias para tu comunidad</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" (click)="navigateTo('/ong')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="people" class="card-icon"></ion-icon>
+            </div>
+            <h2>Soy una ONG</h2>
+            <p>Recibe donaciones para tu organización</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" (click)="navigateTo('/propuestas')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="list" class="card-icon"></ion-icon>
+            </div>
+            <h2>Ver propuestas</h2>
+            <p>Descubre las campañas activas disponibles</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="stats-section">
+        <div class="stat-item">
+          <ion-icon name="gift" class="stat-icon"></ion-icon>
+          <h3>120+</h3>
+          <p>Propuestas activas</p>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="heart" class="stat-icon"></ion-icon>
+          <h3>50+</h3>
+          <p>ONGs colaboradoras</p>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="people-circle" class="stat-icon"></ion-icon>
+          <h3>1000+</h3>
+          <p>Personas ayudadas</p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>¿Ya tienes cuenta? 
+          <span *ngIf="!isLoggedIn" (click)="showLogin()" class="login-link">Iniciar sesión</span>
+          <span *ngIf="isLoggedIn" class="logged-in-text">Bienvenid@ {{ currentUser?.nombre }}</span>
+        </p>
+      </div>
+    </ng-container>
 
   </div>
 </ion-content>
