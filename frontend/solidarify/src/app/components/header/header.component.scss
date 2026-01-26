@@ -1,0 +1,13 @@
+.app-header {
+  --background: var(--ion-color-primary);
+  
+  ion-title {
+    font-weight: bold;
+  }
+  
+  @media (min-width: 768px) {
+    ion-button {
+      --padding-start: 8px;  
+    }
+  }
+}

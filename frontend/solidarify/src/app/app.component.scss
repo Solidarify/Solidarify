@@ -1,0 +1,9 @@
+ion-header {
+  --offset-top: env(safe-area-inset-top); 
+  z-index: 1000;  
+}
+
+ion-content {
+  --offset-top: 56px;  
+  --padding-top: var(--offset-top);
+}

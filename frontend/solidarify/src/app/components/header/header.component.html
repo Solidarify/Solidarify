@@ -1,0 +1,26 @@
+<ion-header class="app-header">
+  <ion-toolbar color="primary">
+    <ion-title  class="logo-title" >
+      
+      <div (click)="goToHome()"  class="title-text">Solidarify</div>
+    </ion-title>
+    
+    <ion-buttons slot="end" *ngIf="authMode === 'none' && !isLoggedIn">
+      <ion-button fill="clear" (click)="showLogin()">
+        <ion-icon name="log-in-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" (click)="showRegister()">
+        <ion-icon name="person-add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <ion-buttons slot="end" *ngIf="isLoggedIn && authMode === 'none'">
+      <ion-avatar slot="icon-only">
+        <ion-icon name="person-circle"></ion-icon>
+      </ion-avatar>
+      <ion-button fill="clear" color="light" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

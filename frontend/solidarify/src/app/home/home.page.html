@@ -1,69 +1,63 @@
 <ion-content [fullscreen]="true" class="home-content">
   <div class="container">
-    
-    <div class="hero-section">
-      <div class="logo-container">
-        <ion-icon name="heart-circle" class="logo-icon"></ion-icon>
-        <h1 class="app-name">Solidarify</h1>
+    <ng-container>
+      <div class="hero-section">
+        <div class="logo-container">
+          <ion-icon name="heart-circle" class="logo-icon"></ion-icon>
+          <h1 class="app-name">Solidarify</h1>
+        </div>
+        <p class="tagline">Conectando solidaridad con quienes más lo necesitan</p>
       </div>
-      <p class="tagline">Conectando solidaridad con quienes más lo necesitan</p>
-    </div>
 
-    <div class="actions-grid">
-      
-      <ion-card class="action-card" (click)="navigateTo('/organizador')">
-        <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="megaphone" class="card-icon"></ion-icon>
-          </div>
-          <h2>Organizar campaña</h2>
-          <p>Crea propuestas solidarias para tu comunidad</p>
-        </ion-card-content>
-      </ion-card>
+      <div class="actions-grid">
+        <ion-card class="action-card" (click)="navigateTo('/organizador')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="megaphone" class="card-icon"></ion-icon>
+            </div>
+            <h2>Organizar campaña</h2>
+            <p>Crea propuestas solidarias para tu comunidad</p>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card class="action-card" (click)="navigateTo('/ong')">
-        <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="people" class="card-icon"></ion-icon>
-          </div>
-          <h2>Soy una ONG</h2>
-          <p>Recibe donaciones para tu organización</p>
-        </ion-card-content>
-      </ion-card>
+        <ion-card class="action-card" (click)="navigateTo('/ong')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="people" class="card-icon"></ion-icon>
+            </div>
+            <h2>Soy una ONG</h2>
+            <p>Recibe donaciones para tu organización</p>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-card class="action-card" (click)="navigateTo('/propuestas')">
-        <ion-card-content>
-          <div class="card-icon-wrapper">
-            <ion-icon name="list" class="card-icon"></ion-icon>
-          </div>
-          <h2>Ver propuestas</h2>
-          <p>Descubre las campañas activas disponibles</p>
-        </ion-card-content>
-      </ion-card>
-
-    </div>
-
-    <div class="stats-section">
-      <div class="stat-item">
-        <ion-icon name="gift" class="stat-icon"></ion-icon>
-        <h3>120+</h3>
-        <p>Propuestas activas</p>
+        <ion-card class="action-card" (click)="navigateTo('/propuestas')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="list" class="card-icon"></ion-icon>
+            </div>
+            <h2>Ver propuestas</h2>
+            <p>Descubre las campañas activas disponibles</p>
+          </ion-card-content>
+        </ion-card>
       </div>
-      <div class="stat-item">
-        <ion-icon name="heart" class="stat-icon"></ion-icon>
-        <h3>50+</h3>
-        <p>ONGs colaboradoras</p>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="people-circle" class="stat-icon"></ion-icon>
-        <h3>1000+</h3>
-        <p>Personas ayudadas</p>
-      </div>
-    </div>
 
-    <div class="footer">
-      <p>¿Ya tienes cuenta? <a (click)="navigateTo('/login')">Iniciar sesión</a></p>
-    </div>
-
+      <div class="stats-section">
+        <div class="stat-item">
+          <ion-icon name="gift" class="stat-icon"></ion-icon>
+          <h3>120+</h3>
+          <p>Propuestas activas</p>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="heart" class="stat-icon"></ion-icon>
+          <h3>50+</h3>
+          <p>ONGs colaboradoras</p>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="people-circle" class="stat-icon"></ion-icon>
+          <h3>1000+</h3>
+          <p>Personas ayudadas</p>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </ion-content>
