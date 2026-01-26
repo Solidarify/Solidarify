@@ -1,3 +1,9 @@
-<ion-app>
-  <ion-router-outlet></ion-router-outlet>
-</ion-app>
+<app-header 
+  [authMode]="authMode"
+  [isLoggedIn]="isLoggedIn"
+  [currentUser]="currentUser"
+  (onShowLogin)="showLogin()"
+  (onShowRegister)="showRegister()"
+  (onLogout)="logout()">
+</app-header>
+<ion-router-outlet></ion-router-outlet>

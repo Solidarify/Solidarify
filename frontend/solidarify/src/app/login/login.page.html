@@ -1,0 +1,55 @@
+
+<ion-content class="ion-padding" fullscreen="true">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="heart-circle" class="login-logo"></ion-icon>
+      <h1>Bienvenido a Solidarify</h1>
+    </div>
+    <div class="login-card">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <ion-item lines="full" class="ion-margin-bottom">
+        <ion-label position="floating">Email *</ion-label>
+        <ion-input 
+          formControlName="email" 
+          type="email" 
+          placeholder="ong@test.com"
+          [class.ion-invalid]="emailField.invalid && emailField.touched">
+        </ion-input>
+        <ion-note slot="error" *ngIf="emailField.invalid && emailField.touched">
+          Email válido requerido
+        </ion-note>
+      </ion-item>
+
+      <ion-item lines="full" class="ion-margin-bottom">
+        <ion-label position="floating">Contraseña *</ion-label>
+        <ion-input 
+          formControlName="password" 
+          type="password"
+          [class.ion-invalid]="passwordField.invalid && passwordField.touched">
+        </ion-input>
+        <ion-note slot="error" *ngIf="passwordField.invalid && passwordField.touched">
+          Mínimo 6 caracteres
+        </ion-note>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        color="primary" 
+        class="ion-margin-bottom"
+        [disabled]="!loginForm.valid || loginLoading">
+        <ion-spinner name="crescent" *ngIf="loginLoading"></ion-spinner>
+        <span *ngIf="!loginLoading">Entrar</span>
+      </ion-button>
+    </form>
+
+    <ion-button 
+      expand="block" 
+      fill="clear" 
+      color="medium"
+      routerLink="/register">
+      ¿Nueva cuenta? Regístrate
+    </ion-button>
+     </div>
+  </div>
+</ion-content>

@@ -1,0 +1,124 @@
+<ion-content fullscreen="true" class="ion-padding register-content">
+  <div class="register-container">
+    <div class="logo-section">
+      <ion-icon name="heart-circle" class="register-logo"></ion-icon>
+      <h1>Crear Cuenta</h1>
+      <p>Selecciona tu rol para continuar</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="stacked">Rol *</ion-label>
+        <ion-select  formControlName="role">
+          <ion-select-option value="ORGANIZADOR">Organizador</ion-select-option>
+          <ion-select-option value="ONG">ONG</ion-select-option>
+          <ion-select-option value="USER">Usuario</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Nombre *</ion-label>
+        <ion-input formControlName="nombre"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Email *</ion-label>
+        <ion-input formControlName="email" type="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Contraseña *</ion-label>
+        <ion-input formControlName="password" type="password"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Teléfono</ion-label>
+        <ion-input formControlName="telefono" type="tel"></ion-input>
+      </ion-item>
+
+      <div *ngIf="roleField?.value === 'ORGANIZADOR'" class="role-section">
+        <h3>Datos Organizador</h3>
+        
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Nombre de la Organización *</ion-label>
+          <ion-input formControlName="orgNombre"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">CIF *</ion-label>
+          <ion-input formControlName="orgCif"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Email de la Organización *</ion-label>
+          <ion-input formControlName="orgEmail" type="email"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Cargo</ion-label>
+          <ion-input formControlName="orgCargo"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Teléfono Directo</ion-label>
+          <ion-input formControlName="orgTelefonoDirecto" type="tel"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Zona Responsable</ion-label>
+          <ion-input formControlName="orgZona"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Observaciones</ion-label>
+          <ion-textarea formControlName="orgObservaciones" rows="3"></ion-textarea>
+        </ion-item>
+      </div>
+      <div *ngIf="roleField?.value === 'ONG'" class="role-section">
+        <h3>Datos ONG</h3>
+        
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Nombre Legal *</ion-label>
+          <ion-input formControlName="ongNombreLegal"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">CIF *</ion-label>
+          <ion-input formControlName="ongCif"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Descripción</ion-label>
+          <ion-textarea formControlName="ongDescripcion" rows="3"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Dirección</ion-label>
+          <ion-input formControlName="ongDireccion"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Teléfono de Contacto</ion-label>
+          <ion-input formControlName="ongTelefonoContacto" type="tel"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Sitio Web</ion-label>
+          <ion-input formControlName="ongWeb" type="url"></ion-input>
+        </ion-item>
+      </div>
+
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="ion-margin-top"
+        [disabled]="!registerForm.valid">
+        Registrarse
+      </ion-button>
+
+      <div class="login-link ion-text-center ion-margin-top">
+        <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia Sesión</a></p>
+      </div>
+    </form>
+  </div>
+</ion-content>
