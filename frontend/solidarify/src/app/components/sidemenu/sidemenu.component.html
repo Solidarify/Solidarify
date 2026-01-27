@@ -1,0 +1,97 @@
+<ion-menu contentId="main-content" type="overlay" side="start">
+  <ion-content>
+    <ion-list>
+      <!-- HEADER PERFIL -->
+      <ion-menu-toggle auto-hide="false">
+        <ion-item lines="none" class="profile-header" *ngIf="currentUser">
+          <ion-avatar slot="start">
+            <ion-icon name="person-circle" class="profile-avatar"></ion-icon>
+          </ion-avatar>
+          <div>
+            <ion-label class="profile-name">{{currentUser?.displayName}}</ion-label>
+            <p class="profile-role">{{currentUserRole | titlecase}}</p>
+          </div>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <!-- USUARIO NORMAL -->
+      <ng-container *ngIf="userRole === 'usuario'">
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/home">
+            <ion-icon name="home-outline" slot="start"></ion-icon>
+            <ion-label>Inicio</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/propuestas">
+            <ion-icon name="list-outline" slot="start"></ion-icon>
+            <ion-label>Mis propuestas</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/mensajes">
+            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+            <ion-label>Mensajes</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ng-container>
+
+      <!-- ORGANIZADOR -->
+      <ng-container *ngIf="userRole === 'organizador'">
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/home">
+            <ion-icon name="home-outline" slot="start"></ion-icon>
+            <ion-label>Dashboard</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/mis-propuestas">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            <ion-label>Mis propuestas</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <!-- Más items... -->
+      </ng-container>
+
+      <!-- ONG -->
+      <ng-container *ngIf="userRole === 'ong'">
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/home">
+            <ion-icon name="home-outline" slot="start"></ion-icon>
+            <ion-label>Dashboard</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/propuestas-recibidas">
+            <ion-icon name="gift-outline" slot="start"></ion-icon>
+            <ion-label>Propuestas recibidas</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ng-container>
+
+      <!-- ADMIN -->
+      <ng-container *ngIf="userRole === 'admin'">
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/admin/dashboard">
+            <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+            <ion-label>Dashboard Admin</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/tabs/admin/ongs-pendientes">
+            <ion-icon name="hourglass-outline" slot="start"></ion-icon>
+            <ion-label>ONGs pendientes ({{countOngsPendientes}})</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ng-container>
+
+      <!-- LOGOUT -->
+      <ion-item lines="none" *ngIf="isLoggedIn" (click)="onLogout.emit()">
+        <ion-button fill="clear" expand="block" color="danger">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          <ion-label>Cerrar sesión</ion-label>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
