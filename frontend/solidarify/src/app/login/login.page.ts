@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { Auth } from '../services/auth';  
+import { Usuario } from '../services/usuario';  
 import { finalize } from 'rxjs/operators';  
 
 @Component({
@@ -16,7 +16,7 @@ export class LoginPage implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private authService: Auth,     
+    private usuarioService: Usuario,     
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -32,20 +32,27 @@ export class LoginPage implements OnInit {
   get passwordField() { return this.loginForm.get('password')!; }
   get roleField() { return this.loginForm.get('role')!; }
 
- async onSubmit() {
+ onSubmit() {
   if (this.loginForm.valid) {
     this.loginLoading = true;
     const { email, password } = this.loginForm.value;
-    
-    const user = await this.authService.login(email, password);
-    this.loginLoading = false;
-    
-    if (user) {
-      this.router.navigate(['/home'], { replaceUrl: true });
-    } else {
-      console.log('Login falló');
-    }
+
+    this.usuarioService.login(email, password).subscribe({
+      next: (user) => {
+        this.loginLoading = false;
+        if (user) {
+          this.router.navigate(['/home'], { replaceUrl: true });
+        } else {
+          console.log('Login falló');
+        }
+      },
+      error: (err) => {
+        this.loginLoading = false;
+        console.error('Error:', err);
+      }
+    });
   }
 }
+
 
 }

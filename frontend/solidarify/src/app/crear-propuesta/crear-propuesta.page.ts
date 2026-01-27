@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/fo
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Usuario } from '../services/usuario';
+import { UsuarioModel } from '../models/usuario.model';
 
 @Component({
   selector: 'app-crear-propuesta',
@@ -14,11 +15,9 @@ export class CrearPropuestaPage implements OnInit {
 
   propuestaForm!: FormGroup;
   loading = false;
+  
+  currentUser: UsuarioModel | null = null; 
 
-  //Datos del organizador logeado
-  currentUser: any = null;
-
-  //Tipos de bienes (a partir del modelo)
   tiposBienes = [
     { id: 1, nombre: 'Alimentos no perecederos' },
     { id: 2, nombre: 'Ropa en buen estado' },
@@ -41,11 +40,18 @@ export class CrearPropuestaPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.currentUser = this.usuarioService.getCurrentUser();
-    if (!this.currentUser) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    this.usuarioService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      
+      if (!this.currentUser) {
+         const saved = localStorage.getItem('currentUser');
+         if (!saved) {
+           console.error('Usuario no logeado. Redirigiendo...');
+           this.router.navigate(['/login']);
+         }
+      }
+    });
+
     this.initForm();
   }
 
@@ -55,33 +61,31 @@ export class CrearPropuestaPage implements OnInit {
       descripcion: ['', [Validators.required, Validators.minLength(20)]],
       tipoBien: ['', Validators.required],
       lugar: ['', [Validators.required, Validators.minLength(5)]],
-      fechaInicio: ['', Validators.required],
-      fechaFin: ['', Validators.required],
+      fechaInicio: [null, Validators.required],
+      fechaFin: [null, Validators.required],
       estadoPropuesta: ['borrador', Validators.required]
     });
   }
 
-  get tituloField(): AbstractControl | null {
-    return this.propuestaForm.get('titulo');
-  }
-
-  get descripcionField(): AbstractControl | null {
-    return this.propuestaForm.get('descripcion');
-  }
-
-  get tipoBienField(): AbstractControl | null {
-    return this.propuestaForm.get('tipoBien');
-  }
-
-  get lugarField(): AbstractControl | null {
-    return this.propuestaForm.get('lugar');
-  }
+  get tituloField(): AbstractControl | null { return this.propuestaForm.get('titulo'); }
+  get descripcionField(): AbstractControl | null { return this.propuestaForm.get('descripcion'); }
+  get tipoBienField(): AbstractControl | null { return this.propuestaForm.get('tipoBien'); }
+  get lugarField(): AbstractControl | null { return this.propuestaForm.get('lugar'); }
 
   async onSubmit(): Promise<void> {
     if (this.propuestaForm.invalid) {
-      await this.showAlert('Error', 'Por favor, completa todos los campos requeridos correctamente.');
-      return;
-    }
+    this.propuestaForm.markAllAsTouched(); 
+    
+    Object.keys(this.propuestaForm.controls).forEach(key => {
+      const controlErrors = this.propuestaForm.get(key)?.errors;
+      if (controlErrors) {
+        console.log('Error en campo:', key, controlErrors);
+      }
+    });
+    
+    await this.showAlert('Error', 'Formulario inválido. Revisa los campos en rojo.');
+    return;
+  }
 
     const loading = await this.loadingCtrl.create({
       message: 'Creando propuesta...',
@@ -89,25 +93,29 @@ export class CrearPropuestaPage implements OnInit {
     await loading.present();
 
     try {
-      //Simular guardado (igual que register console.log)
       const formData = this.prepareFormData();
       console.log('Datos propuesta a enviar:', formData);
 
-      // TODO: Aquí conectar con PropuestaService.create()
+      // SIMULACIÓN DE GUARDADO
+      //  await this.propuestaService.create(formData).toPromise();
       
+      // Simulamos un retardo de red de 1 segundo
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       await loading.dismiss();
-      await this.showAlert('¡Éxito!', 'Propuesta creada correctamente como borrador.');
+      await this.showAlert('¡Éxito!', 'Propuesta creada correctamente.');
       this.router.navigate(['/tabs/mis-propuestas']);
+
     } catch (error) {
       await loading.dismiss();
-      await this.showAlert('Error', 'Ocurrió un error. Inténtalo de nuevo.');
-      console.error('Error crear propuesta:', error);
+      await this.showAlert('Error', 'Ocurrió un error al guardar.');
+      console.error(error);
     }
   }
 
   private prepareFormData(): any {
     return {
-      idOrganizador: this.currentUser.idUsuario,
+      idOrganizador: this.currentUser?.idUsuario, 
       idTipoBien: parseInt(this.propuestaForm.value.tipoBien),
       titulo: this.propuestaForm.value.titulo,
       descripcion: this.propuestaForm.value.descripcion,
@@ -115,7 +123,7 @@ export class CrearPropuestaPage implements OnInit {
       fechaInicio: this.propuestaForm.value.fechaInicio,
       fechaFin: this.propuestaForm.value.fechaFin,
       estadoPropuesta: this.propuestaForm.value.estadoPropuesta,
-      fechaCreacion: new Date()
+      fechaCreacion: new Date().toISOString() 
     };
   }
 
@@ -126,6 +134,18 @@ export class CrearPropuestaPage implements OnInit {
       buttons: ['OK'],
     });
     await alert.present();
+  }
+
+  fechaCambiada(campo: string, event: any) {
+    const valorFecha = event.detail.value;
+    const control = this.propuestaForm.get(campo);
+    
+    if (control) {
+      control.setValue(valorFecha, { emitEvent: false });
+      control.markAsTouched();
+      control.markAsDirty();
+      control.updateValueAndValidity();
+    }
   }
 
 }
