@@ -1,0 +1,72 @@
+<ion-content fullscreen="true" class="ion-padding crear-propuesta-content">
+  <div class="register-container">
+    <div class="logo-section">
+      <ion-icon name="add-circle" class="register-logo"></ion-icon>
+      <h1>Nueva Propuesta</h1>
+      <p>Completa los datos de tu recogida solidaria</p>
+    </div>
+
+    <form [formGroup]="propuestaForm" (ngSubmit)="onSubmit()">
+      
+      <!--Título-->
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Título *</ion-label>
+        <ion-input formControlName="titulo"></ion-input>
+      </ion-item>
+
+      <!--Descripción-->
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Descripción detallada *</ion-label>
+        <ion-textarea formControlName="descripcion" rows="4"></ion-textarea>
+      </ion-item>
+
+      <!--Tipo de bien-->
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Tipo de bien *</ion-label>
+        <ion-select formControlName="tipoBien">
+          <ion-select-option *ngFor="let tipo of tiposBienes" [value]="tipo.id">
+            {{tipo.nombre}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!--Lugar-->
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Lugar exacto *</ion-label>
+        <ion-input formControlName="lugar"></ion-input>
+      </ion-item>
+
+      <!--Fechas-->
+      <div class="date-section">
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Fecha inicio *</ion-label>
+          <ion-datetime formControlName="fechaInicio" displayFormat="DD MMM YYYY"></ion-datetime>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-bottom">
+          <ion-label position="floating">Fecha fin *</ion-label>
+          <ion-datetime formControlName="fechaFin" displayFormat="DD MMM YYYY"></ion-datetime>
+        </ion-item>
+      </div>
+
+      <!--Estado inicial-->
+      <ion-item lines="none" class="ion-margin-bottom">
+        <ion-label position="floating">Estado inicial</ion-label>
+        <ion-select formControlName="estadoPropuesta">
+          <ion-select-option *ngFor="let estado of estadosPropuesta" [value]="estado.value">
+            {{estado.label}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!--Botón submit -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="ion-margin-top"
+        [disabled]="!propuestaForm.valid || loading">
+        Crear Propuesta
+      </ion-button>
+    </form>
+  </div>
+</ion-content>
