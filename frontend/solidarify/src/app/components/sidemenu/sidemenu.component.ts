@@ -7,7 +7,7 @@ import { Organizador } from '../../services/organizador';  // Ajusta la ruta
   templateUrl: './sidemenu.component.html',
   styleUrls: ['./sidemenu.component.scss'],
 })
-export class SidemenuComponent  implements OnInit, OnChanges {
+export class SidemenuComponent implements OnInit, OnChanges {
 
   @Input() currentUser: any = null;
   @Input() isLoggedIn = false;
@@ -20,7 +20,7 @@ export class SidemenuComponent  implements OnInit, OnChanges {
   ongEstadoVerificacion = '';
   countOngsPendientes = 0;
 
-  constructor( private usuarioService: Usuario,
+  constructor(private usuarioService: Usuario,
     private perfilOngService: PerfilOng,
     private organizadorService: Organizador) { }
 
@@ -39,7 +39,7 @@ export class SidemenuComponent  implements OnInit, OnChanges {
   //Detectar rol de usuario (basado en datos fake)
   detectarRol() {
     if (!this.currentUser) {
-      this.userRole = '';
+      this.userRole = 'usuario';
       return;
     }
 
@@ -47,18 +47,18 @@ export class SidemenuComponent  implements OnInit, OnChanges {
     if (this.currentUser.idUsuario === 1) {
       this.userRole = 'admin';
       this.currentUserRole = 'Administrador';
-    } 
+    }
     // Organizador (ID 2)
     else if (this.currentUser.idUsuario === 2) {
       this.userRole = 'organizador';
       this.currentUserRole = 'Organizador';
-    } 
+    }
     // ONG (ID 5)
     else if (this.currentUser.idUsuario === 5) {
       this.userRole = 'ong';
       this.currentUserRole = 'ONG';
       this.ongEstadoVerificacion = 'pendiente'; // Por defecto
-    } 
+    }
     // Usuario normal
     else {
       this.userRole = 'usuario';
