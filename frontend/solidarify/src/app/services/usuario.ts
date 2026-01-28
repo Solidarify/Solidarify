@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, delay, throwError } from 'rxjs';
 import { UsuarioModel } from '../models/usuario.model';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Usuario {
   
-  //Datos falsos
-  private usuariosFake: UsuarioModel[] = [
+  //Datos falsos (BD real)
+   private usuariosFake: UsuarioModel[] = [
     UsuarioModel.fromApi({
       Id_Usuario: 1,
       Nombre: 'Admin General',
@@ -37,27 +39,118 @@ export class Usuario {
     })
   ];
 
-  //Simular login
-  login(email: string, password: string): UsuarioModel | null {
-    const usuario = this.usuariosFake.find(u => 
-      u.email === email && u.passwordHash.includes('hash')
-    );
-    
-    console.log('Login simulado:', { email, encontrado: !!usuario });
-    return usuario || null;
+  //Estado de usuario actual (login/logout)
+  private currentUserSubject = new BehaviorSubject<UsuarioModel | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    // Recuperar usuario persistente
+    const saved = localStorage.getItem('currentUser');
+    if (saved) {
+      const usuario = JSON.parse(saved) as UsuarioModel;
+      this.currentUserSubject.next(new UsuarioModel(usuario));
+    }
   }
 
-  //Obtener todos los usuarios
-  getAll(): UsuarioModel[] {
-    console.log('Usuarios fake cargados:', this.usuariosFake.length);
-    return [...this.usuariosFake]; // copia para no mutar
+  //Simular login (cambio a HTTP)
+  login(email: string, password: string): Observable<UsuarioModel | null> {
+    console.log('Login intento:', email);
+    
+    return of(null).pipe(
+      delay(1000), // Simular latencia red
+      map(() => {
+        const usuario = this.usuariosFake.find(u => 
+          u.email === email.toLowerCase() && 
+          u.passwordHash.includes('hash')
+        );
+        
+        if (usuario) {
+          console.log('Login OK:', usuario.displayName);
+          this.currentUserSubject.next(usuario);
+          localStorage.setItem('currentUser', JSON.stringify(usuario));
+          return usuario;
+        }
+        
+        console.log('Credenciales inválidas');
+        return null;
+      })
+    );
+  }
+
+  //Simular logout
+  logout(): void {
+    console.log('Logout');
+    this.currentUserSubject.next(null);
+    localStorage.removeItem('currentUser');
+  }
+
+  //Obtener todos los usuarios (cambio a HTTP)
+  getAll(): Observable<UsuarioModel[]> {
+    console.log('Cargando todos usuarios...');
+    return of([...this.usuariosFake]).pipe(
+      delay(500) // Simular carga
+    );
   }
 
   //Obtener por ID
-  getById(id: number): UsuarioModel | null {
-    const usuario = this.usuariosFake.find(u => u.idUsuario === id);
-    console.log('Usuario por ID:', id, usuario?.displayName);
-    return usuario || null;
+  getById(id: number): Observable<UsuarioModel | null> {
+    console.log('Buscando usuario ID:', id);
+    return of(this.usuariosFake.find(u => u.idUsuario === id) || null).pipe(
+      delay(300)
+    );
+  }
+
+  //CRUD
+  create(usuarioData: Partial<UsuarioModel>): Observable<UsuarioModel> {
+    console.log('Creando usuario:', usuarioData);
+    const nuevo = new UsuarioModel({
+      ...usuarioData,
+      idUsuario: Date.now(), // Simular auto_increment
+      activo: true
+    });
+    
+    this.usuariosFake.unshift(nuevo);
+    return of(nuevo).pipe(delay(800));
+  }
+
+  update(id: number, usuarioData: Partial<UsuarioModel>): Observable<UsuarioModel> {
+    console.log('Actualizando usuario ID:', id);
+    const index = this.usuariosFake.findIndex(u => u.idUsuario === id);
+    
+    if (index !== -1) {
+      this.usuariosFake[index] = new UsuarioModel({
+        ...this.usuariosFake[index],
+        ...usuarioData
+      });
+      return of(this.usuariosFake[index]).pipe(delay(600));
+    }
+    
+    return throwError(() => new Error('Usuario no encontrado')).pipe(delay(300));
+  }
+
+  delete(id: number): Observable<boolean> {
+    console.log('Eliminando usuario ID:', id);
+    const index = this.usuariosFake.findIndex(u => u.idUsuario === id);
+    
+    if (index !== -1) {
+      this.usuariosFake.splice(index, 1);
+      return of(true).pipe(delay(400));
+    }
+    
+    return of(false).pipe(delay(200));
+  }
+
+  //Utilidades
+  getCurrentUser(): UsuarioModel | null {
+    return this.currentUserSubject.value;
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.currentUserSubject.value;
+  }
+
+  getActivos(): Observable<UsuarioModel[]> {
+    return of(this.usuariosFake.filter(u => u.isActive)).pipe(delay(400));
   }
 
 }
