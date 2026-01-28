@@ -1,20 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular'; 
 import { ListaPropuestasPageRoutingModule } from './lista-propuestas-routing.module';
-
 import { ListaPropuestasPage } from './lista-propuestas.page';
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    IonicModule,
+    ReactiveFormsModule,
+    IonicModule, 
     ListaPropuestasPageRoutingModule
   ],
-  declarations: [ListaPropuestasPage]
+  declarations: [
+    ListaPropuestasPage,
+    PropuestaDetalleComponent
+  ]
 })
 export class ListaPropuestasPageModule {}

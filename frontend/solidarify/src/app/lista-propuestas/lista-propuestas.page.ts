@@ -1,17 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { Usuario } from '../services/usuario';
+import { ModalController } from '@ionic/angular';
+import { Usuario } from '../services/usuario'; 
 import { Propuesta } from '../services/propuesta';
+
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
   selector: 'app-lista-propuestas',
   templateUrl: './lista-propuestas.page.html',
   styleUrls: ['./lista-propuestas.page.scss'],
+  standalone: false
 })
 export class ListaPropuestasPage implements OnInit {
-
+  
   propuestas$!: Observable<any[]>;
   filtroForm!: FormGroup;
   currentUser: any = null;
@@ -21,13 +25,19 @@ export class ListaPropuestasPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private usuarioService: Usuario,
-    private propuestaService: Propuesta
+    private propuestaService: Propuesta,
+    private modalCtrl: ModalController 
   ) { }
 
   ngOnInit() {
     this.currentUser = this.usuarioService.getCurrentUser();
+    
     this.initFiltroForm();
     this.cargarPropuestas();
+  }
+
+  get searchControl(): FormControl {
+    return this.filtroForm.get('search') as FormControl;
   }
 
   initFiltroForm() {
@@ -35,16 +45,18 @@ export class ListaPropuestasPage implements OnInit {
       search: '',
       tipoBien: '',
       lugar: '',
-      estado: 'publicada', // Por defecto solo públicas
+      estado: 'publicada', 
       fechaInicio: '',
       organizador: ''
     });
 
-    // Filtro reactivo(busca mientras escribes)
     this.filtroForm.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap(filtros => this.propuestaService.getFiltradas(filtros))
+      debounceTime(500), 
+      distinctUntilChanged(), 
+      switchMap(filtros => {
+        this.loading = true;
+        return this.propuestaService.getFiltradas(filtros);
+      })
     ).subscribe(propuestas => {
       this.propuestas$ = of(propuestas);
       this.totalPropuestas = propuestas.length;
@@ -61,7 +73,20 @@ export class ListaPropuestasPage implements OnInit {
     });
   }
 
-  // Filtros por campos SQL
+  async verDetalle(propuesta: any) {
+    const modal = await this.modalCtrl.create({
+      component: PropuestaDetalleComponent,
+      componentProps: { 
+        propuesta: propuesta 
+      },
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+      cssClass: 'propuesta-modal-sheet' 
+    });
+    
+    return await modal.present();
+  }
+
   limpiarFiltros() {
     this.filtroForm.reset({ estado: 'publicada' });
   }
@@ -69,5 +94,4 @@ export class ListaPropuestasPage implements OnInit {
   trackById(index: number, propuesta: any) {
     return propuesta.Id_Propuesta;
   }
-
 }
