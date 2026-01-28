@@ -44,7 +44,6 @@ export class Usuario {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    // Recuperar usuario persistente
     const saved = localStorage.getItem('currentUser');
     if (saved) {
       const usuario = JSON.parse(saved) as UsuarioModel;
@@ -55,7 +54,6 @@ export class Usuario {
   //Simular login (cambio a HTTP)
   login(email: string, password: string): Observable<UsuarioModel | null> {
     console.log('Login intento:', email);
-    
     return of(null).pipe(
       delay(1000), // Simular latencia red
       map(() => {
@@ -64,6 +62,9 @@ export class Usuario {
           u.passwordHash.includes('hash')
         );
         
+        console.log('Usuario encontrado:', usuario);
+        console.log('Password esperado:', usuario ? usuario.passwordHash : 'N/A');
+        console.log('Password proporcionado:', password);
         if (usuario) {
           console.log('Login OK:', usuario.displayName);
           this.currentUserSubject.next(usuario);
