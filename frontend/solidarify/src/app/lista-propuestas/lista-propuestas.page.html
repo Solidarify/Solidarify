@@ -1,0 +1,108 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Propuestas Públicas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen class="propuestas-content">
+  
+  <!--Header stats-->
+  <ion-card class="stats-card">
+    <ion-card-content class="stats-content">
+      <div class="stat">
+        <h2>{{totalPropuestas}}</h2>
+        <p>Propuestas disponibles</p>
+      </div>
+      <ion-button fill="clear" color="light" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar filtros
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!--Filtros-->
+  <ion-card class="filtros-card">
+    <ion-card-header>
+      <ion-card-title>Filtros</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="filtroForm">
+        <!--Buscador titulo-->
+        <ion-item lines="none">
+          <ion-icon name="search" slot="start"></ion-icon>
+          <ion-input 
+            formControlName="search" 
+            placeholder="Buscar por título o descripción...">
+          </ion-input>
+        </ion-item>
+
+        <!--Filtro tipo bien-->
+        <ion-item lines="none">
+          <ion-label position="stacked">Tipo de bien</ion-label>
+          <ion-select formControlName="tipoBien">
+            <ion-select-option value="">Todos</ion-select-option>
+            <ion-select-option value="1">Alimentos</ion-select-option>
+            <ion-select-option value="2">Material escolar</ion-select-option>
+            <ion-select-option value="3">Ropa</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!--Lugar-->
+        <ion-item lines="none">
+          <ion-label position="floating">Lugar</ion-label>
+          <ion-input formControlName="lugar" placeholder="Ej: Vegueta, Telde...">
+          </ion-input>
+        </ion-item>
+
+        <!--Fecha inicio-->
+        <ion-item lines="none">
+          <ion-label position="floating">Desde</ion-label>
+          <ion-datetime formControlName="fechaInicio" displayFormat="DD MMM YYYY"></ion-datetime>
+        </ion-item>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!--Lista propuestas-->
+  <ion-list *ngIf="!loading">
+    <ion-list-header class="list-header">
+      <ion-label>Resultados ({{totalPropuestas}})</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let propuesta of (propuestas$ | async); trackBy: trackById" 
+              routerLink="/tabs/propuesta-detalle/{{propuesta.Id_Propuesta}}" 
+              class="propuesta-item" button>
+      
+      <!--Avatar tipo bien-->
+      <ion-avatar slot="start" class="tipo-avatar">
+        <ion-icon [name]="getIconoTipo(propuesta.Id_Tipo_Bien)"></ion-icon>
+      </ion-avatar>
+
+      <!-- CONTENIDO -->
+      <ion-label class="propuesta-label">
+        <h2>{{propuesta.Titulo}}</h2>
+        <p class="lugar">{{propuesta.Lugar}}</p>
+        <p class="descripcion">{{propuesta.Descripcion | slice:0:100}}...</p>
+        <p class="fechas">
+          📅 {{propuesta.Fecha_Inicio | date:'dd/MM'}} - {{propuesta.Fecha_Fin | date:'dd/MM'}}
+        </p>
+      </ion-label>
+
+      <!-- ESTADO + ACCIONES -->
+      <div slot="end" class="acciones">
+        <ion-badge [color]="getColorEstado(propuesta.Estado_Propuesta)" class="estado-badge">
+          {{getEstadoLabel(propuesta.Estado_Propuesta)}}
+        </ion-badge>
+        <ion-button fill="clear" size="small" routerLink="/tabs/propuesta-detalle/{{propuesta.Id_Propuesta}}">
+          Ver
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <!-- LOADING -->
+  <div class="loading-center" *ngIf="loading">
+    <ion-spinner name="dots" color="success"></ion-spinner>
+    <p>Cargando propuestas...</p>
+  </div>
+</ion-content>

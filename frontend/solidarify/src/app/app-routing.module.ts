@@ -21,6 +21,10 @@ const routes: Routes = [
   {
     path: 'crear-propuesta',
     loadChildren: () => import('./crear-propuesta/crear-propuesta.module').then( m => m.CrearPropuestaPageModule)
+  },
+  {
+    path: 'lista-propuestas',
+    loadChildren: () => import('./lista-propuestas/lista-propuestas.module').then( m => m.ListaPropuestasPageModule)
   }
 
 ];
