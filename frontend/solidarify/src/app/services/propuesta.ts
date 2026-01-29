@@ -48,12 +48,34 @@ export class Propuesta {
     })
   ];
 
+  /*
   constructor() {
     // Recuperar propuestas persistentes
     const saved = localStorage.getItem('propuestasFake');
     if (saved) {
       const savedPropuestas = JSON.parse(saved);
       this.propuestasFake.push(...savedPropuestas.map((p: any) => new PropuestaModel(p)));
+    }
+  }
+  */
+
+  //CAMBIO PARA QUE AL RECARGAR LA PÁGINA CON IONIC SERVE, SE MUESTRE LOS CAMBIOS REALIZADOS
+ //SE ALMACENAN LAS PROPUESTAS EN EL LOCAL STORAGE
+  constructor() {
+    //Carga localstorage si no hay datos
+    const saved = localStorage.getItem('propuestasFake');
+    if (saved) {
+      try {
+        const savedPropuestas = JSON.parse(saved);
+        //Reemplaza, no agrega
+        this.propuestasFake = savedPropuestas.map((p: any) => new PropuestaModel(p));
+        console.log('Datos cargados desde localStorage:', this.propuestasFake.length);
+      } catch (e) {
+        console.warn('localStorage corrupto, usando datos fake');
+      }
+    } else {
+      console.log('Sin datos en localStorage, usando fake');
+      this.saveToStorage(); //Guarda los iniciales
     }
   }
 
@@ -181,8 +203,19 @@ export class Propuesta {
     return this.propuestasFake.filter(p => p.isPublicada).length;
   }
 
+  /*
   private saveToStorage(): void {
     localStorage.setItem('propuestasFake', JSON.stringify(this.propuestasFake));
+  }
+  */
+ //CAMBIO PARA QUE AL RECARGAR LA PÁGINA CON IONIC SERVE, SE MUESTRE LOS CAMBIOS REALIZADOS
+ //SE ALMACENAN LAS PROPUESTAS EN EL LOCAL STORAGE
+  private saveToStorage(): void {
+    //Filtra duplicados
+    const uniquePropuestas = this.propuestasFake.filter((p, index, self) => 
+      index === self.findIndex(t => t.idPropuesta === p.idPropuesta)
+    );
+    localStorage.setItem('propuestasFake', JSON.stringify(uniquePropuestas));
   }
 
 }
