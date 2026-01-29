@@ -5,7 +5,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ModalController } from '@ionic/angular';
 import { Usuario } from '../services/usuario'; 
 import { Propuesta } from '../services/propuesta';
-
+import { PropuestaModel } from '../models/propuesta.model';
 import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
@@ -73,18 +73,23 @@ export class ListaPropuestasPage implements OnInit {
     });
   }
 
-  async verDetalle(propuesta: any) {
+  async verDetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({
       component: PropuestaDetalleComponent,
-      componentProps: { 
-        propuesta: propuesta 
-      },
+      componentProps: { propuesta }, //Pasa modelo tipado
       breakpoints: [0, 1],
       initialBreakpoint: 1,
-      cssClass: 'propuesta-modal-sheet' 
+      cssClass: 'propuesta-modal-sheet'
+    });
+
+    //Escucha los cambios del modal y actualiza lista
+    modal.onDidDismiss().then(result => {
+      if (result.data?.propuesta) {
+        this.cargarPropuestas(); // Recarga la lista
+      }
     });
     
-    return await modal.present();
+    await modal.present();
   }
 
   limpiarFiltros() {
@@ -92,6 +97,6 @@ export class ListaPropuestasPage implements OnInit {
   }
 
   trackById(index: number, propuesta: any) {
-    return propuesta.Id_Propuesta;
+    return propuesta.idPropuesta;
   }
 }
