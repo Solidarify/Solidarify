@@ -8,7 +8,6 @@ import { map } from 'rxjs/operators';
 })
 export class PerfilOng {
   
-  //Datos fake (BD de perfilONG)
   private ongsFake: PerfilONGModel[] = [
     new PerfilONGModel({
       idUsuario: 5,
@@ -43,7 +42,6 @@ export class PerfilOng {
   ];
 
   constructor() {
-    // Recuperar ONGs persistentes
     const saved = localStorage.getItem('ongsFake');
     if (saved) {
       const savedOngs = JSON.parse(saved);
@@ -51,7 +49,6 @@ export class PerfilOng {
     }
   }
 
-  //CRUD (cambio a HTTP)
   getAll(): Observable<PerfilONGModel[]> {
     console.log('Cargando todas las ONGs...');
     return of([...this.ongsFake]).pipe(delay(600));
@@ -109,7 +106,6 @@ export class PerfilOng {
     return throwError(() => new Error('ONG no encontrada')).pipe(delay(300));
   }
 
-  //Verificar/Rechazar (admin)
   verificar(idUsuario: number, aprobado: boolean): Observable<PerfilONGModel> {
     console.log('📋', aprobado ? 'Verificando' : 'Rechazando', 'ONG ID:', idUsuario);
     const index = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
@@ -137,7 +133,6 @@ export class PerfilOng {
     return of(false).pipe(delay(200));
   }
 
-  //Utilidades
   countVerificadas(): number {
     return this.ongsFake.filter(o => o.isVerified).length;
   }

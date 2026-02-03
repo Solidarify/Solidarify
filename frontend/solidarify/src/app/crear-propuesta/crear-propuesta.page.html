@@ -88,6 +88,7 @@
         <ion-label class="custom-label">Fecha Fin</ion-label>
         <ion-datetime-button datetime="datetime-fin"></ion-datetime-button>
         
+        <!-- Mensaje de error -->
         <div class="error-msg" *ngIf="propuestaForm.get('fechaFin')?.hasError('required') && propuestaForm.get('fechaFin')?.touched">
           <ion-icon name="alert-circle-outline"></ion-icon> Requerido
         </div>
@@ -117,13 +118,14 @@
   <ng-template>
     <ion-datetime 
       id="datetime-inicio" 
-      presentation="date" 
-      formControlName="fechaInicio"
+      presentation="date"
+      [value]="propuestaForm.get('fechaInicio')?.value"
       [showDefaultButtons]="true"
       doneText="Confirmar"
       cancelText="Cancelar"
-      (ionChange)="fechaCambiada('fechaInicio', $event)" 
-    ></ion-datetime>
+      [min]="fechaMinima"
+      (ionChange)="onFechaInicioChange($event)">
+    </ion-datetime>
   </ng-template>
 </ion-modal>
 
@@ -131,14 +133,16 @@
   <ng-template>
     <ion-datetime 
       id="datetime-fin" 
-      presentation="date" 
-      formControlName="fechaFin"
+      presentation="date"
+      [value]="propuestaForm.get('fechaFin')?.value"
       [showDefaultButtons]="true"
       doneText="Confirmar"
       cancelText="Cancelar"
-      (ionChange)="fechaCambiada('fechaFin', $event)"
-    ></ion-datetime>
+      [min]="fechaMinima"
+      (ionChange)="onFechaFinChange($event)">
+    </ion-datetime>
   </ng-template>
 </ion-modal>
+
 
 </ion-content>

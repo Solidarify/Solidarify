@@ -5,14 +5,26 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule } from '@angular/forms';
-import { HeaderComponent } from './components/header/header.component';  
 import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+
+import { HeaderComponent } from './components/header/header.component';
+import { SidemenuComponent } from './components/sidemenu/sidemenu.component';
+
 @NgModule({
   declarations: [
     AppComponent,
-    HeaderComponent 
+    HeaderComponent,
+    SidemenuComponent 
   ],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, FormsModule, HttpClientModule],
+  imports: [
+    BrowserModule,
+    CommonModule, 
+    IonicModule.forRoot(),
+    AppRoutingModule,
+    FormsModule,
+    HttpClientModule
+  ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],
 })

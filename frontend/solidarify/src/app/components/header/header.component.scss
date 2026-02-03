@@ -11,3 +11,25 @@
     }
   }
 }
+
+
+.app-header {
+  --background: var(--ion-color-primary);
+  
+  ion-title {
+    font-weight: bold;
+  }
+  
+  ion-button[fill="clear"] {
+    ion-icon[name="person-circle"] {
+      font-size: 32px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+  }
+  
+  @media (min-width: 768px) {
+    ion-button {
+      --padding-start: 8px;  
+    }
+  }
+}

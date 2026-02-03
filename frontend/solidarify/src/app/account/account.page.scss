@@ -82,25 +82,21 @@ ion-content {
             --color: #92400e;
             }
 
-            // ONG - Verde sólido
             &.ong {
             --background: #d1fae5;
             --color: #065f46;
             }
 
-            // ORGANIZADOR - Azul sólido
             &.organizador {
             --background: #dbeafe;
             --color: #1e40af;
             }
 
-            // USER - Gris sólido
             &.user {
             --background: #f3f4f6;
             --color: #374151;
             }
 
-            // ACTIVO - Verde brillante sólido  
             &.activo {
             --background: #059669 !important;
             --color: #ffffff !important;

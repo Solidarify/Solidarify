@@ -8,7 +8,6 @@ import { map } from 'rxjs/operators';
 })
 export class Organizador {
   
-  //Datos fake (Organizadores de la BD)
   private organizadoresFake: OrganizadorModel[] = [
     new OrganizadorModel({
       idUsuario: 2,
@@ -44,7 +43,6 @@ export class Organizador {
   ];
 
   constructor() {
-    // Recuperar organizadores persistentes
     const saved = localStorage.getItem('organizadoresFake');
     if (saved) {
       const savedOrgs = JSON.parse(saved);
@@ -52,7 +50,6 @@ export class Organizador {
     }
   }
 
-  //CRUD (cambio a HTTP)
   getAll(): Observable<OrganizadorModel[]> {
     console.log('Cargando todos los organizadores...');
     return of([...this.organizadoresFake]).pipe(delay(600));
@@ -120,7 +117,6 @@ export class Organizador {
     return of(false).pipe(delay(200));
   }
 
-  //Utilidades
   getByZonas(zonas: string[]): Observable<OrganizadorModel[]> {
     console.log('Filtrando por zonas:', zonas);
     const resultados = this.organizadoresFake.filter(o => 
@@ -149,7 +145,6 @@ export class Organizador {
   }
 
   private saveToStorage(): void {
-    // Persistir datos fake (simula BD)
     localStorage.setItem('organizadoresFake', JSON.stringify(this.organizadoresFake));
   }
 }

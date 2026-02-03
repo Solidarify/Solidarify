@@ -10,33 +10,43 @@
       </div>
 
       <div class="actions-grid">
-        <ion-card class="action-card" (click)="navigateTo('/organizador')">
+        <ion-card class="action-card" (click)="navigateTo('/crear-propuesta')">
           <ion-card-content>
             <div class="card-icon-wrapper">
-              <ion-icon name="megaphone" class="card-icon"></ion-icon>
+              <ion-icon name="add-circle" class="card-icon"></ion-icon>
             </div>
-            <h2>Organizar campaña</h2>
-            <p>Crea propuestas solidarias para tu comunidad</p>
+            <h2>Crear propuesta</h2>
+            <p>Inicia una nueva campaña solidaria</p>
           </ion-card-content>
         </ion-card>
 
-        <ion-card class="action-card" (click)="navigateTo('/ong')">
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="people" class="card-icon"></ion-icon>
-            </div>
-            <h2>Soy una ONG</h2>
-            <p>Recibe donaciones para tu organización</p>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" (click)="navigateTo('/propuestas')">
+        <ion-card class="action-card" (click)="navigateTo('/lista-propuestas')">
           <ion-card-content>
             <div class="card-icon-wrapper">
               <ion-icon name="list" class="card-icon"></ion-icon>
             </div>
-            <h2>Ver propuestas</h2>
-            <p>Descubre las campañas activas disponibles</p>
+            <h2>Mis propuestas</h2>
+            <p>Gestiona tus campañas activas</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" (click)="navigateTo('/explorar')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="compass" class="card-icon"></ion-icon>
+            </div>
+            <h2>Explorar</h2>
+            <p>Descubre campañas disponibles</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" (click)="navigateTo('/account')">
+          <ion-card-content>
+            <div class="card-icon-wrapper">
+              <ion-icon name="person-circle" class="card-icon"></ion-icon>
+            </div>
+            <h2>Mi perfil</h2>
+            <p>Gestiona tu cuenta y preferencias</p>
           </ion-card-content>
         </ion-card>
       </div>

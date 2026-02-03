@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Usuario } from '../services/usuario';
 import { UsuarioModel } from '../models/usuario.model';
 
@@ -15,20 +15,27 @@ export class CrearPropuestaPage implements OnInit {
 
   propuestaForm!: FormGroup;
   loading = false;
+  fechaMinima: string;
   
   currentUser: UsuarioModel | null = null; 
 
   tiposBienes = [
     { id: 1, nombre: 'Alimentos no perecederos' },
-    { id: 2, nombre: 'Ropa en buen estado' },
-    { id: 3, nombre: 'Productos de higiene' },
-    { id: 4, nombre: 'Juguetes nuevos/usados' },
-    { id: 5, nombre: 'Libros escolares' }
+    { id: 2, nombre: 'Ropa y calzado' },
+    { id: 3, nombre: 'Juguetes' },
+    { id: 4, nombre: 'Material escolar' },
+    { id: 5, nombre: 'Productos de higiene' },
+    { id: 6, nombre: 'Medicamentos' },
+    { id: 7, nombre: 'Muebles' },
+    { id: 8, nombre: 'Libros' },
+    { id: 9, nombre: 'Electrodomésticos' },
+    { id: 10, nombre: 'Otros' }
   ];
 
   estadosPropuesta = [
-    { value: 'borrador', label: 'Borrador' },
-    { value: 'publicado', label: 'Publicado' }
+    { value: 'borrador', label: 'Borrador (solo tú lo verás)' },
+    { value: 'publicada', label: 'Publicada (visible para todos)' },
+    { value: 'en_proceso', label: 'En proceso' }
   ];
 
   constructor(
@@ -36,19 +43,24 @@ export class CrearPropuestaPage implements OnInit {
     private router: Router,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController,
     private usuarioService: Usuario
-  ) { }
+  ) {
+    this.fechaMinima = new Date().toISOString();
+  }
 
   ngOnInit() {
     this.usuarioService.currentUser$.subscribe(user => {
       this.currentUser = user;
       
       if (!this.currentUser) {
-         const saved = localStorage.getItem('currentUser');
-         if (!saved) {
-           console.error('Usuario no logeado. Redirigiendo...');
-           this.router.navigate(['/login']);
-         }
+        const saved = localStorage.getItem('currentUser');
+        if (!saved) {
+          console.error('Usuario no logeado. Redirigiendo...');
+          this.router.navigate(['/login']);
+        } else {
+          this.currentUser = JSON.parse(saved);
+        }
       }
     });
 
@@ -56,74 +68,158 @@ export class CrearPropuestaPage implements OnInit {
   }
 
   private initForm(): void {
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
     this.propuestaForm = this.fb.group({
-      titulo: ['', [Validators.required, Validators.minLength(5)]],
-      descripcion: ['', [Validators.required, Validators.minLength(20)]],
+      titulo: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
+      descripcion: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
       tipoBien: ['', Validators.required],
-      lugar: ['', [Validators.required, Validators.minLength(5)]],
-      fechaInicio: [null, Validators.required],
-      fechaFin: [null, Validators.required],
-      estadoPropuesta: ['borrador', Validators.required]
+      lugar: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
+      fechaInicio: [hoy.toISOString(), Validators.required],
+      fechaFin: [manana.toISOString(), Validators.required],
+      estadoPropuesta: ['publicada', Validators.required]
     });
   }
 
-  get tituloField(): AbstractControl | null { return this.propuestaForm.get('titulo'); }
-  get descripcionField(): AbstractControl | null { return this.propuestaForm.get('descripcion'); }
-  get tipoBienField(): AbstractControl | null { return this.propuestaForm.get('tipoBien'); }
-  get lugarField(): AbstractControl | null { return this.propuestaForm.get('lugar'); }
+  get tituloField(): AbstractControl | null { 
+    return this.propuestaForm.get('titulo'); 
+  }
+
+  get descripcionField(): AbstractControl | null { 
+    return this.propuestaForm.get('descripcion'); 
+  }
+
+  get tipoBienField(): AbstractControl | null { 
+    return this.propuestaForm.get('tipoBien'); 
+  }
+
+  get lugarField(): AbstractControl | null { 
+    return this.propuestaForm.get('lugar'); 
+  }
+
+  onFechaInicioChange(event: any): void {
+    const fechaSeleccionada = event.detail.value;
+    
+    if (!fechaSeleccionada) return;
+
+    this.propuestaForm.patchValue({ fechaInicio: fechaSeleccionada });
+    this.propuestaForm.get('fechaInicio')?.markAsTouched();
+    
+    const fechaFinActual = this.propuestaForm.get('fechaFin')?.value;
+    
+    if (fechaFinActual && new Date(fechaFinActual) <= new Date(fechaSeleccionada)) {
+      const nuevaFechaFin = new Date(fechaSeleccionada);
+      nuevaFechaFin.setDate(nuevaFechaFin.getDate() + 1); 
+      this.propuestaForm.patchValue({ fechaFin: nuevaFechaFin.toISOString() });
+      
+      this.mostrarToast('La fecha de fin se ajustó automáticamente', 'warning');
+    }
+  }
+
+  onFechaFinChange(event: any): void {
+    const fechaSeleccionada = event.detail.value;
+    
+    if (!fechaSeleccionada) return;
+
+    this.propuestaForm.patchValue({ fechaFin: fechaSeleccionada });
+    this.propuestaForm.get('fechaFin')?.markAsTouched();
+  }
+
+  private validarFechas(): boolean {
+    const fechaInicio = this.propuestaForm.get('fechaInicio')?.value;
+    const fechaFin = this.propuestaForm.get('fechaFin')?.value;
+
+    if (!fechaInicio || !fechaFin) {
+      this.mostrarToast('Debes seleccionar ambas fechas', 'warning');
+      return false;
+    }
+
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+
+    if (fin <= inicio) {
+      this.mostrarToast('La fecha de fin debe ser posterior a la fecha de inicio', 'warning');
+      return false;
+    }
+
+    const unAnoEnMs = 365 * 24 * 60 * 60 * 1000;
+    if (fin.getTime() - inicio.getTime() > unAnoEnMs) {
+      this.mostrarToast('La campaña no puede durar más de 1 año', 'warning');
+      return false;
+    }
+
+    return true;
+  }
 
   async onSubmit(): Promise<void> {
+    this.propuestaForm.markAllAsTouched();
+
     if (this.propuestaForm.invalid) {
-    this.propuestaForm.markAllAsTouched(); 
-    
-    Object.keys(this.propuestaForm.controls).forEach(key => {
-      const controlErrors = this.propuestaForm.get(key)?.errors;
-      if (controlErrors) {
-        console.log('Error en campo:', key, controlErrors);
-      }
-    });
-    
-    await this.showAlert('Error', 'Formulario inválido. Revisa los campos en rojo.');
-    return;
-  }
+      console.log('Formulario inválido. Errores:');
+      Object.keys(this.propuestaForm.controls).forEach(key => {
+        const controlErrors = this.propuestaForm.get(key)?.errors;
+        if (controlErrors) {
+          console.log(`- ${key}:`, controlErrors);
+        }
+      });
+      
+      await this.mostrarToast('Por favor completa todos los campos correctamente', 'warning');
+      return;
+    }
+
+    if (!this.validarFechas()) {
+      return;
+    }
 
     const loading = await this.loadingCtrl.create({
       message: 'Creando propuesta...',
+      spinner: 'crescent'
     });
     await loading.present();
 
     try {
       const formData = this.prepareFormData();
-      console.log('Datos propuesta a enviar:', formData);
+      console.log('📤 Datos a enviar:', formData);
 
-      // SIMULACIÓN DE GUARDADO
-      //  await this.propuestaService.create(formData).toPromise();
+      // await this.propuestaService.create(formData).toPromise();
       
-      // Simulamos un retardo de red de 1 segundo
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulación por ahora
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       await loading.dismiss();
-      await this.showAlert('¡Éxito!', 'Propuesta creada correctamente.');
-      this.router.navigate(['/tabs/mis-propuestas']);
+      
+      await this.mostrarToast('¡Propuesta creada exitosamente!', 'success');
+      
+      this.propuestaForm.reset({
+        estadoPropuesta: 'publicada',
+        fechaInicio: new Date().toISOString(),
+        fechaFin: new Date(Date.now() + 86400000).toISOString() // +1 día
+      });
+      
+      this.router.navigate(['/lista-propuestas']);
 
     } catch (error) {
       await loading.dismiss();
-      await this.showAlert('Error', 'Ocurrió un error al guardar.');
-      console.error(error);
+      console.error('❌ Error al crear propuesta:', error);
+      await this.showAlert('Error', 'Ocurrió un error al guardar la propuesta. Inténtalo de nuevo.');
     }
   }
 
   private prepareFormData(): any {
+    const formValues = this.propuestaForm.value;
+    
     return {
-      idOrganizador: this.currentUser?.idUsuario, 
-      idTipoBien: parseInt(this.propuestaForm.value.tipoBien),
-      titulo: this.propuestaForm.value.titulo,
-      descripcion: this.propuestaForm.value.descripcion,
-      lugar: this.propuestaForm.value.lugar,
-      fechaInicio: this.propuestaForm.value.fechaInicio,
-      fechaFin: this.propuestaForm.value.fechaFin,
-      estadoPropuesta: this.propuestaForm.value.estadoPropuesta,
-      fechaCreacion: new Date().toISOString() 
+      idOrganizador: this.currentUser?.idUsuario || 0,
+      idTipoBien: parseInt(formValues.tipoBien),
+      titulo: formValues.titulo.trim(),
+      descripcion: formValues.descripcion.trim(),
+      lugar: formValues.lugar.trim(),
+      fechaInicio: formValues.fechaInicio,
+      fechaFin: formValues.fechaFin,
+      estadoPropuesta: formValues.estadoPropuesta,
+      fechaCreacion: new Date().toISOString()
     };
   }
 
@@ -132,20 +228,19 @@ export class CrearPropuestaPage implements OnInit {
       header,
       message,
       buttons: ['OK'],
+      cssClass: 'custom-alert'
     });
     await alert.present();
   }
 
-  fechaCambiada(campo: string, event: any) {
-    const valorFecha = event.detail.value;
-    const control = this.propuestaForm.get(campo);
-    
-    if (control) {
-      control.setValue(valorFecha, { emitEvent: false });
-      control.markAsTouched();
-      control.markAsDirty();
-      control.updateValueAndValidity();
-    }
+  private async mostrarToast(message: string, color: 'success' | 'warning' | 'danger' = 'warning'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom',
+      icon: color === 'success' ? 'checkmark-circle' : 'alert-circle-outline'
+    });
+    toast.present();
   }
-
 }

@@ -1,8 +1,12 @@
 <ion-header class="app-header">
   <ion-toolbar color="primary">
-    <ion-title  class="logo-title" >
-      
-      <div (click)="goToHome()"  class="title-text">Solidarify</div>
+    
+    <ion-buttons slot="start" *ngIf="isLoggedIn">
+      <ion-menu-button color="light"></ion-menu-button>
+    </ion-buttons>
+    
+    <ion-title class="logo-title">
+      <div (click)="goToHome()" class="title-text">Solidarify</div>
     </ion-title>
     
     <ion-buttons slot="end" *ngIf="authMode === 'none' && !isLoggedIn">
@@ -15,12 +19,14 @@
     </ion-buttons>
     
     <ion-buttons slot="end" *ngIf="isLoggedIn && authMode === 'none'">
-      <ion-avatar slot="icon-only">
-        <ion-icon name="person-circle"></ion-icon>
-      </ion-avatar>
+      <ion-button fill="clear" color="light" routerLink="/account">
+        <ion-icon name="person-circle" slot="icon-only" style="font-size: 32px;"></ion-icon>
+      </ion-button>
+      
       <ion-button fill="clear" color="light" (click)="logout()">
         <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
+    
   </ion-toolbar>
 </ion-header>

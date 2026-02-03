@@ -38,7 +38,6 @@ export class AccountPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Suscribir a cambios de usuario logueado
     this.subs.add(
       this.usuarioService.currentUser$.subscribe((usuario) => {
         if (usuario) {
@@ -49,7 +48,6 @@ export class AccountPage implements OnInit, OnDestroy {
       })
     );
 
-    // Cargar usuario actual si ya está logueado
     const currentUser = this.usuarioService.getCurrentUser();
     if (currentUser) {
       this.cargarPerfilCompleto(currentUser);
@@ -66,7 +64,6 @@ export class AccountPage implements OnInit, OnDestroy {
     try {
       this.usuario = usuario;
 
-      // Cargar perfiles en paralelo
       const [ong, organizador] = await Promise.all([
         this.ongService.getById(usuario.idUsuario!).toPromise().catch(() => null),
         this.organizadorService.getById(usuario.idUsuario!).toPromise().catch(() => null)
@@ -120,7 +117,6 @@ export class AccountPage implements OnInit, OnDestroy {
   }
 
   async guardarCambios() {
-  //CONFIRMACIÓN antes de guardar
     const confirm = await this.alertCtrl.create({
       header: 'Confirmar cambios',
       message: '¿Estás seguro de guardar estos cambios en tu perfil?',
@@ -135,20 +131,17 @@ export class AccountPage implements OnInit, OnDestroy {
           text: 'Guardar',
           cssClass: 'primary',
           handler: async () => {
-            //LOADING + GUARDADO (tu código original)
             const loading = await this.loadingCtrl.create({
               message: 'Guardando cambios...'
             });
             await loading.present();
 
             try {
-              // Actualizar usuario básico
               await this.usuarioService.update(
                 this.usuario.idUsuario!,
                 this.usuarioEditado
               ).toPromise();
 
-              // Actualizar perfiles si existen
               if (this.esONG && this.perfilONGEditado) {
                 await this.ongService.update(
                   this.perfilONG!.idUsuario!,
@@ -163,12 +156,10 @@ export class AccountPage implements OnInit, OnDestroy {
                 ).toPromise();
               }
 
-              // Actualizar estado local
               this.usuario = new UsuarioModel(this.usuarioEditado);
               if (this.perfilONG) this.perfilONG = new PerfilONGModel(this.perfilONGEditado!);
               if (this.organizador) this.organizador = new OrganizadorModel(this.organizadorEditado!);
 
-              // ÉXITO mejorado
               const alert = await this.alertCtrl.create({
                 header: '¡Guardado!',
                 message: 'Tus datos se han actualizado correctamente.',

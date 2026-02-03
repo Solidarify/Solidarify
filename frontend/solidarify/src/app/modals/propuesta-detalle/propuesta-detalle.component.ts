@@ -26,7 +26,6 @@ export class PropuestaDetalleComponent implements OnInit {
   ngOnInit() {
     console.log('Detalle cargado para:', this.propuesta.titulo);
 
-    //Mapea snake_case a camelCase para ngModel (porque genera duplicados)
     this.propuestaEditada = new PropuestaModel(this.propuesta);
     this.propuestaOriginal = new PropuestaModel(this.propuesta);
   }
@@ -55,12 +54,10 @@ export class PropuestaDetalleComponent implements OnInit {
           handler: async () => {
             
             try {
-              //ID correcto
               const propuestaActualizada = await this.propuestaService
                 .update(this.propuestaEditada.idPropuesta!, this.propuestaEditada)
                 .toPromise();
               
-              //Actualiza original
               this.propuestaOriginal = new PropuestaModel(propuestaActualizada!);
               this.modoEdicion = false;
               
@@ -90,7 +87,7 @@ export class PropuestaDetalleComponent implements OnInit {
   }
 
   get tipoBienNombre(): string {
-    return this.propuestaEditada.tipoBienNombre; //Usa getter del modelo
+    return this.propuestaEditada.tipoBienNombre; 
   }
 
   cerrar() {

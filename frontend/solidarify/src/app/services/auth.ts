@@ -18,7 +18,6 @@ export interface LoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class Auth {
-  // Estado observable
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   currentUser$ = new BehaviorSubject<User | null>(null);
 

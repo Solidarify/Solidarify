@@ -8,7 +8,6 @@ import { map, catchError } from 'rxjs/operators';
 })
 export class Usuario {
   
-  //Datos falsos (BD real)
    private usuariosFake: UsuarioModel[] = [
     UsuarioModel.fromApi({
       Id_Usuario: 1,

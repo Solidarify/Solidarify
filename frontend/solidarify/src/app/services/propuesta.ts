@@ -8,7 +8,6 @@ import { PropuestaModel } from '../models/propuesta.model';
 })
 export class Propuesta {
   
-  // ✅ Datos falsos (tu SQL)
   private propuestasFake: PropuestaModel[] = [
     PropuestaModel.fromApi({
       Id_Propuesta: 1,

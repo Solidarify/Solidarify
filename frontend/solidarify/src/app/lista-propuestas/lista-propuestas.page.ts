@@ -82,10 +82,9 @@ export class ListaPropuestasPage implements OnInit {
       cssClass: 'propuesta-modal-sheet'
     });
 
-    //Escucha los cambios del modal y actualiza lista
     modal.onDidDismiss().then(result => {
       if (result.data?.propuesta) {
-        this.cargarPropuestas(); // Recarga la lista
+        this.cargarPropuestas(); 
       }
     });
     
