@@ -8,7 +8,7 @@ import { map, catchError } from 'rxjs/operators';
 })
 export class Usuario {
   
-   private usuariosFake: UsuarioModel[] = [
+  private usuariosFake: UsuarioModel[] = [
     UsuarioModel.fromApi({
       Id_Usuario: 1,
       Nombre: 'Admin General',
@@ -16,7 +16,8 @@ export class Usuario {
       Password_Hash: 'hash_admin',
       Telefono: '600000001',
       Activo: 1,
-      Created_At: '2025-01-01T09:00:00Z'
+      Created_At: '2025-01-01T09:00:00Z',
+      roles: ['ADMIN'] 
     }),
     UsuarioModel.fromApi({
       Id_Usuario: 2,
@@ -25,7 +26,8 @@ export class Usuario {
       Password_Hash: 'hash_org_norte',
       Telefono: '600000002',
       Activo: 1,
-      Created_At: '2025-01-02T09:00:00Z'
+      Created_At: '2025-01-02T09:00:00Z',
+      roles: ['ORGANIZADOR'] 
     }),
     UsuarioModel.fromApi({
       Id_Usuario: 5,
@@ -34,7 +36,18 @@ export class Usuario {
       Password_Hash: 'hash_ong_manosverdes',
       Telefono: '600000005',
       Activo: 1,
-      Created_At: '2025-01-03T09:00:00Z'
+      Created_At: '2025-01-03T09:00:00Z',
+      roles: ['ONG'] 
+    }),
+    UsuarioModel.fromApi({
+      Id_Usuario: 10,
+      Nombre: 'Juan Usuario',
+      Email: 'juan@usuario.com',
+      Password_Hash: 'hash_usuario',
+      Telefono: '600000010',
+      Activo: 1,
+      Created_At: '2025-01-10T09:00:00Z',
+      roles: ['Usuario'] 
     })
   ];
 

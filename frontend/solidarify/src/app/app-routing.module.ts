@@ -8,7 +8,8 @@ const routes: Routes = [
   { path: 'register', loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule) },
   { path: 'account', loadChildren: () => import('./account/account.module').then(m => m.AccountPageModule) },
   { path: 'crear-propuesta', loadChildren: () => import('./crear-propuesta/crear-propuesta.module').then(m => m.CrearPropuestaPageModule) },
-  { path: 'lista-propuestas', loadChildren: () => import('./lista-propuestas/lista-propuestas.module').then(m => m.ListaPropuestasPageModule) },
+  { path: 'lista-propuestas', loadChildren: () => import('./lista-propuestas/lista-propuestas.module').then(m => m.ListaPropuestasPageModule), data: { mode: 'mine' } },
+  { path: 'explorar', loadChildren: () => import('./lista-propuestas/lista-propuestas.module').then(m => m.ListaPropuestasPageModule), data: { mode: 'explore' }},
 ];
 
 

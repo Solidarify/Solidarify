@@ -10,43 +10,88 @@
       </div>
 
       <div class="actions-grid">
-        <ion-card class="action-card" (click)="navigateTo('/crear-propuesta')">
+        <ion-card class="action-card" [class.disabled]="!canCreateProposal()" 
+        (click)="navigateTo('/crear-propuesta', canCreateProposal())">
           <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="add-circle" class="card-icon"></ion-icon>
+            <!--<div class="card-info-row">-->
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="add-circle" class="card-icon"></ion-icon>
+              </div>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                class="info-button"
+                (click)="showInfo('crear'); $event.stopPropagation()">
+                <ion-icon name="information-circle-outline"></ion-icon>
+              </ion-button>
             </div>
             <h2>Crear propuesta</h2>
             <p>Inicia una nueva campaña solidaria</p>
+            <!--<div class="role-badge" *ngIf="currentUser?.role === 'ORGANIZADOR'">ORGANIZADOR</div>-->
           </ion-card-content>
         </ion-card>
 
-        <ion-card class="action-card" (click)="navigateTo('/lista-propuestas')">
+        <ion-card class="action-card" [class.disabled]="!canViewMyProposals()" 
+        (click)="navigateTo('/explorar', canViewMyProposals())">
           <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="list" class="card-icon"></ion-icon>
+            <!--<div class="card-info-row">-->
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="list" class="card-icon"></ion-icon>
+              </div>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                class="info-button"
+                (click)="showInfo('mis'); $event.stopPropagation()">
+                <ion-icon name="information-circle-outline"></ion-icon>
+              </ion-button>
             </div>
             <h2>Mis propuestas</h2>
             <p>Gestiona tus campañas activas</p>
           </ion-card-content>
         </ion-card>
 
-        <ion-card class="action-card" (click)="navigateTo('/explorar')">
+        <ion-card class="action-card" [class.disabled]="!canExplore()"
+        (click)="navigateTo('/explorar', canExplore())">
           <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="compass" class="card-icon"></ion-icon>
+            <!--<div class="card-info-row">-->
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="compass" class="card-icon"></ion-icon>
+              </div>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                class="info-button"
+                (click)="showInfo('explorar'); $event.stopPropagation()">
+                <ion-icon name="information-circle-outline"></ion-icon>
+              </ion-button>
             </div>
             <h2>Explorar</h2>
             <p>Descubre campañas disponibles</p>
           </ion-card-content>
         </ion-card>
 
-        <ion-card class="action-card" (click)="navigateTo('/account')">
+        <ion-card class="action-card" [class.disabled]="!isLoggedIn"
+        (click)="navigateTo('/account', isLoggedIn)">
           <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="person-circle" class="card-icon"></ion-icon>
+            <!--<div class="card-info-row">-->
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="person-circle" class="card-icon"></ion-icon>
+              </div>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                class="info-button"
+                (click)="showInfo('perfil'); $event.stopPropagation()">
+                <ion-icon name="information-circle-outline"></ion-icon>
+              </ion-button>
             </div>
             <h2>Mi perfil</h2>
-            <p>Gestiona tu cuenta y preferencias</p>
+            <p>{{ currentUser?.nombre || 'Gestión de cuenta' }}</p>
           </ion-card-content>
         </ion-card>
       </div>

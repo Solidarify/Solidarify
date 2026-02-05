@@ -7,7 +7,7 @@ export interface User {
   id: number;
   nombre: string;
   email: string;
-  role: 'ORGANIZADOR' | 'ONG';
+  role: 'ORGANIZADOR' | 'ONG' | 'Usuario' | 'ADMIN';
 }
 
 export interface LoginResponse {

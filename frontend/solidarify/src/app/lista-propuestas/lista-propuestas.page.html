@@ -4,9 +4,16 @@
     <div class="stats-content">
       <div class="stat-text">
         <h2>{{totalPropuestas}}</h2>
-        <p>Disponibles ahora</p>
+        <p>{{ userRole === 'Usuario' ? 'Propuestas públicas' : pageTitle }} 
+        disponibles</p>
       </div>
-      <ion-button fill="outline" shape="round" color="primary" (click)="limpiarFiltros()">
+      <!-- Ocultar filtros avanzados para Usuario -->
+      <ion-button 
+        *ngIf="userRole !== 'Usuario'" 
+        fill="outline" 
+        shape="round" 
+        color="primary" 
+        (click)="limpiarFiltros()">
         <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
@@ -23,7 +30,7 @@
   </div>
 
   <div class="list-header" *ngIf="!loading">
-    <ion-label>Resultados <span>({{totalPropuestas}})</span></ion-label>
+    <ion-label>{{pageTitle}} <span>({{totalPropuestas}})</span></ion-label>
   </div>
   <ion-list lines="none" *ngIf="!loading">
     <ion-item *ngFor="let propuesta of (propuestas$ | async); trackBy: trackById" 
