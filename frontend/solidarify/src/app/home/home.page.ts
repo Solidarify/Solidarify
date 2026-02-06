@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Auth, User } from '../services/auth';
 import { Usuario } from '../services/usuario';
+import { UsuarioModel } from '../models/usuario.model';
+import { Subscription } from 'rxjs';
 
 export type UserRole = 'ORGANIZADOR' | 'ONG' | 'Usuario' | 'ADMIN';
 
@@ -12,11 +13,12 @@ export type UserRole = 'ORGANIZADOR' | 'ONG' | 'Usuario' | 'ADMIN';
   styleUrls: ['./home.page.scss'],
   standalone: false
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
+  currentUser: UsuarioModel | null = null;
+  isLoggedIn = false;
+  userRoles: string[] = [];
 
-    currentUser: any = null;
-    isLoggedIn = false;
-    userRoles: string[] = [];
+  private userSub?: Subscription;
 
   constructor(    
     private router: Router,
@@ -25,70 +27,124 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('🧑‍💻 HomePage cargando usuario...');
-    this.currentUser = this.usuarioService.getCurrentUser();
-    this.isLoggedIn = !!this.currentUser;
+    console.log('🏠 HomePage ngOnInit()');
     
-    // ✅ MAPEAR ROLES según tu lógica (como hace SideMenu)
-    this.userRoles = this.detectarRoles(this.currentUser);
-    console.log('✅ Usuario:', this.currentUser);
-    console.log('✅ Roles detectados:', this.userRoles);
-    console.log('✅ Permisos:', {
-      create: this.canCreateProposal(),
-      myProposals: this.canViewMyProposals(),
-      explore: this.canExplore()
+    // ✅ SUSCRIPCIÓN con unsubscribe para evitar memory leaks
+    this.userSub = this.usuarioService.currentUser$.subscribe(user => {
+      console.log('🔄 Usuario recibido:', user);
+      this.currentUser = user;
+      this.isLoggedIn = !!user;
+      
+      // ✅ ACTUALIZAR ROLES cada vez que cambie el usuario
+      this.userRoles = this.roles;
+      
+      console.log('🔍 Estado actualizado:', {
+        nombre: user?.displayName,
+        roles: this.userRoles,
+        isLoggedIn: this.isLoggedIn,
+        permissions: {
+          create: this.canCreateProposal(),
+          myProposals: this.canViewMyProposals(),
+          explore: this.canExplore()
+        }
+      });
     });
+
+    // ✅ Verificar usuario inicial desde localStorage
+    const initialUser = this.usuarioService.getCurrentUser();
+    if (initialUser) {
+      console.log('🏠 Usuario inicial desde localStorage:', initialUser.displayName);
+    }
   }
 
-  private detectarRoles(user: any): string[] {
-    const roles: string[] = [];
+  ngOnDestroy() {
+    this.userSub?.unsubscribe();
+  }
+
+  // ✅ Getter que actualiza userRoles
+  private get roles(): string[] {
+    if (!this.currentUser) return [];
     
-    if (!user) return roles;
-    
-    if (user.roles && user.roles.includes('ORGANIZADOR')) {
-      roles.push('ORGANIZADOR');
-    }
-    if (user.roles && user.roles.includes('ONG')) {
-      roles.push('ONG');
-    }
-    if (user.roles && user.roles.includes('ADMIN')) {
-      roles.push('ADMIN');
+    // Prioridad: roles del modelo (ya definido en usuariosFake)
+    if (this.currentUser.roles?.length) {
+      return this.currentUser.roles;
     }
     
-    // Fallback: por email/nombre como en tu sistema
-    if (!roles.length) {
-      if (user.email?.includes('@admin')) roles.push('ADMIN');
-      else if (user.nombre?.includes('Organizador')) roles.push('ORGANIZADOR');
-      else roles.push('Usuario');
-    }
+    // Fallback por email/nombre
+    if (this.currentUser.email?.includes('@admin')) return ['ADMIN'];
+    if (this.currentUser.nombre?.includes('Organizador') || this.currentUser.nombre?.includes('Norte')) return ['ORGANIZADOR'];
+    if (this.currentUser.nombre?.includes('ONG')) return ['ONG'];
     
-    return roles;
+    return ['Usuario'];
+  }
+
+  // ✅ MÉTODO logout que navega
+  logout() {
+    console.log('🚪 Logout desde HomePage');
+    this.usuarioService.logout();
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   canCreateProposal(): boolean {
-    return this.userRoles.includes('ORGANIZADOR');
+    return this.roles.includes('ORGANIZADOR') || this.roles.includes('ADMIN');
   }
 
   canViewMyProposals(): boolean {
-    return this.userRoles.includes('ORGANIZADOR') || this.userRoles.includes('ONG');
+    return this.roles.includes('ORGANIZADOR') || this.roles.includes('ONG') || this.roles.includes('ADMIN');
   }
 
   canExplore(): boolean {
-    return !!this.currentUser;
+    return true;
   }
 
-  navigateTo(route: string, allowed: boolean) {
-    console.log('🚀 navigateTo:', route, 'Usuario:', this.currentUser);
-
-    if (route === '/crear-propuesta' && !this.canCreateProposal()) return;
-    if (route === '/lista-propuestas' && !this.canViewMyProposals()) return;
-    if (route === '/explorar' && !this.canExplore()) return;
-    if (route === '/account' && !this.isLoggedIn) return;
+  // ✅ navigateTo simplificado
+  navigateTo(route: string): void {
+    console.log('🚀 navigateTo:', route);
     
-    // Si llega aquí → tiene permisos → navega
+    switch(route) {
+      case '/crear-propuesta':
+        if (!this.canCreateProposal()) {
+          this.showPermissionAlert('crear');
+          return;
+        }
+        break;
+      case '/lista-propuestas':
+        if (!this.canViewMyProposals()) {
+          this.showPermissionAlert('mis');
+          return;
+        }
+        break;
+      case '/account':
+        if (!this.isLoggedIn) {
+          this.showPermissionAlert('perfil');
+          return; 
+        }
+        break;
+    }
+    
     this.router.navigate([route]);
   }
 
+  // ✅ Alert personalizada
+  private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise <void> {
+    const role = this.userRoles[0] || 'no logueado';
+    let message = '';
+    
+    switch(option) {
+      case 'crear': message = `❌ Solo **ORGANIZADOR** y **ADMIN**`; break;
+      case 'mis': message = `❌ Solo **ORGANIZADOR**, **ONG** y **ADMIN**`; break;
+      case 'perfil': message = `❌ Debes iniciar sesión`; break;
+    }
+    
+    const alert = await this.alertCtrl.create({
+      header: 'Acceso restringido',
+      message: `${message}\n\nTu rol: **${role}**`,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  // ✅ Para los botones info (usa roles actualizados)
   async showInfo(option: 'crear' | 'mis' | 'explorar' | 'perfil') {
     let header = '', message = '';
     const role = this.userRoles[0] || 'no logueado';
@@ -96,31 +152,30 @@ export class HomePage implements OnInit {
     switch (option) {
       case 'crear':
         header = 'Crear propuesta';
-        message = this.canCreateProposal() 
+        message = this.canCreateProposal()
           ? `✅ Como **${role}**, puedes crear propuestas.`
-          : `❌ Solo **ORGANIZADOR**.`;
+          : `❌ Solo **ORGANIZADOR** y **ADMIN**. Tu rol: **${role}**`;
         break;
-
       case 'mis':
         header = 'Mis propuestas';
         message = this.canViewMyProposals()
           ? `📋 Tus propuestas como **${role}**.`
-          : `ℹ️ Solo **ORGANIZADOR** y **ONG**.`;
+          : `❌ Solo **ORGANIZADOR**, **ONG** y **ADMIN**. Tu rol: **${role}**`;
         break;
-
       case 'explorar':
         header = 'Explorar';
         message = `🔍 Lista pública de propuestas.`;
         break;
-
       case 'perfil':
         header = 'Mi perfil';
-        message = `👤 Gestiona tu cuenta **${role}**.`;
+        message = this.isLoggedIn 
+          ? `👤 Gestiona tu cuenta **${role}**.`
+          : `❌ Inicia sesión primero`;
         break;
     }
 
     const alert = await this.alertCtrl.create({
-      header, 
+      header,
       message: message.replace(/<strong>/g, '').replace(/<\/strong>/g, ' **'),
       buttons: ['Entendido']
     });

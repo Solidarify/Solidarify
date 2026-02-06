@@ -30,7 +30,8 @@ export class UsuarioModel {
             telefono: api?.Telefono || api?.telefono,
             activo: api?.Activo !== undefined ? api.Activo : true,
             createdAt: api?.CreatedAt || api?.createdAt,
-            updatedAt: api?.Updated_At || api?.updatedAt
+            updatedAt: api?.Updated_At || api?.updatedAt,
+            roles: api?.roles || api?.Roles || []
             
         });
     }

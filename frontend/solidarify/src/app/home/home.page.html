@@ -11,7 +11,7 @@
 
       <div class="actions-grid">
         <ion-card class="action-card" [class.disabled]="!canCreateProposal()" 
-        (click)="navigateTo('/crear-propuesta', canCreateProposal())">
+        (click)="navigateTo('/crear-propuesta')">
           <ion-card-content>
             <!--<div class="card-info-row">-->
             <div class="card-header">
@@ -33,7 +33,7 @@
         </ion-card>
 
         <ion-card class="action-card" [class.disabled]="!canViewMyProposals()" 
-        (click)="navigateTo('/explorar', canViewMyProposals())">
+        (click)="navigateTo('/lista-propuestas/mine')">
           <ion-card-content>
             <!--<div class="card-info-row">-->
             <div class="card-header">
@@ -54,7 +54,7 @@
         </ion-card>
 
         <ion-card class="action-card" [class.disabled]="!canExplore()"
-        (click)="navigateTo('/explorar', canExplore())">
+        (click)="navigateTo('/lista-propuestas/explore')">
           <ion-card-content>
             <!--<div class="card-info-row">-->
             <div class="card-header">
@@ -75,7 +75,7 @@
         </ion-card>
 
         <ion-card class="action-card" [class.disabled]="!isLoggedIn"
-        (click)="navigateTo('/account', isLoggedIn)">
+        (click)="navigateTo('/account')">
           <ion-card-content>
             <!--<div class="card-info-row">-->
             <div class="card-header">
@@ -92,6 +92,18 @@
             </div>
             <h2>Mi perfil</h2>
             <p>{{ currentUser?.nombre || 'Gestión de cuenta' }}</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" *ngIf="isLoggedIn" (click)="logout()">
+          <ion-card-content>
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="log-out-outline" class="card-icon"></ion-icon>
+              </div>
+            </div>
+            <h2>Cerrar sesión</h2>
+            <p>Salir de tu cuenta</p>
           </ion-card-content>
         </ion-card>
       </div>
