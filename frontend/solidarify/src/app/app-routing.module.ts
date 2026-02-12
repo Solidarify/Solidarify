@@ -11,7 +11,11 @@ const routes: Routes = [
   // ✅ RUTAS PROPUESTAS CORRECTAS
   { path: 'lista-propuestas/:mode', loadChildren: () => import('./lista-propuestas/lista-propuestas.module').then(m => m.ListaPropuestasPageModule) },
   { path: 'explorar', redirectTo: 'lista-propuestas/explore', pathMatch: 'full' },  // Alias
-  { path: 'crear-propuesta', loadChildren: () => import('./crear-propuesta/crear-propuesta.module').then(m => m.CrearPropuestaPageModule) }
+  { path: 'crear-propuesta', loadChildren: () => import('./crear-propuesta/crear-propuesta.module').then(m => m.CrearPropuestaPageModule) },  {
+    path: 'lista-ongs',
+    loadChildren: () => import('./lista-ongs/lista-ongs.module').then( m => m.ListaOngsPageModule)
+  }
+
 ];
 
 /*

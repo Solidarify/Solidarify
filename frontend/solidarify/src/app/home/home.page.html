@@ -74,6 +74,26 @@
           </ion-card-content>
         </ion-card>
 
+        <ion-card class="action-card" [class.disabled]="!canViewOngs()"
+          (click)="navigateTo('/lista-ongs')">
+          <ion-card-content>
+            <div class="card-header">
+              <div class="card-icon-wrapper">
+                <ion-icon name="business-outline" class="card-icon"></ion-icon>
+              </div>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                class="info-button"
+                (click)="showInfo('ongs'); $event.stopPropagation()">
+                <ion-icon name="information-circle-outline"></ion-icon>
+              </ion-button>
+            </div>
+            <h2>Directorio ONGs</h2>
+            <p>Ver todas las organizaciones registradas</p>
+          </ion-card-content>
+        </ion-card>
+
         <ion-card class="action-card" [class.disabled]="!isLoggedIn"
         (click)="navigateTo('/account')">
           <ion-card-content>

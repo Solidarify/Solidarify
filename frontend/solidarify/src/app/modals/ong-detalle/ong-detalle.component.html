@@ -1,0 +1,163 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()" color="medium">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>{{ modoEdicion ? 'Editar ONG' : 'Detalle ONG' }}</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button color="primary">
+        <ion-icon name="share-social-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button *ngIf="isAdmin && !modoEdicion" (click)="activarEdicion()" color="warning">
+        <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="isAdmin && modoEdicion" (click)="cancelarEdicion()" color="medium">
+        Cancelar
+      </ion-button>
+      <ion-button *ngIf="isAdmin && modoEdicion" (click)="guardarCambios()" color="success">
+        Guardar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-bottom">
+
+  <div class="hero-image">
+    <img src="https://placehold.co/600x300/0f172a/e5e7eb?text=Perfil+ONG"
+         alt="Imagen ONG"
+         class="main-img">
+
+    <div class="badge-estado" [class.verificado]="ongEditada.isVerified">
+      {{ ongEditada.estadoVerificacion | titlecase }}
+    </div>
+  </div>
+
+  <div class="content-container ion-padding">
+
+    <ion-item *ngIf="modoEdicion" lines="none">
+      <ion-input [(ngModel)]="ongEditada.nombreLegal" placeholder="Nombre legal"></ion-input>
+    </ion-item>
+
+    <h1 *ngIf="!modoEdicion" class="titulo">{{ ongEditada.displayName }}</h1>
+
+    <div class="organizador-row">
+      <ion-avatar slot="start">
+        <img src="https://ui-avatars.com/api/?name={{ongEditada.displayName}}&background=1d4ed8&color=fff">
+      </ion-avatar>
+
+      <div class="org-info">
+        <span class="label">CIF</span>
+        <span class="nombre">{{ ongEditada.cif }}</span>
+      </div>
+    </div>
+
+    <ion-grid class="info-grid ion-no-padding">
+      <ion-row>
+        <ion-col size="12">
+          <div class="info-item">
+            <ion-icon name="location-outline" color="primary"></ion-icon>
+            <div>
+              <span class="label">Dirección</span>
+
+              <input *ngIf="modoEdicion"
+                     [(ngModel)]="ongEditada.direccion"
+                     class="input-edit"
+                     type="text"
+                     placeholder="Dirección completa">
+
+              <span *ngIf="!modoEdicion" class="value">
+                {{ ongEditada.direccion || 'Sin especificar' }}
+              </span>
+            </div>
+          </div>
+        </ion-col>
+
+        <ion-col size="6">
+          <div class="info-item">
+            <ion-icon name="call-outline" color="primary"></ion-icon>
+            <div>
+              <span class="label">Teléfono de contacto</span>
+
+              <input *ngIf="modoEdicion"
+                     [(ngModel)]="ongEditada.telefonoContacto"
+                     class="input-edit"
+                     type="tel"
+                     placeholder="Teléfono">
+
+              <span *ngIf="!modoEdicion" class="value">
+                {{ ongEditada.telefonoContacto || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+        </ion-col>
+
+        <ion-col size="6">
+          <div class="info-item">
+            <ion-icon name="globe-outline" color="primary"></ion-icon>
+            <div>
+              <span class="label">Web</span>
+
+              <input *ngIf="modoEdicion"
+                     [(ngModel)]="ongEditada.web"
+                     class="input-edit"
+                     type="text"
+                     placeholder="https://...">
+
+              <span *ngIf="!modoEdicion" class="value">
+                {{ ongEditada.web || 'Sin web' }}
+              </span>
+            </div>
+          </div>
+        </ion-col>
+
+        <ion-col size="12" *ngIf="ongEditada.createdAt">
+          <div class="info-item">
+            <ion-icon name="time-outline" color="primary"></ion-icon>
+            <div>
+              <span class="label">Fecha alta</span>
+              <span class="value">
+                {{ ongEditada.createdAt | date:'d MMM y' }}
+              </span>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <hr class="separator">
+
+    <div class="descripcion-section">
+      <h3>Sobre esta ONG</h3>
+
+      <textarea *ngIf="modoEdicion"
+                [(ngModel)]="ongEditada.descripcion"
+                rows="4"
+                class="textarea-edit"
+                placeholder="Descripción de la ONG"></textarea>
+
+      <p *ngIf="!modoEdicion">
+        {{ ongEditada.descripcion || 'No hay descripción disponible para esta ONG.' }}
+      </p>
+    </div>
+
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block"
+                shape="round"
+                class="ion-margin"
+                (click)="contactar()"
+                [disabled]="modoEdicion">
+      Ver datos de contacto
+      <ion-icon name="chatbubble-ellipses-outline" slot="end"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

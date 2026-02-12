@@ -93,6 +93,10 @@ export class HomePage implements OnInit, OnDestroy {
     return this.roles.includes('ORGANIZADOR') || this.roles.includes('ONG') || this.roles.includes('ADMIN');
   }
 
+  canViewOngs(): boolean {
+    return true;
+  }
+
   canExplore(): boolean {
     return true;
   }
@@ -120,6 +124,8 @@ export class HomePage implements OnInit, OnDestroy {
           return; 
         }
         break;
+      case '/lista-ongs':
+        break;
     }
     
     this.router.navigate([route]);
@@ -145,7 +151,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // ✅ Para los botones info (usa roles actualizados)
-  async showInfo(option: 'crear' | 'mis' | 'explorar' | 'perfil') {
+  async showInfo(option: 'crear' | 'mis' | 'explorar' | 'perfil' | 'ongs') {
     let header = '', message = '';
     const role = this.userRoles[0] || 'no logueado';
 
@@ -171,6 +177,10 @@ export class HomePage implements OnInit, OnDestroy {
         message = this.isLoggedIn 
           ? `👤 Gestiona tu cuenta **${role}**.`
           : `❌ Inicia sesión primero`;
+        break;
+      case 'ongs':
+        header = 'Lista de ONGs';
+        message = `📋 Directorio completo de ONGs ${this.roles.includes('ADMIN') ? '(ADMIN puede editar)' : ''}`;
         break;
     }
 
