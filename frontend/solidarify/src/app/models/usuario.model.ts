@@ -7,6 +7,7 @@ export class UsuarioModel {
     activo: boolean;
     createdAt?: Date;
     updatedAt?: Date;
+    roles?: string[];
 
     constructor(data: Partial<UsuarioModel> = {}) {
         this.idUsuario = data.idUsuario;
@@ -17,6 +18,7 @@ export class UsuarioModel {
         this.activo = data.activo ?? true;
         this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
         this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
+        this.roles = data.roles || [];
     }
 
     static fromApi(api: any): UsuarioModel {
@@ -28,7 +30,9 @@ export class UsuarioModel {
             telefono: api?.Telefono || api?.telefono,
             activo: api?.Activo !== undefined ? api.Activo : true,
             createdAt: api?.CreatedAt || api?.createdAt,
-            updatedAt: api?.Updated_At || api?.updatedAt
+            updatedAt: api?.Updated_At || api?.updatedAt,
+            roles: api?.roles || api?.Roles || []
+            
         });
     }
 

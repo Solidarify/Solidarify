@@ -1,6 +1,53 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MenuController } from '@ionic/angular';
+import { Usuario } from './services/usuario'; 
+import { Subscription } from 'rxjs';
 
+type AuthMode = 'none' | 'login' | 'register';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  standalone: false,
+})
+export class AppComponent implements OnInit, OnDestroy {
+  authMode: AuthMode = 'none';
+  isLoggedIn = false;
+  currentUser: any = null;
+  
+  private userSub?: Subscription;
+
+  constructor(
+    private menuCtrl: MenuController,
+    private usuarioService: Usuario
+  ) {}
+
+  ngOnInit() {
+    // ✅ Escucha el usuario REAL (no simulado)
+    this.userSub = this.usuarioService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.isLoggedIn = !!user;
+      console.log('AppComponent usuario:', user?.displayName || 'sin usuario');
+    });
+  }
+
+  ngOnDestroy() {
+    this.userSub?.unsubscribe();
+  }
+
+  showLogin() { this.authMode = 'login'; }
+  showRegister() { this.authMode = 'register'; }
+  closeForm() { this.authMode = 'none'; }
+
+  logout() {
+    console.log('🚪 Logout desde AppComponent');
+    this.usuarioService.logout();
+    this.menuCtrl.close();
+  }
+}
+
+/*
 type AuthMode = 'none' | 'login' | 'register';
 
 @Component({
@@ -61,3 +108,4 @@ export class AppComponent {
     this.registerForm = {  };
   }
 }
+*/
