@@ -1,5 +1,5 @@
 export class UsuarioModel {
-    idUsuario?: number;
+    idUsuario: number;
     nombre: string;
     email: string;
     passwordHash: string;
@@ -10,7 +10,7 @@ export class UsuarioModel {
     roles?: string[];
 
     constructor(data: Partial<UsuarioModel> = {}) {
-        this.idUsuario = data.idUsuario;
+        this.idUsuario = data.idUsuario ?? 0;
         this.nombre = data.nombre ?? '';
         this.email = data.email?.toLowerCase().trim() ?? '';
         this.passwordHash = data.passwordHash ?? '';

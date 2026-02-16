@@ -1,136 +1,163 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, delay, throwError } from 'rxjs';
-import { PerfilONGModel } from '../models/perfil-ong.model';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
+import { PerfilONGModel } from '../models/perfil-ong.model'; 
 
 @Injectable({
   providedIn: 'root',
 })
 export class PerfilOng {
   
+  private http = inject(HttpClient);
+  
+  // CONFIG
+  private readonly USE_MOCK = true;
+  private readonly API_URL = 'http://localhost:3000/api/ongs';
+  private readonly STORAGE_KEY = 'ongsFake';
+
+  // DATOS MOCK
   private ongsFake: PerfilONGModel[] = [
     new PerfilONGModel({
-      idUsuario: 5,
-      nombreLegal: 'Fundación Manos Verdes',
-      cif: 'G12345678',
-      descripcion: 'Apoyo alimentario a familias vulnerables de Las Palmas',
-      direccion: 'Calle Solidaridad 10, Las Palmas de Gran Canaria',
-      telefonoContacto: '928 123 456',
-      web: 'https://manosverdes.org',
-      estadoVerificacion: 'verificado',
-      idAdminVerificador: 1,
-      createdAt: new Date('2025-01-03')
+      idUsuario: 5, nombreLegal: 'Fundación Manos Verdes', cif: 'G12345678', 
+      descripcion: 'Apoyo alimentario...', direccion: 'Calle Solidaridad 10', telefonoContacto: '928 123 456', 
+      web: 'https://manosverdes.org', estadoVerificacion: 'verificado', idAdminVerificador: 1, createdAt: new Date('2025-01-03')
     }),
     new PerfilONGModel({
-      idUsuario: 6,
-      nombreLegal: 'Asociación Sonrisas Solidarias',
-      cif: 'G87654321',
-      descripcion: 'Ayuda educativa para niños en situación vulnerable',
-      telefonoContacto: '600 987 654',
-      estadoVerificacion: 'pendiente',
-      createdAt: new Date('2025-01-10')
+      idUsuario: 6, nombreLegal: 'Asociación Sonrisas', cif: 'G87654321', 
+      descripcion: 'Ayuda educativa...', telefonoContacto: '600 987 654', estadoVerificacion: 'pendiente', createdAt: new Date('2025-01-10')
     }),
     new PerfilONGModel({
-      idUsuario: 7,
-      nombreLegal: 'Fundación Esperanza Viva',
-      cif: 'G44556677',
-      direccion: 'Av. Principal 25, Telde',
-      estadoVerificacion: 'rechazado',
-      idAdminVerificador: 1,
-      createdAt: new Date('2025-01-15')
+      idUsuario: 7, nombreLegal: 'Fundación Esperanza', cif: 'G44556677', 
+      direccion: 'Av. Principal 25', estadoVerificacion: 'rechazado', idAdminVerificador: 1, createdAt: new Date('2025-01-15')
     })
   ];
 
   constructor() {
-    const saved = localStorage.getItem('ongsFake');
-    if (saved) {
-      const savedOngs = JSON.parse(saved);
-      this.ongsFake.push(...savedOngs.map((o: any) => new PerfilONGModel(o)));
-    }
+    this.loadFromStorage();
   }
 
+
   getAll(): Observable<PerfilONGModel[]> {
-    console.log('Cargando todas las ONGs...');
-    return of([...this.ongsFake]).pipe(delay(600));
+    if (this.USE_MOCK) {
+      return of([...this.ongsFake]).pipe(delay(600));
+    }
+    return this.http.get<any[]>(this.API_URL).pipe(
+      map(items => items.map(i => new PerfilONGModel(i)))
+    );
   }
 
   getById(idUsuario: number): Observable<PerfilONGModel | null> {
-    console.log('Buscando ONG ID:', idUsuario);
-    const ong = this.ongsFake.find(o => o.idUsuario === idUsuario);
-    return of(ong || null).pipe(delay(400));
+    if (this.USE_MOCK) {
+      const ong = this.ongsFake.find(o => o.idUsuario === idUsuario);
+      return of(ong || null).pipe(delay(400));
+    }
+    return this.http.get<any>(`${this.API_URL}/${idUsuario}`).pipe(
+      map(i => new PerfilONGModel(i))
+    );
   }
 
   getByCif(cif: string): Observable<PerfilONGModel | null> {
-    console.log('Buscando ONG CIF:', cif);
-    const ong = this.ongsFake.find(o => o.cif === cif.toUpperCase());
-    return of(ong || null).pipe(delay(500));
+    if (this.USE_MOCK) {
+      const ong = this.ongsFake.find(o => o.cif === cif.toUpperCase());
+      return of(ong || null).pipe(delay(500));
+    }
+    return this.http.get<any>(`${this.API_URL}/buscar?cif=${cif}`).pipe(
+      map(items => items.length ? new PerfilONGModel(items[0]) : null)
+    );
   }
 
   getVerificadas(): Observable<PerfilONGModel[]> {
-    console.log('Cargando ONGs verificadas...');
-    return of(this.ongsFake.filter(o => o.isVerified)).pipe(delay(400));
+    if (this.USE_MOCK) {
+      return of(this.ongsFake.filter(o => o.isVerified)).pipe(delay(400));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?estado=verificado`).pipe(
+      map(items => items.map(i => new PerfilONGModel(i)))
+    );
   }
 
   getPendientes(): Observable<PerfilONGModel[]> {
-    console.log('Cargando ONGs pendientes...');
-    return of(this.ongsFake.filter(o => o.isPending)).pipe(delay(400));
+    if (this.USE_MOCK) {
+      return of(this.ongsFake.filter(o => o.isPending)).pipe(delay(400));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?estado=pendiente`).pipe(
+      map(items => items.map(i => new PerfilONGModel(i)))
+    );
+  }
+
+  searchByName(nombre: string): Observable<PerfilONGModel[]> {
+    if (this.USE_MOCK) {
+      const res = this.ongsFake.filter(o => o.nombreLegal.toLowerCase().includes(nombre.toLowerCase()));
+      return of(res).pipe(delay(600));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?q=${nombre}`).pipe(
+      map(items => items.map(i => new PerfilONGModel(i)))
+    );
   }
 
   create(ongData: Partial<PerfilONGModel>): Observable<PerfilONGModel> {
-    console.log('Creando nueva ONG:', ongData.nombreLegal);
-    const nuevaOng = new PerfilONGModel({
-      ...ongData,
-      idUsuario: Date.now(), // Simular auto_increment
-      estadoVerificacion: 'pendiente',
-      createdAt: new Date()
-    });
-    
-    this.ongsFake.unshift(nuevaOng);
-    this.saveToStorage();
-    return of(nuevaOng).pipe(delay(1000));
+    if (this.USE_MOCK) {
+      const nuevaOng = new PerfilONGModel({
+        ...ongData,
+        idUsuario: Date.now(),
+        estadoVerificacion: 'pendiente',
+        createdAt: new Date()
+      });
+      this.ongsFake.unshift(nuevaOng);
+      this.saveToStorage();
+      return of(nuevaOng).pipe(delay(1000));
+    }
+    return this.http.post<any>(this.API_URL, ongData).pipe(
+      map(i => new PerfilONGModel(i))
+    );
   }
 
   update(idUsuario: number, ongData: Partial<PerfilONGModel>): Observable<PerfilONGModel> {
-    console.log('Actualizando ONG ID:', idUsuario);
-    const index = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
-    
-    if (index !== -1) {
-      this.ongsFake[index] = new PerfilONGModel({
-        ...this.ongsFake[index],
-        ...ongData
-      });
-      this.saveToStorage();
-      return of(this.ongsFake[index]).pipe(delay(800));
+    if (this.USE_MOCK) {
+      const idx = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
+      if (idx !== -1) {
+        const updated = new PerfilONGModel({ ...this.ongsFake[idx], ...ongData });
+        this.ongsFake[idx] = updated;
+        this.saveToStorage();
+        return of(updated).pipe(delay(800));
+      }
+      return throwError(() => new Error('ONG no encontrada'));
     }
-    
-    return throwError(() => new Error('ONG no encontrada')).pipe(delay(300));
-  }
-
-  verificar(idUsuario: number, aprobado: boolean): Observable<PerfilONGModel> {
-    console.log('📋', aprobado ? 'Verificando' : 'Rechazando', 'ONG ID:', idUsuario);
-    const index = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
-    
-    if (index !== -1 && this.ongsFake[index].isPending) {
-      this.ongsFake[index].estadoVerificacion = aprobado ? 'verificado' : 'rechazado';
-      this.ongsFake[index].idAdminVerificador = 1; // Admin actual
-      this.saveToStorage();
-      return of(this.ongsFake[index]).pipe(delay(700));
-    }
-    
-    return throwError(() => new Error('ONG no puede ser verificada')).pipe(delay(300));
+    return this.http.put<any>(`${this.API_URL}/${idUsuario}`, ongData).pipe(
+      map(i => new PerfilONGModel(i))
+    );
   }
 
   delete(idUsuario: number): Observable<boolean> {
-    console.log('Eliminando ONG ID:', idUsuario);
-    const index = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
-    
-    if (index !== -1) {
-      this.ongsFake.splice(index, 1);
-      this.saveToStorage();
-      return of(true).pipe(delay(500));
+    if (this.USE_MOCK) {
+      const idx = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
+      if (idx !== -1) {
+        this.ongsFake.splice(idx, 1);
+        this.saveToStorage();
+        return of(true).pipe(delay(500));
+      }
+      return of(false);
+    }
+    return this.http.delete<boolean>(`${this.API_URL}/${idUsuario}`);
+  }
+
+
+  verificar(idUsuario: number, aprobado: boolean): Observable<PerfilONGModel> {
+    if (this.USE_MOCK) {
+      const idx = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
+      if (idx !== -1 && this.ongsFake[idx].isPending) {
+        this.ongsFake[idx].estadoVerificacion = aprobado ? 'verificado' : 'rechazado';
+        this.ongsFake[idx].idAdminVerificador = 1; 
+        this.saveToStorage();
+        return of(this.ongsFake[idx]).pipe(delay(700));
+      }
+      return throwError(() => new Error('No se puede verificar'));
     }
     
-    return of(false).pipe(delay(200));
+    const action = aprobado ? 'aprobar' : 'rechazar';
+    return this.http.patch<any>(`${this.API_URL}/${idUsuario}/${action}`, {}).pipe(
+      map(i => new PerfilONGModel(i))
+    );
   }
 
   countVerificadas(): number {
@@ -141,15 +168,22 @@ export class PerfilOng {
     return this.ongsFake.filter(o => o.isPending).length;
   }
 
-  searchByName(nombre: string): Observable<PerfilONGModel[]> {
-    const resultados = this.ongsFake.filter(o => 
-      o.nombreLegal.toLowerCase().includes(nombre.toLowerCase())
-    );
-    return of(resultados).pipe(delay(600));
+  private loadFromStorage() {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        this.ongsFake = parsed.map((o: any) => new PerfilONGModel(o));
+      } catch (e) {
+        console.warn('Error storage ONGs, usando default');
+        this.saveToStorage();
+      }
+    } else {
+      this.saveToStorage();
+    }
   }
 
   private saveToStorage(): void {
-    // Persistir datos fake (simula BD)
-    localStorage.setItem('ongsFake', JSON.stringify(this.ongsFake));
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.ongsFake));
   }
 }

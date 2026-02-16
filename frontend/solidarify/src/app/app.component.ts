@@ -1,53 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { MenuController } from '@ionic/angular';
-import { Usuario } from './services/usuario'; 
-import { Subscription } from 'rxjs';
+import { Router } from '@angular/router'; 
+import { Auth } from './services/auth';
+import { UsuarioModel } from './models/usuario.model';
 
-type AuthMode = 'none' | 'login' | 'register';
-
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  standalone: false,
-})
-export class AppComponent implements OnInit, OnDestroy {
-  authMode: AuthMode = 'none';
-  isLoggedIn = false;
-  currentUser: any = null;
-  
-  private userSub?: Subscription;
-
-  constructor(
-    private menuCtrl: MenuController,
-    private usuarioService: Usuario
-  ) {}
-
-  ngOnInit() {
-    // ✅ Escucha el usuario REAL (no simulado)
-    this.userSub = this.usuarioService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.isLoggedIn = !!user;
-      console.log('AppComponent usuario:', user?.displayName || 'sin usuario');
-    });
-  }
-
-  ngOnDestroy() {
-    this.userSub?.unsubscribe();
-  }
-
-  showLogin() { this.authMode = 'login'; }
-  showRegister() { this.authMode = 'register'; }
-  closeForm() { this.authMode = 'none'; }
-
-  logout() {
-    console.log('🚪 Logout desde AppComponent');
-    this.usuarioService.logout();
-    this.menuCtrl.close();
-  }
-}
-
-/*
 type AuthMode = 'none' | 'login' | 'register';
 
 @Component({
@@ -57,55 +13,50 @@ type AuthMode = 'none' | 'login' | 'register';
   standalone: false,
 })
 export class AppComponent {
+  
+  // INYECCIÓN
+  private auth = inject(Auth);
+  private menuCtrl = inject(MenuController);
+  private router = inject(Router);
+
+  // ESTADO
   authMode: AuthMode = 'none';
-  selectedRole: string = '';
+  currentUser: UsuarioModel | null = null;
   isLoggedIn = false;
-  currentUser: any = null;
-  loginForm = { email: '', password: '' };
-  registerForm = { };
 
-  constructor(private menuCtrl: MenuController) {
-    this.simularLogin();
+  constructor() {
+    // REACTIVIDAD AUTOMÁTICA (Angular Signals)
+    // Se ejecuta cada vez que cambia el usuario en Auth
+    effect(() => {
+      const user = this.auth.currentUser();
+      this.currentUser = user;
+      this.isLoggedIn = !!user;
+      
+      console.log('AppComponent: Estado sesión actualizado:', user ? user.nombre : 'Sin usuario');
+      
+      if (!user) {
+        this.menuCtrl.close();
+        this.authMode = 'login';
+      } else {
+        this.authMode = 'none'; // Si hay usuario, ocultamos modales de login
+      }
+    });
   }
 
-  simularLogin() {
-    setTimeout(() => {
-      this.isLoggedIn = true;
-      this.currentUser = {
-        idUsuario: 2,
-        displayName: 'Pedro Organizador',
-        email: 'pedro@test.com',
-        roles: ['ORGANIZADOR'] // ['ADMIN'], ['ONG'], o []
-      };
-      console.log('Usuario simulado:', this.currentUser);
-    }, 500);
+  showLogin() { 
+    this.router.navigate(['/login']);
   }
 
-  showLogin() {
-    this.authMode = 'login';
-    this.selectedRole = '';
+  showRegister() { 
+    this.router.navigate(['/register']);
   }
 
-  showRegister() {
-    this.authMode = 'register';
-    this.selectedRole = '';
-  }
-
-  closeForm() {
-    this.authMode = 'none';
-    this.resetForms();
+  closeForm() { 
+    this.authMode = 'none'; 
   }
 
   logout() {
-    this.isLoggedIn = false;
-    this.currentUser = null;
-    this.menuCtrl.close();
-    console.log('Logout realizado');
-  }
-
-  private resetForms() {
-    this.loginForm = { email: '', password: '' };
-    this.registerForm = {  };
+    console.log('🚪 Cerrando sesión...');
+    this.auth.logout(); 
   }
 }
-*/

@@ -1,19 +1,19 @@
 <ion-content [fullscreen]="true">
-
+  
   <div class="stats-card">
     <div class="stats-content">
       <div class="stat-text">
-        <h2>{{ totalOngs }}</h2>
-        <p>{{ pageTitle }} disponibles</p>
+        <h2>{{totalOngs}}</h2>
+        <p>ONGs registradas</p>
       </div>
-
+      
       <ion-button 
-        *ngIf="userRole !== 'Usuario'" 
+        *ngIf="searchControl.value" 
         fill="outline" 
         shape="round" 
         color="primary" 
         (click)="limpiarFiltros()">
-        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
   </div>
@@ -23,51 +23,58 @@
       <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
       <ion-input 
         [formControl]="searchControl" 
-        placeholder="Buscar ONGs por nombre, CIF...">
+        placeholder="Buscar por nombre...">
       </ion-input>
     </ion-item>
   </div>
 
   <div class="list-header" *ngIf="!loading">
-    <ion-label>{{ pageTitle }} <span>({{ totalOngs }})</span></ion-label>
+    <ion-label>{{pageTitle}}</ion-label>
   </div>
 
   <ion-list lines="none" *ngIf="!loading">
-    <ion-item *ngFor="let ong of (ongs$ | async); trackBy: trackById"
-              button
-              detail="false"
-              class="ong-item"
-              (click)="verDetalle(ong)">
+    
+    <ng-container *ngIf="ongs$ | async as ongs">
+      
+      <ion-item *ngFor="let ong of ongs; trackBy: trackById" 
+                button 
+                detail="false"
+                class="ong-item"
+                (click)="verDetalle(ong)">
+        
+        <div class="tipo-avatar" slot="start">
+          <ion-icon name="business" color="primary"></ion-icon>
+        </div>
 
-      <div class="tipo-avatar" slot="start">
-        <ion-icon name="people-circle-outline"></ion-icon>
+        <ion-label class="ong-label">
+          <h2>
+            {{ong.nombreLegal}}
+            <ion-icon *ngIf="ong.isVerified" name="checkmark-circle" color="success" style="font-size: 0.8em;"></ion-icon>
+          </h2>
+          
+          <div class="info-row" *ngIf="ong.web">
+            <ion-icon name="globe-outline"></ion-icon>
+            <span>{{ong.web}}</span>
+          </div>
+
+          <p class="descripcion-corta" *ngIf="ong.descripcion">
+            {{ong.descripcion}}
+          </p>
+        </ion-label>
+
+        <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
+      </ion-item>
+
+      <div *ngIf="ongs.length === 0" class="empty-state ion-padding text-center">
+        <p>No se encontraron organizaciones.</p>
       </div>
 
-      <ion-label class="ong-label">
-        <h2>{{ ong.displayName }}</h2>
-
-        <div class="info-row">
-          <ion-icon name="document-text-outline"></ion-icon>
-          <span>{{ ong.cif }}</span>
-        </div>
-
-        <div class="info-row" *ngIf="ong.direccion">
-          <ion-icon name="location-outline"></ion-icon>
-          <span>{{ ong.direccion }}</span>
-        </div>
-
-        <div class="estado-chip" [ngClass]="ong.estadoVerificacion">
-          {{ ong.estadoVerificacion | titlecase }}
-        </div>
-      </ion-label>
-
-      <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-    </ion-item>
+    </ng-container>
   </ion-list>
 
   <div class="loading-center" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Cargando ONGs...</p>
+    <p>Cargando directorio...</p>
   </div>
 
 </ion-content>

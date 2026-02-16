@@ -1,22 +1,19 @@
 <ion-content fullscreen="true" class="account-fullscreen">
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
+  
+  <div *ngIf="loading()" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando perfil...</p>
   </div>
 
-  <!-- Sin usuario -->
-  <div *ngIf="!loading && !usuario" class="no-user">
+  <div *ngIf="!loading() && !usuario()" class="no-user">
     <ion-icon name="person-outline" class="no-user-icon"></ion-icon>
     <h3>Inicia sesión</h3>
     <p>Para ver y editar tu perfil</p>
     <ion-button routerLink="/login" color="primary" shape="round">Entrar</ion-button>
   </div>
 
-  <!-- PERFIL -->
-  <div *ngIf="!loading && usuario" class="account-container">
+  <div *ngIf="!loading() && usuario()" class="account-container">
     
-    <!-- Hero con avatar y datos básicos -->
     <div class="hero-section">
       <div class="avatar-section">
         <ion-avatar>
@@ -25,12 +22,12 @@
       </div>
       
       <div class="user-info">
-        <h1>{{ usuario.displayName }}</h1>
-        <p class="email">{{ usuario.email }}</p>
+        <h1>{{ usuario()?.nombre }}</h1> 
+        <p class="email">{{ usuario()?.email }}</p>
         
         <div class="badges-container">
           <div class="badges">
-            <ion-chip *ngFor="let rol of roles" [class]="rol.toLowerCase()" size="small">
+            <ion-chip *ngFor="let rol of rolesVisuales" [class]="rol.toLowerCase()" size="small">
               {{ rol | titlecase }}
             </ion-chip>
             <ion-chip class="activo" color="success" size="small">
@@ -39,13 +36,12 @@
             </ion-chip>
           </div>
           
-          <!--BOTÓN EDITAR (solo lectura)-->
           <ion-button *ngIf="!modoEdicion" 
-                     (click)="activarEdicion()" 
-                     fill="clear" 
-                     size="small" 
-                     color="light"
-                     class="edit-btn">
+                       (click)="activarEdicion()" 
+                       fill="clear" 
+                       size="small" 
+                       color="light"
+                       class="edit-btn">
             <ion-icon name="create-outline" slot="icon-only"></ion-icon>
             <span>Editar</span>
           </ion-button>
@@ -53,10 +49,8 @@
       </div>
     </div>
 
-    <!-- Datos en tarjetas -->
     <div class="account-card">
       
-      <!-- Datos básicos usuario -->
       <div class="section">
         <h2>Datos personales</h2>
         
@@ -67,11 +61,11 @@
               <span class="label">Nombre</span>
               <ion-input 
                 *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado.nombre" 
+                [(ngModel)]="usuarioEditado!.nombre" 
                 class="input-edit"
                 placeholder="Tu nombre completo">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ usuario.displayName }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</span>
             </div>
           </div>
 
@@ -81,12 +75,12 @@
               <span class="label">Email</span>
               <ion-input 
                 *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado.email" 
+                [(ngModel)]="usuarioEditado!.email" 
                 type="email"
                 class="input-edit"
                 placeholder="tu@email.com">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ usuario.email }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</span>
             </div>
           </div>
 
@@ -96,21 +90,20 @@
               <span class="label">Teléfono</span>
               <ion-input 
                 *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado.telefono" 
+                [(ngModel)]="usuarioEditado!.telefono" 
                 type="tel"
                 class="input-edit"
                 placeholder="600 000 000">
               </ion-input>
               <span *ngIf="!modoEdicion" class="value">
-                {{ usuario.telefono || 'No especificado' }}
+                {{ usuario()?.telefono || 'No especificado' }}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Datos ONG -->
-      <div *ngIf="esONG" class="section">
+      <div *ngIf="esONG()" class="section">
         <h2>Datos de la ONG</h2>
         <div class="info-grid">
           <div class="info-item full-width">
@@ -123,7 +116,7 @@
                 class="input-edit"
                 placeholder="Nombre legal de la organización">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG?.nombreLegal }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.nombreLegal }}</span>
             </div>
           </div>
 
@@ -137,7 +130,7 @@
                 class="input-edit"
                 placeholder="G12345678">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG?.cif }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.cif }}</span>
             </div>
           </div>
 
@@ -146,8 +139,8 @@
             <div>
               <span class="label">Estado verificación</span>
               <span class="value badge-verificacion" 
-                    [class]="perfilONG!.isVerified ? 'verificado' : 'pendiente'">
-                {{ perfilONG?.estadoVerificacion | titlecase }}
+                    [class]="perfilONG()?.isVerified ? 'verificado' : 'pendiente'">
+                {{ perfilONG()?.estadoVerificacion | titlecase }}
               </span>
             </div>
           </div>
@@ -162,7 +155,7 @@
                 class="input-edit"
                 placeholder="Dirección completa">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG?.direccion || 'No especificada' }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.direccion || 'No especificada' }}</span>
             </div>
           </div>
 
@@ -177,14 +170,13 @@
                 class="input-edit"
                 placeholder="https://...">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG?.web || 'No especificado' }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.web || 'No especificado' }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Datos Organizador -->
-      <div *ngIf="esOrganizador" class="section">
+      <div *ngIf="esOrganizador()" class="section">
         <h2>Datos del Organizador</h2>
         <div class="info-grid">
           <div class="info-item full-width">
@@ -197,7 +189,7 @@
                 class="input-edit"
                 placeholder="Nombre de la organización">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador?.nombre }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.nombre }}</span>
             </div>
           </div>
 
@@ -211,7 +203,7 @@
                 class="input-edit"
                 placeholder="G12345678">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador?.cif }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.cif }}</span>
             </div>
           </div>
 
@@ -225,7 +217,7 @@
                 class="input-edit"
                 placeholder="Zona geográfica">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador?.zonaResponsable || 'No especificada' }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.zonaResponsable || 'No especificada' }}</span>
             </div>
           </div>
 
@@ -240,7 +232,7 @@
                 class="input-edit"
                 placeholder="600 000 000">
               </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador?.telefonoDirecto || 'No especificado' }}</span>
+              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.telefonoDirecto || 'No especificado' }}</span>
             </div>
           </div>
         </div>

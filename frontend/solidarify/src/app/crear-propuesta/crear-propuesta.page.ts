@@ -1,9 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { Usuario } from '../services/usuario';
+import { firstValueFrom } from 'rxjs';
+
+// SERVICIOS
+import { Auth } from '../services/auth';
+import { Propuesta } from '../services/propuesta';
+
+// MODELOS
 import { UsuarioModel } from '../models/usuario.model';
+import { PropuestaModel } from '../models/propuesta.model';
 
 @Component({
   selector: 'app-crear-propuesta',
@@ -13,11 +20,19 @@ import { UsuarioModel } from '../models/usuario.model';
 })
 export class CrearPropuestaPage implements OnInit {
 
-  propuestaForm!: FormGroup;
-  loading = false;
-  fechaMinima: string;
+  // INYECCIÓN
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private alertCtrl = inject(AlertController);
+  private loadingCtrl = inject(LoadingController);
+  private toastCtrl = inject(ToastController);
   
-  currentUser: UsuarioModel | null = null; 
+  private auth = inject(Auth);         
+  private propuestaService = inject(Propuesta);
+
+  propuestaForm!: FormGroup;
+  currentUser: UsuarioModel | null = null;
+  fechaMinima: string = new Date().toISOString();
 
   tiposBienes = [
     { id: 1, nombre: 'Alimentos no perecederos' },
@@ -38,33 +53,25 @@ export class CrearPropuestaPage implements OnInit {
     { value: 'en_proceso', label: 'En proceso' }
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController,
-    private usuarioService: Usuario
-  ) {
-    this.fechaMinima = new Date().toISOString();
+  constructor() {
+    this.initForm();
   }
 
   ngOnInit() {
-    this.usuarioService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      
-      if (!this.currentUser) {
-        const saved = localStorage.getItem('currentUser');
-        if (!saved) {
-          console.error('Usuario no logeado. Redirigiendo...');
-          this.router.navigate(['/login']);
-        } else {
-          this.currentUser = JSON.parse(saved);
-        }
-      }
-    });
+    if (!this.auth.isAuthenticated()) {
+      this.mostrarToast('Debes iniciar sesión para crear propuestas', 'warning');
+      this.router.navigate(['/login']);
+      return;
+    }
 
-    this.initForm();
+    // if (!this.auth.hasRole('ORGANIZADOR') && !this.auth.hasRole('ONG')) { ... }
+
+    const user = this.auth.currentUser();
+    if (user) {
+      this.currentUser = user;
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
 
   private initForm(): void {
@@ -83,95 +90,46 @@ export class CrearPropuestaPage implements OnInit {
     });
   }
 
-  get tituloField(): AbstractControl | null { 
-    return this.propuestaForm.get('titulo'); 
-  }
-
-  get descripcionField(): AbstractControl | null { 
-    return this.propuestaForm.get('descripcion'); 
-  }
-
-  get tipoBienField(): AbstractControl | null { 
-    return this.propuestaForm.get('tipoBien'); 
-  }
-
-  get lugarField(): AbstractControl | null { 
-    return this.propuestaForm.get('lugar'); 
-  }
+  get f() { return this.propuestaForm.controls; }
 
   onFechaInicioChange(event: any): void {
     const fechaSeleccionada = event.detail.value;
-    
     if (!fechaSeleccionada) return;
 
-    this.propuestaForm.patchValue({ fechaInicio: fechaSeleccionada });
-    this.propuestaForm.get('fechaInicio')?.markAsTouched();
-    
-    const fechaFinActual = this.propuestaForm.get('fechaFin')?.value;
-    
-    if (fechaFinActual && new Date(fechaFinActual) <= new Date(fechaSeleccionada)) {
-      const nuevaFechaFin = new Date(fechaSeleccionada);
-      nuevaFechaFin.setDate(nuevaFechaFin.getDate() + 1); 
-      this.propuestaForm.patchValue({ fechaFin: nuevaFechaFin.toISOString() });
-      
-      this.mostrarToast('La fecha de fin se ajustó automáticamente', 'warning');
+    const finActual = this.propuestaForm.get('fechaFin')?.value;
+    if (finActual && new Date(finActual) <= new Date(fechaSeleccionada)) {
+      const nuevaFin = new Date(fechaSeleccionada);
+      nuevaFin.setDate(nuevaFin.getDate() + 1);
+      this.propuestaForm.patchValue({ fechaFin: nuevaFin.toISOString() });
+      this.mostrarToast('Fecha fin ajustada automáticamente', 'warning');
     }
-  }
-
-  onFechaFinChange(event: any): void {
-    const fechaSeleccionada = event.detail.value;
-    
-    if (!fechaSeleccionada) return;
-
-    this.propuestaForm.patchValue({ fechaFin: fechaSeleccionada });
-    this.propuestaForm.get('fechaFin')?.markAsTouched();
   }
 
   private validarFechas(): boolean {
-    const fechaInicio = this.propuestaForm.get('fechaInicio')?.value;
-    const fechaFin = this.propuestaForm.get('fechaFin')?.value;
-
-    if (!fechaInicio || !fechaFin) {
-      this.mostrarToast('Debes seleccionar ambas fechas', 'warning');
-      return false;
-    }
-
-    const inicio = new Date(fechaInicio);
-    const fin = new Date(fechaFin);
+    const inicio = new Date(this.propuestaForm.value.fechaInicio);
+    const fin = new Date(this.propuestaForm.value.fechaFin);
 
     if (fin <= inicio) {
-      this.mostrarToast('La fecha de fin debe ser posterior a la fecha de inicio', 'warning');
+      this.mostrarToast('La fecha de fin debe ser posterior a la de inicio', 'warning');
       return false;
     }
-
-    const unAnoEnMs = 365 * 24 * 60 * 60 * 1000;
-    if (fin.getTime() - inicio.getTime() > unAnoEnMs) {
+    
+    const unAno = 365 * 24 * 60 * 60 * 1000;
+    if (fin.getTime() - inicio.getTime() > unAno) {
       this.mostrarToast('La campaña no puede durar más de 1 año', 'warning');
       return false;
     }
-
     return true;
   }
 
-  async onSubmit(): Promise<void> {
-    this.propuestaForm.markAllAsTouched();
-
+  async onSubmit() {
     if (this.propuestaForm.invalid) {
-      console.log('Formulario inválido. Errores:');
-      Object.keys(this.propuestaForm.controls).forEach(key => {
-        const controlErrors = this.propuestaForm.get(key)?.errors;
-        if (controlErrors) {
-          console.log(`- ${key}:`, controlErrors);
-        }
-      });
-      
-      await this.mostrarToast('Por favor completa todos los campos correctamente', 'warning');
+      this.propuestaForm.markAllAsTouched();
+      this.mostrarToast('Revisa los campos marcados en rojo', 'warning');
       return;
     }
 
-    if (!this.validarFechas()) {
-      return;
-    }
+    if (!this.validarFechas()) return;
 
     const loading = await this.loadingCtrl.create({
       message: 'Creando propuesta...',
@@ -180,67 +138,55 @@ export class CrearPropuestaPage implements OnInit {
     await loading.present();
 
     try {
-      const formData = this.prepareFormData();
-      console.log('📤 Datos a enviar:', formData);
+      const datos = this.prepararDatos();
+      
+      await firstValueFrom(this.propuestaService.create(datos));
 
-      // await this.propuestaService.create(formData).toPromise();
-      
-      // Simulación por ahora
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      await loading.dismiss();
-      
-      await this.mostrarToast('¡Propuesta creada exitosamente!', 'success');
-      
-      this.propuestaForm.reset({
-        estadoPropuesta: 'publicada',
-        fechaInicio: new Date().toISOString(),
-        fechaFin: new Date(Date.now() + 86400000).toISOString() // +1 día
-      });
-      
-      this.router.navigate(['/lista-propuestas']);
+      this.mostrarToast('¡Propuesta creada con éxito!', 'success');
+      this.propuestaForm.reset();
+      this.router.navigate(['/lista-propuestas']); 
 
     } catch (error) {
-      await loading.dismiss();
-      console.error('❌ Error al crear propuesta:', error);
-      await this.showAlert('Error', 'Ocurrió un error al guardar la propuesta. Inténtalo de nuevo.');
+      console.error('Error creando propuesta:', error);
+      this.mostrarAlerta('Error', 'No se pudo crear la propuesta. Inténtalo de nuevo.');
+    } finally {
+      loading.dismiss();
     }
   }
 
-  private prepareFormData(): any {
-    const formValues = this.propuestaForm.value;
-    
+  private prepararDatos(): Partial<PropuestaModel> {
+    const val = this.propuestaForm.value;
     return {
-      idOrganizador: this.currentUser?.idUsuario || 0,
-      idTipoBien: parseInt(formValues.tipoBien),
-      titulo: formValues.titulo.trim(),
-      descripcion: formValues.descripcion.trim(),
-      lugar: formValues.lugar.trim(),
-      fechaInicio: formValues.fechaInicio,
-      fechaFin: formValues.fechaFin,
-      estadoPropuesta: formValues.estadoPropuesta,
-      fechaCreacion: new Date().toISOString()
+      idOrganizador: this.currentUser?.idUsuario,
+      idTipoBien: parseInt(val.tipoBien),
+      titulo: val.titulo.trim(),
+      descripcion: val.descripcion.trim(),
+      lugar: val.lugar.trim(),
+      fechaInicio: new Date(val.fechaInicio), 
+      fechaFin: new Date(val.fechaFin),
+      estadoPropuesta: val.estadoPropuesta,
+      fechaPublicacion: val.estadoPropuesta === 'publicada' ? new Date() : undefined
     };
   }
 
-  private async showAlert(header: string, message: string): Promise<void> {
+
+  private async mostrarToast(message: string, color: 'success' | 'warning' | 'danger') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2500,
+      color,
+      position: 'bottom',
+      icon: color === 'success' ? 'checkmark-circle' : 'alert-circle'
+    });
+    toast.present();
+  }
+
+  private async mostrarAlerta(header: string, message: string) {
     const alert = await this.alertCtrl.create({
       header,
       message,
-      buttons: ['OK'],
-      cssClass: 'custom-alert'
+      buttons: ['OK']
     });
     await alert.present();
-  }
-
-  private async mostrarToast(message: string, color: 'success' | 'warning' | 'danger' = 'warning'): Promise<void> {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 3000,
-      color,
-      position: 'bottom',
-      icon: color === 'success' ? 'checkmark-circle' : 'alert-circle-outline'
-    });
-    toast.present();
   }
 }

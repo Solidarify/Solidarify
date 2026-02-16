@@ -141,7 +141,6 @@
   }
 }
 
-//Estilos al modificar campos
 .input-hero, .input-edit, .textarea-edit {
   width: 100% !important;
   min-height: 44px;
@@ -182,4 +181,30 @@
 
 ion-datetime {
   --border-radius: 12px;
+}
+
+.hero-image-container {
+  position: relative;
+  height: 200px;
+  background: #f1f5f9;
+  
+  .main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .edit-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    padding: 5px;
+  }
+}
+
+.transparent-item {
+  --background: transparent;
+  --color: white;
 }

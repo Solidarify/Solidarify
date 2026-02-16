@@ -1,150 +1,101 @@
-<ion-content [fullscreen]="true" class="home-content">
-  <div class="container">
-    <ng-container>
-      <div class="hero-section">
-        <div class="logo-container">
-          <ion-icon name="heart-circle" class="logo-icon"></ion-icon>
-          <h1 class="app-name">Solidarify</h1>
-        </div>
-        <p class="tagline">Conectando solidaridad con quienes más lo necesitan</p>
-      </div>
-
-      <div class="actions-grid">
-        <ion-card class="action-card" [class.disabled]="!canCreateProposal()" 
-        (click)="navigateTo('/crear-propuesta')">
-          <ion-card-content>
-            <!--<div class="card-info-row">-->
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="add-circle" class="card-icon"></ion-icon>
-              </div>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                class="info-button"
-                (click)="showInfo('crear'); $event.stopPropagation()">
-                <ion-icon name="information-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <h2>Crear propuesta</h2>
-            <p>Inicia una nueva campaña solidaria</p>
-            <!--<div class="role-badge" *ngIf="currentUser?.role === 'ORGANIZADOR'">ORGANIZADOR</div>-->
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" [class.disabled]="!canViewMyProposals()" 
-        (click)="navigateTo('/lista-propuestas/mine')">
-          <ion-card-content>
-            <!--<div class="card-info-row">-->
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="list" class="card-icon"></ion-icon>
-              </div>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                class="info-button"
-                (click)="showInfo('mis'); $event.stopPropagation()">
-                <ion-icon name="information-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <h2>Mis propuestas</h2>
-            <p>Gestiona tus campañas activas</p>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" [class.disabled]="!canExplore()"
-        (click)="navigateTo('/lista-propuestas/explore')">
-          <ion-card-content>
-            <!--<div class="card-info-row">-->
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="compass" class="card-icon"></ion-icon>
-              </div>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                class="info-button"
-                (click)="showInfo('explorar'); $event.stopPropagation()">
-                <ion-icon name="information-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <h2>Explorar</h2>
-            <p>Descubre campañas disponibles</p>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" [class.disabled]="!canViewOngs()"
-          (click)="navigateTo('/lista-ongs')">
-          <ion-card-content>
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="business-outline" class="card-icon"></ion-icon>
-              </div>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                class="info-button"
-                (click)="showInfo('ongs'); $event.stopPropagation()">
-                <ion-icon name="information-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <h2>Directorio ONGs</h2>
-            <p>Ver todas las organizaciones registradas</p>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" [class.disabled]="!isLoggedIn"
-        (click)="navigateTo('/account')">
-          <ion-card-content>
-            <!--<div class="card-info-row">-->
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="person-circle" class="card-icon"></ion-icon>
-              </div>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                class="info-button"
-                (click)="showInfo('perfil'); $event.stopPropagation()">
-                <ion-icon name="information-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <h2>Mi perfil</h2>
-            <p>{{ currentUser?.nombre || 'Gestión de cuenta' }}</p>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card" *ngIf="isLoggedIn" (click)="logout()">
-          <ion-card-content>
-            <div class="card-header">
-              <div class="card-icon-wrapper">
-                <ion-icon name="log-out-outline" class="card-icon"></ion-icon>
-              </div>
-            </div>
-            <h2>Cerrar sesión</h2>
-            <p>Salir de tu cuenta</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
-
-      <div class="stats-section">
-        <div class="stat-item">
-          <ion-icon name="gift" class="stat-icon"></ion-icon>
-          <h3>120+</h3>
-          <p>Propuestas activas</p>
-        </div>
-        <div class="stat-item">
-          <ion-icon name="heart" class="stat-icon"></ion-icon>
-          <h3>50+</h3>
-          <p>ONGs colaboradoras</p>
-        </div>
-        <div class="stat-item">
-          <ion-icon name="people-circle" class="stat-icon"></ion-icon>
-          <h3>1000+</h3>
-          <p>Personas ayudadas</p>
-        </div>
-      </div>
-    </ng-container>
+<ion-content [fullscreen]="true" class="bg-light">
+  
+  <div class="header-section ion-padding">
+    <div class="saludo">
+      <p>Hola, <strong>Usuario</strong> 👋</p>
+      <h1>¿Cómo quieres <br> <span class="highlight">ayudar hoy?</span></h1>
+    </div>
+    
+    <ion-avatar class="profile-pic">
+      <img src="https://i.pravatar.cc/150?u=solidarify" />
+    </ion-avatar>
   </div>
+
+  <div class="stats-container ion-padding-horizontal">
+    <div class="impact-card">
+      <div class="stat-item">
+        <span class="number">12</span>
+        <span class="label">Ayudas</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-item">
+        <span class="number">3</span>
+        <span class="label">En curso</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-item">
+        <span class="number">🏆</span>
+        <span class="label">Nivel 2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title ion-padding-top ion-padding-horizontal">
+    <h3>📢 Urgente esta semana</h3>
+    <span class="see-all">Ver todo</span>
+  </div>
+
+  <div class="urgent-scroll">
+    <div class="urgent-card" (click)="irADetalle(1)">
+      <div class="card-img" style="background-image: url('https://placehold.co/300x200/orange/white?text=Comida');">
+        <span class="badge">🔥 24h restan</span>
+      </div>
+      <div class="card-info">
+        <h4>Recogida de Alimentos</h4>
+        <p><ion-icon name="location-outline"></ion-icon> Madrid Centro</p>
+      </div>
+    </div>
+
+    <div class="urgent-card" (click)="irADetalle(2)">
+      <div class="card-img" style="background-image: url('https://placehold.co/300x200/blue/white?text=Ropa');">
+        <span class="badge">Nuevo</span>
+      </div>
+      <div class="card-info">
+        <h4>Abrigos para invierno</h4>
+        <p><ion-icon name="location-outline"></ion-icon> Zona Norte</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title ion-padding-top ion-padding-horizontal">
+    <h3>Explorar</h3>
+  </div>
+
+  <ion-grid class="menu-grid">
+    <ion-row>
+      <ion-col size="6">
+        <div class="menu-card primary" routerLink="/crear-propuesta">
+          <div class="icon-circle">
+            <ion-icon name="add"></ion-icon>
+          </div>
+          <h5>Crear <br>Propuesta</h5>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card secondary" routerLink="/lista-propuestas">
+          <div class="icon-circle">
+            <ion-icon name="search"></ion-icon>
+          </div>
+          <h5>Buscar <br>Ayuda</h5>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card tertiary" routerLink="/lista-ongs">
+          <div class="icon-circle">
+            <ion-icon name="heart"></ion-icon>
+          </div>
+          <h5>Ver <br>ONGs</h5>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card dark">
+          <div class="icon-circle">
+            <ion-icon name="stats-chart"></ion-icon>
+          </div>
+          <h5>Mi <br>Actividad</h5>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 </ion-content>

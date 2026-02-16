@@ -1,169 +1,71 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, delay, throwError } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
 import { UsuarioModel } from '../models/usuario.model';
-import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
-export class Usuario {
+export class Usuario { 
   
+  private http = inject(HttpClient);
+  
+  // CONFIG
+  private readonly USE_MOCK = true;
+  private readonly API_URL = 'http://localhost:3000/api/usuarios';
+
+  // DATA FAKE
   private usuariosFake: UsuarioModel[] = [
-    UsuarioModel.fromApi({
-      Id_Usuario: 1,
-      Nombre: 'Admin General',
-      Email: 'admin@donapp.com',
-      Password_Hash: 'hash_admin',
-      Telefono: '600000001',
-      Activo: 1,
-      Created_At: '2025-01-01T09:00:00Z',
-      roles: ['ADMIN'] 
-    }),
-    UsuarioModel.fromApi({
-      Id_Usuario: 2,
-      Nombre: 'Organizador Norte',
-      Email: 'org.norte@donapp.com',
-      Password_Hash: 'hash_org_norte',
-      Telefono: '600000002',
-      Activo: 1,
-      Created_At: '2025-01-02T09:00:00Z',
-      roles: ['ORGANIZADOR'] 
-    }),
-    UsuarioModel.fromApi({
-      Id_Usuario: 5,
-      Nombre: 'ONG Manos Verdes',
-      Email: 'contacto@manosverdes.org',
-      Password_Hash: 'hash_ong_manosverdes',
-      Telefono: '600000005',
-      Activo: 1,
-      Created_At: '2025-01-03T09:00:00Z',
-      roles: ['ONG'] 
-    }),
-    UsuarioModel.fromApi({
-      Id_Usuario: 10,
-      Nombre: 'Juan Usuario',
-      Email: 'juan@usuario.com',
-      Password_Hash: 'hash_usuario',
-      Telefono: '600000010',
-      Activo: 1,
-      Created_At: '2025-01-10T09:00:00Z',
-      roles: ['Usuario'] 
-    })
+    UsuarioModel.fromApi({ Id_Usuario: 1, Nombre: 'Admin General', Email: 'admin@donapp.com', roles: ['ADMIN'], Activo: 1 }),
+    UsuarioModel.fromApi({ Id_Usuario: 2, Nombre: 'Organizador Norte', Email: 'org@donapp.com', roles: ['ORGANIZADOR'], Activo: 1 }),
+    UsuarioModel.fromApi({ Id_Usuario: 5, Nombre: 'ONG Manos Verdes', Email: 'ong@donapp.com', roles: ['ONG'], Activo: 1 }),
+    UsuarioModel.fromApi({ Id_Usuario: 10, Nombre: 'Juan Usuario', Email: 'user@donapp.com', roles: ['USUARIO'], Activo: 1 })
   ];
 
-  //Estado de usuario actual (login/logout)
-  private currentUserSubject = new BehaviorSubject<UsuarioModel | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  constructor() {}
 
-  constructor() {
-    const saved = localStorage.getItem('currentUser');
-    if (saved) {
-      const usuario = JSON.parse(saved) as UsuarioModel;
-      this.currentUserSubject.next(new UsuarioModel(usuario));
-    }
-  }
-
-  //Simular login (cambio a HTTP)
-  login(email: string, password: string): Observable<UsuarioModel | null> {
-    console.log('Login intento:', email);
-    return of(null).pipe(
-      delay(1000), // Simular latencia red
-      map(() => {
-        const usuario = this.usuariosFake.find(u => 
-          u.email === email.toLowerCase() && 
-          u.passwordHash.includes('hash')
-        );
-        
-        console.log('Usuario encontrado:', usuario);
-        console.log('Password esperado:', usuario ? usuario.passwordHash : 'N/A');
-        console.log('Password proporcionado:', password);
-        if (usuario) {
-          console.log('Login OK:', usuario.displayName);
-          this.currentUserSubject.next(usuario);
-          localStorage.setItem('currentUser', JSON.stringify(usuario));
-          return usuario;
-        }
-        
-        console.log('Credenciales inválidas');
-        return null;
-      })
-    );
-  }
-
-  //Simular logout
-  logout(): void {
-    console.log('Logout');
-    this.currentUserSubject.next(null);
-    localStorage.removeItem('currentUser');
-  }
-
-  //Obtener todos los usuarios (cambio a HTTP)
   getAll(): Observable<UsuarioModel[]> {
-    console.log('Cargando todos usuarios...');
-    return of([...this.usuariosFake]).pipe(
-      delay(500) // Simular carga
-    );
+    if (this.USE_MOCK) return of([...this.usuariosFake]).pipe(delay(500));
+    return this.http.get<any[]>(this.API_URL).pipe(map(items => items.map(i => UsuarioModel.fromApi(i))));
   }
 
-  //Obtener por ID
   getById(id: number): Observable<UsuarioModel | null> {
-    console.log('Buscando usuario ID:', id);
-    return of(this.usuariosFake.find(u => u.idUsuario === id) || null).pipe(
-      delay(300)
-    );
+    if (this.USE_MOCK) return of(this.usuariosFake.find(u => u.idUsuario === id) || null).pipe(delay(300));
+    return this.http.get<any>(`${this.API_URL}/${id}`).pipe(map(i => UsuarioModel.fromApi(i)));
   }
 
-  //CRUD
-  create(usuarioData: Partial<UsuarioModel>): Observable<UsuarioModel> {
-    console.log('Creando usuario:', usuarioData);
-    const nuevo = new UsuarioModel({
-      ...usuarioData,
-      idUsuario: Date.now(), // Simular auto_increment
-      activo: true
-    });
-    
-    this.usuariosFake.unshift(nuevo);
-    return of(nuevo).pipe(delay(800));
-  }
-
-  update(id: number, usuarioData: Partial<UsuarioModel>): Observable<UsuarioModel> {
-    console.log('Actualizando usuario ID:', id);
-    const index = this.usuariosFake.findIndex(u => u.idUsuario === id);
-    
-    if (index !== -1) {
-      this.usuariosFake[index] = new UsuarioModel({
-        ...this.usuariosFake[index],
-        ...usuarioData
-      });
-      return of(this.usuariosFake[index]).pipe(delay(600));
+  create(data: Partial<UsuarioModel>): Observable<UsuarioModel> {
+    if (this.USE_MOCK) {
+      const nuevo = new UsuarioModel({ ...data, idUsuario: Date.now(), activo: true });
+      this.usuariosFake.unshift(nuevo);
+      return of(nuevo).pipe(delay(800));
     }
-    
-    return throwError(() => new Error('Usuario no encontrado')).pipe(delay(300));
+    return this.http.post<any>(this.API_URL, data).pipe(map(i => UsuarioModel.fromApi(i)));
+  }
+
+  update(id: number, data: Partial<UsuarioModel>): Observable<UsuarioModel> {
+    if (this.USE_MOCK) {
+      const idx = this.usuariosFake.findIndex(u => u.idUsuario === id);
+      if (idx !== -1) {
+        const updated = new UsuarioModel({ ...this.usuariosFake[idx], ...data });
+        this.usuariosFake[idx] = updated;
+        return of(updated).pipe(delay(600));
+      }
+      return throwError(() => new Error('No encontrado'));
+    }
+    return this.http.put<any>(`${this.API_URL}/${id}`, data).pipe(map(i => UsuarioModel.fromApi(i)));
   }
 
   delete(id: number): Observable<boolean> {
-    console.log('Eliminando usuario ID:', id);
-    const index = this.usuariosFake.findIndex(u => u.idUsuario === id);
-    
-    if (index !== -1) {
-      this.usuariosFake.splice(index, 1);
-      return of(true).pipe(delay(400));
+    if (this.USE_MOCK) {
+      const idx = this.usuariosFake.findIndex(u => u.idUsuario === id);
+      if (idx !== -1) {
+        this.usuariosFake.splice(idx, 1);
+        return of(true).pipe(delay(400));
+      }
+      return of(false);
     }
-    
-    return of(false).pipe(delay(200));
+    return this.http.delete<boolean>(`${this.API_URL}/${id}`);
   }
-
-  //Utilidades
-  getCurrentUser(): UsuarioModel | null {
-    return this.currentUserSubject.value;
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.currentUserSubject.value;
-  }
-
-  getActivos(): Observable<UsuarioModel[]> {
-    return of(this.usuariosFake.filter(u => u.isActive)).pipe(delay(400));
-  }
-
 }

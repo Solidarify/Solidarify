@@ -2,37 +2,49 @@
   <ion-toolbar color="primary">
     <ion-title>Menú</ion-title>
   </ion-toolbar>
+  
+  <ion-toolbar color="primary" class="user-toolbar">
+    <div class="user-info">
+      <h3>{{ currentUser?.nombre || 'Bienvenido' }}</h3>
+      <p class="role-badge">{{ currentUserRole }}</p>
+    </div>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    
+  <ion-list lines="none">
 
-    <ng-container *ngIf="isOrganizador">
+    <ng-container *ngIf="isAdmin">
+      <ion-item-divider color="light">
+        <ion-label>Administración</ion-label>
+      </ion-item-divider>
+
       <ion-menu-toggle>
         <ion-item routerLink="/home" routerLinkActive="router-link-active">
           <ion-icon name="home-outline" slot="start"></ion-icon>
           <ion-label>Dashboard</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle>
-        <ion-item routerLink="/lista-propuestas" routerLinkActive="router-link-active">
+        <ion-item routerLink="/lista-ongs" routerLinkActive="router-link-active">
+          <ion-icon name="business-outline" slot="start"></ion-icon>
+          <ion-label>
+            Gestionar ONGs
+            <ion-badge color="warning" class="menu-badge" *ngIf="countOngsPendientes > 0">
+              {{ countOngsPendientes }}
+            </ion-badge>
+          </ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'explore'}" routerLinkActive="router-link-active">
           <ion-icon name="list-outline" slot="start"></ion-icon>
-          <ion-label>Mis Propuestas</ion-label>
+          <ion-label>Todas las propuestas</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <ion-menu-toggle>
-        <ion-item routerLink="/crear-propuesta" routerLinkActive="router-link-active">
-          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-          <ion-label>Crear Propuesta</ion-label>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle>
-        <ion-item button (click)="mostrarMensajePendiente('mensajes')">
-          <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-          <ion-label>Mensajes</ion-label>
-        </ion-item>
-      </ion-menu-toggle>
+      
       <ion-menu-toggle>
         <ion-item routerLink="/account" routerLinkActive="router-link-active">
           <ion-icon name="person-outline" slot="start"></ion-icon>
@@ -41,16 +53,124 @@
       </ion-menu-toggle>
     </ng-container>
 
-    <!-- (Resto de secciones: ADMIN, ONG, USUARIO NORMAL...) -->
+    <ng-container *ngIf="isOrganizador && !isAdmin">
+      <ion-menu-toggle>
+        <ion-item routerLink="/home" routerLinkActive="router-link-active">
+          <ion-icon name="home-outline" slot="start"></ion-icon>
+          <ion-label>Inicio</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
 
-<ion-item 
-  lines="none" 
-  class="logout-item" 
-  button 
-  detail="false"
-  (click)="onLogout.emit()">
-  <ion-icon name="log-out-outline" slot="start"></ion-icon>
-  <ion-label>Cerrar sesión</ion-label>
-</ion-item>
+      <ion-menu-toggle>
+        <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'mine'}" routerLinkActive="router-link-active">
+          <ion-icon name="list-outline" slot="start"></ion-icon>
+          <ion-label>Mis Propuestas</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item routerLink="/crear-propuesta" routerLinkActive="router-link-active">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          <ion-label>Nueva Campaña</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item button (click)="mostrarMensajePendiente('mensajes')">
+          <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+          <ion-label>Mensajes</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item routerLink="/account" routerLinkActive="router-link-active">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-label>Mi Perfil</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ng-container>
+
+    <ng-container *ngIf="isONG && !isAdmin">
+      <ion-item-divider color="light">
+        <ion-label>
+          Panel ONG
+          <ion-badge [color]="ongEstadoVerificacion === 'verificado' ? 'success' : 'warning'" class="header-badge">
+            {{ ongEstadoVerificacion | titlecase }}
+          </ion-badge>
+        </ion-label>
+      </ion-item-divider>
+
+      <ion-menu-toggle>
+        <ion-item routerLink="/home" routerLinkActive="router-link-active">
+          <ion-icon name="home-outline" slot="start"></ion-icon>
+          <ion-label>Inicio</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'mine'}" routerLinkActive="router-link-active">
+          <ion-icon name="file-tray-full-outline" slot="start"></ion-icon>
+          <ion-label>Mis Asignaciones</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'explore'}" routerLinkActive="router-link-active">
+          <ion-icon name="search-outline" slot="start"></ion-icon>
+          <ion-label>Buscar Donaciones</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item routerLink="/account" routerLinkActive="router-link-active">
+          <ion-icon name="business-outline" slot="start"></ion-icon>
+          <ion-label>Perfil Organización</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ng-container>
+
+
+    <ng-container *ngIf="isUsuarioNormal">
+      <ion-menu-toggle>
+        <ion-item routerLink="/home" routerLinkActive="router-link-active">
+          <ion-icon name="home-outline" slot="start"></ion-icon>
+          <ion-label>Inicio</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'explore'}" routerLinkActive="router-link-active">
+          <ion-icon name="compass-outline" slot="start"></ion-icon>
+          <ion-label>Explorar Propuestas</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle>
+        <ion-item routerLink="/lista-ongs" routerLinkActive="router-link-active">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          <ion-label>Directorio ONGs</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      
+      <ion-menu-toggle *ngIf="isLoggedIn">
+        <ion-item routerLink="/account" routerLinkActive="router-link-active">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-label>Mi Perfil</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ng-container>
+
+    <div class="menu-spacer"></div>
+
+    <ion-item 
+      lines="none" 
+      class="logout-item ion-margin-top" 
+      button 
+      detail="false"
+      (click)="onLogout.emit()">
+      <ion-icon name="log-out-outline" slot="start" color="medium"></ion-icon>
+      <ion-label color="medium">Cerrar sesión</ion-label>
+    </ion-item>
+
   </ion-list>
 </ion-content>

@@ -1,12 +1,17 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Usuario } from '../services/usuario';
-import { UsuarioModel } from '../models/usuario.model';
-import { PerfilOng } from '../services/perfil-ong';
-import { PerfilONGModel } from '../models/perfil-ong.model';
-import { Organizador } from '../services/organizador';
-import { OrganizadorModel } from '../models/organizador.model';
+import { Component, effect, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { AlertController, LoadingController } from '@ionic/angular';
+
+// SERVICIOS
+import { Auth } from '../services/auth';
+import { Usuario } from '../services/usuario';
+import { PerfilOng } from '../services/perfil-ong';
+import { Organizador } from '../services/organizador';
+
+// MODELOS
+import { UsuarioModel } from '../models/usuario.model';
+import { PerfilONGModel } from '../models/perfil-ong.model';
+import { OrganizadorModel } from '../models/organizador.model';
 
 @Component({
   selector: 'app-account',
@@ -14,187 +19,180 @@ import { AlertController, LoadingController } from '@ionic/angular';
   styleUrls: ['./account.page.scss'],
   standalone: false
 })
-export class AccountPage implements OnInit, OnDestroy {
-  usuario!: UsuarioModel;
-  usuarioEditado!: UsuarioModel;
-  perfilONG?: PerfilONGModel;
-  perfilONGEditado?: PerfilONGModel;
-  organizador?: OrganizadorModel;
-  organizadorEditado?: OrganizadorModel;
+export class AccountPage {
+  
+  private auth = inject(Auth);
+  private usuarioService = inject(Usuario);
+  private ongService = inject(PerfilOng);
+  private organizadorService = inject(Organizador);
+  private alertCtrl = inject(AlertController);
+  private loadingCtrl = inject(LoadingController);
 
-  roles: string[] = [];
+  usuario = signal<UsuarioModel | null>(null);
+  perfilONG = signal<PerfilONGModel | null>(null);
+  organizador = signal<OrganizadorModel | null>(null);
+  loading = signal<boolean>(true);
+
+  usuarioEditado: UsuarioModel | null = null;
+  perfilONGEditado: PerfilONGModel | null = null;
+  organizadorEditado: OrganizadorModel | null = null;
   modoEdicion = false;
-  loading = true;
+  
+  rolesVisuales: string[] = [];
 
-  private subs = new Subscription();
+  constructor() {
+    effect(async () => {
+      const currentUser = this.auth.currentUser(); // Dependencia reactiva
 
-  constructor(
-    private usuarioService: Usuario,
-    private ongService: PerfilOng,
-    private organizadorService: Organizador,
-    private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController
-    
-  ) {}
-
-  ngOnInit() {
-    this.subs.add(
-      this.usuarioService.currentUser$.subscribe((usuario) => {
-        if (usuario) {
-          this.cargarPerfilCompleto(usuario);
-        } else {
-          this.loading = false;
-        }
-      })
-    );
-
-    const currentUser = this.usuarioService.getCurrentUser();
-    if (currentUser) {
-      this.cargarPerfilCompleto(currentUser);
-    }
+      if (currentUser) {
+        this.loading.set(true);
+        await this.cargarDatosAdicionales(currentUser);
+      } else {
+        this.usuario.set(null);
+        this.perfilONG.set(null);
+        this.organizador.set(null);
+        this.rolesVisuales = [];
+        this.loading.set(false);
+      }
+    });
   }
 
-  ngOnDestroy() {
-    this.subs.unsubscribe();
-  }
-
-  private async cargarPerfilCompleto(usuario: UsuarioModel) {
-    this.loading = true;
-    
+  private async cargarDatosAdicionales(user: UsuarioModel) {
     try {
-      this.usuario = usuario;
+      this.usuario.set(user);
+      
+      this.actualizarRolesVisuales();
 
-      const [ong, organizador] = await Promise.all([
-        this.ongService.getById(usuario.idUsuario!).toPromise().catch(() => null),
-        this.organizadorService.getById(usuario.idUsuario!).toPromise().catch(() => null)
-      ]);
+      const promises: Promise<any>[] = [];
 
-      // Determinar roles
-      this.roles = [];
-      if (ong) {
-        this.perfilONG = ong;
-        this.roles.push('ONG');
-      }
-      if (organizador) {
-        this.organizador = organizador;
-        this.roles.push('ORGANIZADOR');
-      }
-      if (!ong && !organizador) {
-        this.roles.push('USER');
-      }
-      if (usuario.idUsuario === 1) {
-        this.roles.push('ADMIN');
+      if (this.auth.hasRole('ONG')) {
+        promises.push(
+          firstValueFrom(this.ongService.getById(user.idUsuario))
+            .then(p => this.perfilONG.set(p))
+            .catch(() => this.perfilONG.set(null))
+        );
       }
 
-      this.resetEdicion();
+        if (this.auth.hasRole('ORGANIZADOR') && user.idUsuario) { 
+      promises.push(
+        firstValueFrom(this.organizadorService.getById(user.idUsuario))
+          .then(o => this.organizador.set(o))
+          .catch(() => this.organizador.set(null))
+      );
+    }
 
-    } catch (error) {
-      console.error('Error cargando perfil:', error);
+      await Promise.all(promises);
+      this.resetEdicion(); 
 
+    } catch (e) {
+      console.error('Error carga reactiva:', e);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
-  // Getters
-  get esUsuario(): boolean { return this.roles.includes('USER'); }
-  get esONG(): boolean { return this.roles.includes('ONG'); }
-  get esOrganizador(): boolean { return this.roles.includes('ORGANIZADOR'); }
-  get esAdmin(): boolean { return this.roles.includes('ADMIN'); }
+  private actualizarRolesVisuales() {
+    this.rolesVisuales = [];
+    if (this.auth.hasRole('ADMIN')) this.rolesVisuales.push('ADMIN');
+    if (this.auth.hasRole('ONG')) this.rolesVisuales.push('ONG');
+    if (this.auth.hasRole('ORGANIZADOR')) this.rolesVisuales.push('ORGANIZADOR');
+    if (this.auth.hasRole('USUARIO')) this.rolesVisuales.push('USUARIO');
+  }
 
   get avatarUrl(): string {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.usuario.displayName)}&background=0D8ABC&color=fff&size=128`;
+    const u = this.usuario();
+    return u 
+      ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=0D8ABC&color=fff&size=128`
+      : '';
   }
 
-  // Edición
-  async activarEdicion() {
+  esUsuario = () => this.auth.hasRole('USUARIO');
+  esONG = () => this.auth.hasRole('ONG');
+  esOrganizador = () => this.auth.hasRole('ORGANIZADOR');
+  esAdmin = () => this.auth.hasRole('ADMIN');
+
+  activarEdicion() {
     this.modoEdicion = true;
   }
 
   cancelarEdicion() {
-    this.resetEdicion();
     this.modoEdicion = false;
+    this.resetEdicion();
+  }
+
+  private resetEdicion() {
+    const u = this.usuario();
+    if (u) this.usuarioEditado = new UsuarioModel(u);
+    
+    const p = this.perfilONG();
+    if (p) this.perfilONGEditado = new PerfilONGModel(p);
+    
+    const o = this.organizador();
+    if (o) this.organizadorEditado = new OrganizadorModel(o);
   }
 
   async guardarCambios() {
     const confirm = await this.alertCtrl.create({
       header: 'Confirmar cambios',
-      message: '¿Estás seguro de guardar estos cambios en tu perfil?',
-      cssClass: 'custom-alert',
+      message: '¿Estás seguro de guardar estos cambios?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary'
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Guardar',
-          cssClass: 'primary',
-          handler: async () => {
-            const loading = await this.loadingCtrl.create({
-              message: 'Guardando cambios...'
-            });
-            await loading.present();
-
-            try {
-              await this.usuarioService.update(
-                this.usuario.idUsuario!,
-                this.usuarioEditado
-              ).toPromise();
-
-              if (this.esONG && this.perfilONGEditado) {
-                await this.ongService.update(
-                  this.perfilONG!.idUsuario!,
-                  this.perfilONGEditado
-                ).toPromise();
-              }
-
-              if (this.esOrganizador && this.organizadorEditado) {
-                await this.organizadorService.update(
-                  this.organizador!.idUsuario!,
-                  this.organizadorEditado
-                ).toPromise();
-              }
-
-              this.usuario = new UsuarioModel(this.usuarioEditado);
-              if (this.perfilONG) this.perfilONG = new PerfilONGModel(this.perfilONGEditado!);
-              if (this.organizador) this.organizador = new OrganizadorModel(this.organizadorEditado!);
-
-              const alert = await this.alertCtrl.create({
-                header: '¡Guardado!',
-                message: 'Tus datos se han actualizado correctamente.',
-                cssClass: 'success-alert',
-                buttons: ['OK']
-              });
-              await alert.present();
-
-            } catch (error) {
-              console.error('Error guardando:', error);
-              const alert = await this.alertCtrl.create({
-                header: 'Error',
-                message: 'No se pudieron guardar los cambios. Inténtalo de nuevo.',
-                cssClass: 'error-alert',
-                buttons: ['OK']
-              });
-              await alert.present();
-            } finally {
-              await loading.dismiss();
-              this.modoEdicion = false;
-            }
-          }
+          handler: () => this.ejecutarGuardado()
         }
       ]
     });
     await confirm.present();
   }
 
-  private resetEdicion() {
-    this.usuarioEditado = new UsuarioModel(this.usuario);
-    if (this.perfilONG) {
-      this.perfilONGEditado = new PerfilONGModel(this.perfilONG);
+  private async ejecutarGuardado() {
+    const u = this.usuario();
+    if (!u || !this.usuarioEditado) return;
+
+    const loading = await this.loadingCtrl.create({ message: 'Guardando...' });
+    await loading.present();
+
+    try {
+      const updatedUser = await firstValueFrom(
+        this.usuarioService.update(u.idUsuario, this.usuarioEditado)
+      );
+      
+      this.auth.currentUser.set(updatedUser); 
+      
+      const p = this.perfilONG();
+      if (this.esONG() && p && this.perfilONGEditado) {
+        const updatedOng = await firstValueFrom(
+          this.ongService.update(p.idUsuario!, this.perfilONGEditado)
+        );
+        this.perfilONG.set(updatedOng);
+      }
+
+      const o = this.organizador();
+      if (this.esOrganizador() && o && this.organizadorEditado) {
+        const updatedOrg = await firstValueFrom(
+          this.organizadorService.update(o.idUsuario!, this.organizadorEditado)
+        );
+        this.organizador.set(updatedOrg);
+      }
+
+      this.modoEdicion = false;
+      this.mostrarAlerta('¡Guardado!', 'Datos actualizados correctamente.');
+
+    } catch (error) {
+      console.error('Error guardando:', error);
+      this.mostrarAlerta('Error', 'No se pudieron guardar los cambios.');
+    } finally {
+      loading.dismiss();
     }
-    if (this.organizador) {
-      this.organizadorEditado = new OrganizadorModel(this.organizador);
-    }
+  }
+
+  private async mostrarAlerta(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

@@ -1,150 +1,174 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, delay, throwError } from 'rxjs';
-import { OrganizadorModel } from '../models/organizador.model';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
+import { OrganizadorModel } from '../models/organizador.model'; 
 
 @Injectable({
   providedIn: 'root',
 })
 export class Organizador {
   
+  private http = inject(HttpClient);
+  
+  private readonly USE_MOCK = true;
+  private readonly API_URL = 'http://localhost:3000/api/organizadores';
+  private readonly STORAGE_KEY = 'organizadoresFake';
+
   private organizadoresFake: OrganizadorModel[] = [
     new OrganizadorModel({
-      idUsuario: 2,
-      nombre: 'Solidaridad Norte LP',
-      cif: 'G11223344',
-      email: 'contacto@solidaridadnorte.com',
-      cargo: 'Coordinador de Campañas',
-      telefonoDirecto: '600 123 456',
-      zonaResponsable: 'Zona Norte Las Palmas de Gran Canaria',
-      observaciones: '5 años experiencia en recogida de alimentos y ropa',
-      createdAt: new Date('2025-01-02')
+      idUsuario: 2, nombre: 'Solidaridad Norte LP', cif: 'G11223344', email: 'contacto@solidaridadnorte.com', cargo: 'Coordinador', telefonoDirecto: '600 123 456', zonaResponsable: 'Zona Norte', observaciones: 'Exp en alimentos', createdAt: new Date('2025-01-02')
     }),
     new OrganizadorModel({
-      idUsuario: 3,
-      nombre: 'Ayuda Vecinal Sur GC',
-      cif: 'G55667788',
-      email: 'ayuda.vecinal@sur.org',
-      cargo: 'Responsable Logística',
-      telefonoDirecto: '600 987 654',
-      zonaResponsable: 'Zona Sur Gran Canaria (Telde, Vecindario)',
-      observaciones: 'Especializados en distribución puntual de ayuda',
-      createdAt: new Date('2025-01-05')
+      idUsuario: 3, nombre: 'Ayuda Vecinal Sur GC', cif: 'G55667788', email: 'ayuda@sur.org', cargo: 'Logística', telefonoDirecto: '600 987 654', zonaResponsable: 'Zona Sur', observaciones: 'Distribución puntual', createdAt: new Date('2025-01-05')
     }),
     new OrganizadorModel({
-      idUsuario: 4,
-      nombre: 'Cooperativa Isla Bonita',
-      cif: 'G99887766',
-      email: 'info@islabonita.coop',
-      zonaResponsable: 'Tamaraceite - Zona Centro',
-      observaciones: 'Cooperativa de voluntarios con vehículo propio',
-      createdAt: new Date('2025-01-12')
+      idUsuario: 4, nombre: 'Cooperativa Isla Bonita', cif: 'G99887766', email: 'info@islabonita.coop', zonaResponsable: 'Centro', observaciones: 'Voluntarios con vehículo', createdAt: new Date('2025-01-12')
     })
   ];
 
   constructor() {
-    const saved = localStorage.getItem('organizadoresFake');
-    if (saved) {
-      const savedOrgs = JSON.parse(saved);
-      this.organizadoresFake.push(...savedOrgs.map((o: any) => new OrganizadorModel(o)));
-    }
+    this.loadFromStorage();
   }
 
   getAll(): Observable<OrganizadorModel[]> {
-    console.log('Cargando todos los organizadores...');
-    return of([...this.organizadoresFake]).pipe(delay(600));
+    if (this.USE_MOCK) return of([...this.organizadoresFake]).pipe(delay(600));
+    
+    return this.http.get<any[]>(this.API_URL).pipe(
+      map(items => items.map(i => new OrganizadorModel(i)))
+    );
   }
 
   getById(idUsuario: number): Observable<OrganizadorModel | null> {
-    console.log('Buscando organizador ID:', idUsuario);
-    const org = this.organizadoresFake.find(o => o.idUsuario === idUsuario);
-    return of(org || null).pipe(delay(400));
+    if (this.USE_MOCK) {
+      const org = this.organizadoresFake.find(o => o.idUsuario === idUsuario);
+      return of(org || null).pipe(delay(400));
+    }
+    return this.http.get<any>(`${this.API_URL}/${idUsuario}`).pipe(
+      map(i => new OrganizadorModel(i))
+    );
   }
 
   getByZona(zona: string): Observable<OrganizadorModel[]> {
-    console.log('Buscando organizadores en zona:', zona);
-    const resultados = this.organizadoresFake.filter(o => 
-      o.zonaResponsable?.toLowerCase().includes(zona.toLowerCase())
+    if (this.USE_MOCK) {
+      const res = this.organizadoresFake.filter(o => o.zonaResponsable?.toLowerCase().includes(zona.toLowerCase()));
+      return of(res).pipe(delay(500));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?zona=${zona}`).pipe(
+      map(items => items.map(i => new OrganizadorModel(i)))
     );
-    return of(resultados).pipe(delay(500));
   }
 
   getByCif(cif: string): Observable<OrganizadorModel | null> {
-    console.log('Buscando organizador CIF:', cif);
-    const org = this.organizadoresFake.find(o => o.cif === cif.toUpperCase());
-    return of(org || null).pipe(delay(400));
-  }
-
-  create(organizadorData: Partial<OrganizadorModel>): Observable<OrganizadorModel> {
-    console.log('Creando nuevo organizador:', organizadorData.nombre);
-    const nuevoOrg = new OrganizadorModel({
-      ...organizadorData,
-      idUsuario: Date.now(), // Simular auto_increment
-      createdAt: new Date()
-    });
-    
-    this.organizadoresFake.unshift(nuevoOrg);
-    this.saveToStorage();
-    return of(nuevoOrg).pipe(delay(1000));
-  }
-
-  update(idUsuario: number, organizadorData: Partial<OrganizadorModel>): Observable<OrganizadorModel> {
-    console.log('Actualizando organizador ID:', idUsuario);
-    const index = this.organizadoresFake.findIndex(o => o.idUsuario === idUsuario);
-    
-    if (index !== -1) {
-      this.organizadoresFake[index] = new OrganizadorModel({
-        ...this.organizadoresFake[index],
-        ...organizadorData
-      });
-      this.saveToStorage();
-      return of(this.organizadoresFake[index]).pipe(delay(800));
+    if (this.USE_MOCK) {
+      const org = this.organizadoresFake.find(o => o.cif === cif.toUpperCase());
+      return of(org || null).pipe(delay(400));
     }
-    
-    return throwError(() => new Error('Organizador no encontrado')).pipe(delay(300));
-  }
-
-  delete(idUsuario: number): Observable<boolean> {
-    console.log('Eliminando organizador ID:', idUsuario);
-    const index = this.organizadoresFake.findIndex(o => o.idUsuario === idUsuario);
-    
-    if (index !== -1) {
-      this.organizadoresFake.splice(index, 1);
-      this.saveToStorage();
-      return of(true).pipe(delay(500));
-    }
-    
-    return of(false).pipe(delay(200));
-  }
-
-  getByZonas(zonas: string[]): Observable<OrganizadorModel[]> {
-    console.log('Filtrando por zonas:', zonas);
-    const resultados = this.organizadoresFake.filter(o => 
-      zonas.some(zona => o.zonaResponsable?.toLowerCase().includes(zona.toLowerCase()))
+    return this.http.get<any[]>(`${this.API_URL}?cif=${cif}`).pipe(
+      map(items => items.length ? new OrganizadorModel(items[0]) : null)
     );
-    return of(resultados).pipe(delay(600));
   }
 
   searchByName(nombre: string): Observable<OrganizadorModel[]> {
-    console.log('Buscando organizador:', nombre);
-    const resultados = this.organizadoresFake.filter(o => 
-      o.nombre.toLowerCase().includes(nombre.toLowerCase())
+    if (this.USE_MOCK) {
+      const res = this.organizadoresFake.filter(o => o.nombre.toLowerCase().includes(nombre.toLowerCase()));
+      return of(res).pipe(delay(500));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?q=${nombre}`).pipe(
+      map(items => items.map(i => new OrganizadorModel(i)))
     );
-    return of(resultados).pipe(delay(500));
+  }
+
+  create(data: Partial<OrganizadorModel>): Observable<OrganizadorModel> {
+    if (this.USE_MOCK) {
+      const nuevo = new OrganizadorModel({
+        ...data,
+        idUsuario: Date.now(),
+        createdAt: new Date()
+      });
+      this.organizadoresFake.unshift(nuevo);
+      this.saveToStorage();
+      return of(nuevo).pipe(delay(1000));
+    }
+    return this.http.post<any>(this.API_URL, data).pipe(map(i => new OrganizadorModel(i)));
+  }
+
+  update(idUsuario: number, data: Partial<OrganizadorModel>): Observable<OrganizadorModel> {
+    if (this.USE_MOCK) {
+      const idx = this.organizadoresFake.findIndex(o => o.idUsuario === idUsuario);
+      if (idx !== -1) {
+        const updated = new OrganizadorModel({ ...this.organizadoresFake[idx], ...data });
+        this.organizadoresFake[idx] = updated;
+        this.saveToStorage();
+        return of(updated).pipe(delay(800));
+      }
+      return throwError(() => new Error('Organizador no encontrado'));
+    }
+    return this.http.put<any>(`${this.API_URL}/${idUsuario}`, data).pipe(map(i => new OrganizadorModel(i)));
+  }
+
+  delete(idUsuario: number): Observable<boolean> {
+    if (this.USE_MOCK) {
+      const idx = this.organizadoresFake.findIndex(o => o.idUsuario === idUsuario);
+      if (idx !== -1) {
+        this.organizadoresFake.splice(idx, 1);
+        this.saveToStorage();
+        return of(true).pipe(delay(500));
+      }
+      return of(false);
+    }
+    return this.http.delete<boolean>(`${this.API_URL}/${idUsuario}`);
+  }
+
+  getByZonas(zonas: string[]): Observable<OrganizadorModel[]> {
+    if (this.USE_MOCK) {
+      const res = this.organizadoresFake.filter(o => 
+        zonas.some(z => o.zonaResponsable?.toLowerCase().includes(z.toLowerCase()))
+      );
+      return of(res).pipe(delay(600));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?zonas=${zonas.join(',')}`).pipe(
+      map(items => items.map(i => new OrganizadorModel(i)))
+    );
   }
 
   getConContacto(): Observable<OrganizadorModel[]> {
-    console.log('Organizador con contacto disponible...');
-    return of(this.organizadoresFake.filter(o => o.hasContactInfo)).pipe(delay(400));
+    if (this.USE_MOCK) {
+      return of(this.organizadoresFake.filter(o => o.hasContactInfo)).pipe(delay(400));
+    }
+    return this.http.get<any[]>(`${this.API_URL}?has_contact=true`).pipe(
+      map(items => items.map(i => new OrganizadorModel(i)))
+    );
   }
 
-  countByZona(zona: string): number {
-    return this.organizadoresFake.filter(o => 
-      o.zonaResponsable?.toLowerCase().includes(zona.toLowerCase())
-    ).length;
+countByZona(zona: string): Observable<number> {
+    if (this.USE_MOCK) {
+      const count = this.organizadoresFake.filter(o => 
+        o.zonaResponsable?.toLowerCase().includes(zona.toLowerCase())
+      ).length;
+      return of(count).pipe(delay(300)); 
+    }
+    
+    return this.http.get<{ count: number }>(`${this.API_URL}/count?zona=${zona}`).pipe(
+      map(response => response.count)
+    );
+  }
+
+  private loadFromStorage() {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        this.organizadoresFake = parsed.map((o: any) => new OrganizadorModel(o));
+      } catch (e) {
+        this.saveToStorage();
+      }
+    } else {
+      this.saveToStorage();
+    }
   }
 
   private saveToStorage(): void {
-    localStorage.setItem('organizadoresFake', JSON.stringify(this.organizadoresFake));
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.organizadoresFake));
   }
 }

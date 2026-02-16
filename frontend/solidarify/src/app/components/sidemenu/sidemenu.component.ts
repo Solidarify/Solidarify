@@ -1,8 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { ToastController } from '@ionic/angular';
-import { Usuario } from '../../services/usuario';
-import { PerfilOng } from '../../services/perfil-ong';
-import { Organizador } from '../../services/organizador';
+import { PerfilOng } from '../../services/perfil-ong'; // Solo si necesitas cargar estado extra
 
 @Component({
   selector: 'app-sidemenu',
@@ -12,9 +10,11 @@ import { Organizador } from '../../services/organizador';
 })
 export class SidemenuComponent implements OnInit, OnChanges {
 
+  private perfilOngService = inject(PerfilOng);
+  private toastCtrl = inject(ToastController);
+
   @Input() currentUser: any = null;
   @Input() isLoggedIn = false;
-
   @Output() onLogout = new EventEmitter<void>();
 
   isAdmin = false;
@@ -26,56 +26,33 @@ export class SidemenuComponent implements OnInit, OnChanges {
   ongEstadoVerificacion = '';
   countOngsPendientes = 0;
 
-  constructor(
-    private usuarioService: Usuario,
-    private perfilOngService: PerfilOng,
-    private organizadorService: Organizador,
-    private toastCtrl: ToastController
-  ) { }
+  constructor() { }
 
   ngOnInit() {
-    console.log('🔧 SidemenuComponent inicializado');
     this.actualizarMenu();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('🔄 ngOnChanges detectado:', changes);
     if (changes['currentUser'] || changes['isLoggedIn']) {
       this.actualizarMenu();
     }
   }
 
-  actualizarMenu() {
-    console.log('📋 Actualizando menú...');
-    console.log('  - currentUser:', this.currentUser);
-    console.log('  - isLoggedIn:', this.isLoggedIn);
-    
+  private actualizarMenu() {
     this.detectarRoles();
     this.cargarContadores();
   }
 
-  detectarRoles() {
-    this.isAdmin = false;
-    this.isOrganizador = false;
-    this.isONG = false;
-    this.isUsuarioNormal = false;
+  private detectarRoles() {
+    this.resetRoles();
 
-    if (!this.currentUser) {
-      console.log('⚠️ No hay currentUser, modo invitado');
+    if (!this.currentUser || !this.isLoggedIn) {
       this.isUsuarioNormal = true;
       this.currentUserRole = 'Invitado';
       return;
     }
 
-    if (!this.currentUser.roles || this.currentUser.roles.length === 0) {
-      console.log('⚠️ Usuario sin roles específicos');
-      this.isUsuarioNormal = true;
-      this.currentUserRole = 'Usuario';
-      return;
-    }
-
-    const roles = this.currentUser.roles.map((r: string) => r.toUpperCase());
-    console.log('🎭 Roles detectados:', roles);
+    const roles = (this.currentUser.roles || []).map((r: string) => r.toUpperCase());
 
     if (roles.includes('ADMIN')) {
       this.isAdmin = true;
@@ -97,48 +74,39 @@ export class SidemenuComponent implements OnInit, OnChanges {
       this.isUsuarioNormal = true;
       this.currentUserRole = 'Usuario';
     }
+  }
 
-    console.log('✅ Roles finales:', {
-      isAdmin: this.isAdmin,
-      isOrganizador: this.isOrganizador,
-      isONG: this.isONG,
-      isUsuarioNormal: this.isUsuarioNormal,
-      currentUserRole: this.currentUserRole
+  private resetRoles() {
+    this.isAdmin = false;
+    this.isOrganizador = false;
+    this.isONG = false;
+    this.isUsuarioNormal = false;
+    this.currentUserRole = '';
+    this.ongEstadoVerificacion = '';
+  }
+
+  private cargarEstadoONG() {
+    if (!this.currentUser?.idUsuario) return;
+    
+    this.perfilOngService.getById(this.currentUser.idUsuario).subscribe({
+      next: (ong) => this.ongEstadoVerificacion = ong?.estadoVerificacion || 'pendiente',
+      error: () => this.ongEstadoVerificacion = 'pendiente'
     });
   }
 
-  cargarEstadoONG() {
-    if (!this.currentUser?.idUsuario) return;
-    
-    this.perfilOngService.getById(this.currentUser.idUsuario).subscribe(
-      (ong: any) => {
-        this.ongEstadoVerificacion = ong?.estadoVerificacion || 'pendiente';
-      },
-      error => {
-        console.error('Error al cargar perfil ONG:', error);
-        this.ongEstadoVerificacion = 'pendiente';
-      }
-    );
-  }
-
-  cargarContadores() {
+  private cargarContadores() {
     if (this.isAdmin) {
-      this.perfilOngService.getPendientes().subscribe(
-        ongs => {
-          this.countOngsPendientes = ongs.length;
-        },
-        error => {
-          console.error('Error al cargar ONGs pendientes:', error);
-          this.countOngsPendientes = 0;
-        }
-      );
+      this.perfilOngService.getPendientes().subscribe({
+        next: (ongs) => this.countOngsPendientes = ongs.length,
+        error: () => this.countOngsPendientes = 0
+      });
     }
   }
 
   async mostrarMensajePendiente(seccion: string) {
     const toast = await this.toastCtrl.create({
       message: `La sección "${seccion}" estará disponible próximamente`,
-      duration: 2500,
+      duration: 2000,
       color: 'warning',
       position: 'bottom',
       icon: 'construct-outline'

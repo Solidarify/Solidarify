@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
-import { Propuesta } from 'src/app/services/propuesta';
+import { firstValueFrom } from 'rxjs';
+import { Propuesta } from '../../services/propuesta';
+import { Auth } from '../../services/auth';
 import { PropuestaModel } from '../../models/propuesta.model';
 
 @Component({
@@ -11,23 +13,33 @@ import { PropuestaModel } from '../../models/propuesta.model';
 })
 export class PropuestaDetalleComponent implements OnInit {
   
-  @Input() propuesta!: PropuestaModel; 
-  modoEdicion = false;
-  propuestaOriginal!: PropuestaModel;
-  propuestaEditada!: PropuestaModel;
+  private modalCtrl = inject(ModalController);
+  private toastCtrl = inject(ToastController);
+  private alertCtrl = inject(AlertController);
+  private propuestaService = inject(Propuesta);
+  private auth = inject(Auth); 
 
-  constructor(
-    private modalCtrl: ModalController,
-    private toastCtrl: ToastController,
-    private propuestaService: Propuesta,
-    private alertCtrl: AlertController
-  ) { }
+  @Input() propuesta!: PropuestaModel; 
+
+  modoEdicion = false;
+  propuestaEditada!: PropuestaModel; 
+
+  constructor() { }
 
   ngOnInit() {
-    console.log('Detalle cargado para:', this.propuesta.titulo);
-
     this.propuestaEditada = new PropuestaModel(this.propuesta);
-    this.propuestaOriginal = new PropuestaModel(this.propuesta);
+  }
+
+  get puedeEditar(): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+
+    return this.auth.hasRole('ADMIN') || user.idUsuario === this.propuesta.idOrganizador;
+  }
+
+  get esMiPropuesta(): boolean {
+    const user = this.auth.currentUser();
+    return user?.idUsuario === this.propuesta.idOrganizador;
   }
 
   activarEdicion() {
@@ -35,73 +47,88 @@ export class PropuestaDetalleComponent implements OnInit {
   }
 
   cancelarEdicion() {
-    this.propuestaEditada = new PropuestaModel(this.propuestaOriginal);
+    this.propuestaEditada = new PropuestaModel(this.propuesta);
     this.modoEdicion = false;
   }
 
   async guardarCambios() {
     const alert = await this.alertCtrl.create({
       header: '¿Guardar cambios?',
-      message: 'Los cambios se guardarán permanentemente.',
+      message: 'La información se actualizará públicamente.',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Guardar',
-          role: 'confirm',
-          handler: async () => {
-            
-            try {
-              const propuestaActualizada = await this.propuestaService
-                .update(this.propuestaEditada.idPropuesta!, this.propuestaEditada)
-                .toPromise();
-              
-              this.propuestaOriginal = new PropuestaModel(propuestaActualizada!);
-              this.modoEdicion = false;
-              
-              const toast = await this.toastCtrl.create({
-                message: 'Propuesta actualizada correctamente',
-                duration: 2000,
-                color: 'success'
-              });
-              
-              toast.present();
-              this.modalCtrl.dismiss({ propuesta: this.propuestaEditada });
-
-            } catch (error) {
-              console.error('Error actualizando:', error);
-              const toast = await this.toastCtrl.create({
-                message: 'Error al guardar cambios',
-                duration: 2000,
-                color: 'danger'
-              });
-              await toast.present();
-            }
-          }
+          handler: () => this.ejecutarGuardado()
         }
       ]
     });
     await alert.present();
   }
 
-  get tipoBienNombre(): string {
-    return this.propuestaEditada.tipoBienNombre; 
+  private async ejecutarGuardado() {
+    try {
+      const actualizada = await firstValueFrom(
+        this.propuestaService.update(this.propuestaEditada.idPropuesta!, this.propuestaEditada)
+      );
+      
+      this.mostrarToast('Propuesta actualizada correctamente', 'success');
+      
+      this.modalCtrl.dismiss({ 
+        propuesta: actualizada,
+        refresh: true 
+      });
+
+    } catch (error) {
+      console.error('Error actualizando:', error);
+      this.mostrarToast('Error al guardar cambios', 'danger');
+    }
   }
+
 
   cerrar() {
     this.modalCtrl.dismiss();
   }
 
   async contactar() {
-    const toast = await this.toastCtrl.create({
-      message: `Solicitud enviada al organizador #${this.propuesta.idOrganizador}`,
-      duration: 2000,
-      color: 'success',
-      position: 'bottom',
-      icon: 'checkmark-circle'
-    });
-    toast.present();
+    if (!this.auth.isAuthenticated()) {
+      this.mostrarToast('Debes iniciar sesión para contactar', 'warning');
+      return;
     }
+
+    if (this.esMiPropuesta) {
+      this.mostrarToast('¡Es tu propia propuesta!', 'medium');
+      return;
+    }
+
+    // Lógica futura: Abrir chat o enviar email
+    this.mostrarToast(`Solicitud de contacto enviada al organizador`, 'success');
+  }
+
+  private async mostrarToast(message: string, color: 'success' | 'danger' | 'warning' | 'medium') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'bottom',
+      icon: color === 'success' ? 'checkmark-circle' : 'alert-circle'
+    });
+    await toast.present();
+  }
+
+get tipoBienNombre(): string {
+  // PropuestaModel ya tiene una lógica para esto
+  const map: {[key: number]: string} = {
+    1: 'Alimentos',
+    2: 'Ropa',
+    3: 'Juguetes',
+    4: 'Material Escolar',
+    5: 'Higiene',
+    10: 'Otros'
+  };
+  
+  return map[this.propuestaEditada.idTipoBien] || 'Varios';
+}
+
+ 
 }

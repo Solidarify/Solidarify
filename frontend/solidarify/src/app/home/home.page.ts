@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Usuario } from '../services/usuario';
+import { ModalController } from '@ionic/angular';
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
+import { PropuestaModel } from '../models/propuesta.model';
+import { Auth } from '../services/auth'; 
 import { UsuarioModel } from '../models/usuario.model';
-import { Subscription } from 'rxjs';
-
-export type UserRole = 'ORGANIZADOR' | 'ONG' | 'Usuario' | 'ADMIN';
 
 @Component({
   selector: 'app-home',
@@ -13,182 +13,178 @@ export type UserRole = 'ORGANIZADOR' | 'ONG' | 'Usuario' | 'ADMIN';
   styleUrls: ['./home.page.scss'],
   standalone: false
 })
-export class HomePage implements OnInit, OnDestroy {
-  currentUser: UsuarioModel | null = null;
-  isLoggedIn = false;
-  userRoles: string[] = [];
+export class HomePage implements OnInit {
+  
+    private modalCtrl = inject(ModalController);
+  private auth = inject(Auth);
+  private router = inject(Router);
+  private alertCtrl = inject(AlertController);
 
-  private userSub?: Subscription;
+  currentUser = this.auth.currentUser; 
+  isLoggedIn = this.auth.isAuthenticated; 
 
-  constructor(    
-    private router: Router,
-    private alertCtrl: AlertController,
-    private usuarioService: Usuario
-  ) {}
+  constructor() {
+    
+  }
 
   ngOnInit() {
-    console.log('🏠 HomePage ngOnInit()');
-    
-    // ✅ SUSCRIPCIÓN con unsubscribe para evitar memory leaks
-    this.userSub = this.usuarioService.currentUser$.subscribe(user => {
-      console.log('🔄 Usuario recibido:', user);
-      this.currentUser = user;
-      this.isLoggedIn = !!user;
-      
-      // ✅ ACTUALIZAR ROLES cada vez que cambie el usuario
-      this.userRoles = this.roles;
-      
-      console.log('🔍 Estado actualizado:', {
-        nombre: user?.displayName,
-        roles: this.userRoles,
-        isLoggedIn: this.isLoggedIn,
-        permissions: {
-          create: this.canCreateProposal(),
-          myProposals: this.canViewMyProposals(),
-          explore: this.canExplore()
-        }
-      });
-    });
-
-    // ✅ Verificar usuario inicial desde localStorage
-    const initialUser = this.usuarioService.getCurrentUser();
-    if (initialUser) {
-      console.log('🏠 Usuario inicial desde localStorage:', initialUser.displayName);
-    }
+    console.log('🏠 HomePage iniciada');
+  }
+  
+  get canCreateProposal(): boolean {
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
   }
 
-  ngOnDestroy() {
-    this.userSub?.unsubscribe();
+  get canViewMyProposals(): boolean {
+    // Mis propuestas: Organizadores y ONGs (para ver sus asignaciones) y Admin
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
   }
 
-  // ✅ Getter que actualiza userRoles
-  private get roles(): string[] {
-    if (!this.currentUser) return [];
-    
-    // Prioridad: roles del modelo (ya definido en usuariosFake)
-    if (this.currentUser.roles?.length) {
-      return this.currentUser.roles;
-    }
-    
-    // Fallback por email/nombre
-    if (this.currentUser.email?.includes('@admin')) return ['ADMIN'];
-    if (this.currentUser.nombre?.includes('Organizador') || this.currentUser.nombre?.includes('Norte')) return ['ORGANIZADOR'];
-    if (this.currentUser.nombre?.includes('ONG')) return ['ONG'];
-    
-    return ['Usuario'];
+  get canViewOngs(): boolean {
+    return true; 
   }
 
-  // ✅ MÉTODO logout que navega
+
   logout() {
-    console.log('🚪 Logout desde HomePage');
-    this.usuarioService.logout();
-    this.router.navigate(['/login'], { replaceUrl: true });
+    console.log('🚪 Cerrando sesión...');
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
-  canCreateProposal(): boolean {
-    return this.roles.includes('ORGANIZADOR') || this.roles.includes('ADMIN');
-  }
+navigateTo(route: string): void {
+  console.log('🚀 Navegando a:', route);
+  
+  switch(route) {
+    case '/crear-propuesta':
+      if (!this.canCreateProposal) { 
+        this.showPermissionAlert('crear');
+        return;
+      }
+      this.router.navigate([route]);
+      break;
 
-  canViewMyProposals(): boolean {
-    return this.roles.includes('ORGANIZADOR') || this.roles.includes('ONG') || this.roles.includes('ADMIN');
-  }
+    case '/lista-propuestas/explore':
+      this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+      break;
 
-  canViewOngs(): boolean {
-    return true;
-  }
+    case '/lista-propuestas/mine':
+      this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+      break;
+      
+    case '/lista-propuestas':
+      if (this.canViewMyProposals) {
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+      } else {
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+      }
+      break;
+            
+    case '/account':
+      if (!this.isLoggedIn()) { 
+        this.showPermissionAlert('perfil');
+        this.router.navigate(['/login']);
+        return; 
+      }
+      this.router.navigate([route]);
+      break;
 
-  canExplore(): boolean {
-    return true;
+    default:
+      this.router.navigate([route]);
+      break;
   }
+}
 
-  // ✅ navigateTo simplificado
-  navigateTo(route: string): void {
-    console.log('🚀 navigateTo:', route);
-    
-    switch(route) {
-      case '/crear-propuesta':
-        if (!this.canCreateProposal()) {
-          this.showPermissionAlert('crear');
-          return;
-        }
-        break;
-      case '/lista-propuestas':
-        if (!this.canViewMyProposals()) {
-          this.showPermissionAlert('mis');
-          return;
-        }
-        break;
-      case '/account':
-        if (!this.isLoggedIn) {
-          this.showPermissionAlert('perfil');
-          return; 
-        }
-        break;
-      case '/lista-ongs':
-        break;
-    }
-    
-    this.router.navigate([route]);
-  }
 
-  // ✅ Alert personalizada
-  private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise <void> {
-    const role = this.userRoles[0] || 'no logueado';
+  private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise<void> {
+    const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
     let message = '';
     
     switch(option) {
-      case 'crear': message = `❌ Solo **ORGANIZADOR** y **ADMIN**`; break;
-      case 'mis': message = `❌ Solo **ORGANIZADOR**, **ONG** y **ADMIN**`; break;
-      case 'perfil': message = `❌ Debes iniciar sesión`; break;
+      case 'crear': message = `❌ Solo **ORGANIZADORES** y **ADMINS** pueden crear propuestas.`; break;
+      case 'mis': message = `❌ Solo **ORGANIZADORES**, **ONGs** y **ADMINS** tienen panel propio.`; break;
+      case 'perfil': message = `❌ Debes iniciar sesión para ver tu perfil.`; break;
     }
     
     const alert = await this.alertCtrl.create({
       header: 'Acceso restringido',
-      message: `${message}\n\nTu rol: **${role}**`,
+      message: `${message}\n\nTu rol actual: **${roles}**`,
       buttons: ['OK']
     });
     await alert.present();
   }
 
-  // ✅ Para los botones info (usa roles actualizados)
   async showInfo(option: 'crear' | 'mis' | 'explorar' | 'perfil' | 'ongs') {
     let header = '', message = '';
-    const role = this.userRoles[0] || 'no logueado';
+    const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
 
     switch (option) {
       case 'crear':
         header = 'Crear propuesta';
-        message = this.canCreateProposal()
-          ? `✅ Como **${role}**, puedes crear propuestas.`
-          : `❌ Solo **ORGANIZADOR** y **ADMIN**. Tu rol: **${role}**`;
+        message = this.canCreateProposal
+          ? `✅ Tienes permiso para crear campañas.`
+          : `❌ Requiere rol **ORGANIZADOR** o **ADMIN**.`;
         break;
       case 'mis':
         header = 'Mis propuestas';
-        message = this.canViewMyProposals()
-          ? `📋 Tus propuestas como **${role}**.`
-          : `❌ Solo **ORGANIZADOR**, **ONG** y **ADMIN**. Tu rol: **${role}**`;
+        message = this.canViewMyProposals
+          ? `📋 Gestiona tus propuestas creadas o asignadas.`
+          : `❌ Panel de gestión para **ORGANIZADORES** y **ONGs**.`;
         break;
       case 'explorar':
         header = 'Explorar';
-        message = `🔍 Lista pública de propuestas.`;
+        message = `🔍 Busca iniciativas públicas para colaborar.`;
         break;
       case 'perfil':
         header = 'Mi perfil';
-        message = this.isLoggedIn 
-          ? `👤 Gestiona tu cuenta **${role}**.`
-          : `❌ Inicia sesión primero`;
+        message = this.isLoggedIn()
+          ? `👤 Configura tu cuenta de **${roles}**.`
+          : `❌ Inicia sesión para acceder.`;
         break;
       case 'ongs':
-        header = 'Lista de ONGs';
-        message = `📋 Directorio completo de ONGs ${this.roles.includes('ADMIN') ? '(ADMIN puede editar)' : ''}`;
+        header = 'Directorio de ONGs';
+        message = `📋 Lista de organizaciones verificadas.`;
         break;
     }
 
     const alert = await this.alertCtrl.create({
       header,
-      message: message.replace(/<strong>/g, '').replace(/<\/strong>/g, ' **'),
+      message,
       buttons: ['Entendido']
     });
     await alert.present();
   }
+
+
+get canExplore(): boolean {
+  return true; 
+}
+
+async irADetalle(id: number) {
+    
+    // 1. Simular datos según el ID clicado
+    const datosSimulados = new PropuestaModel({
+      idPropuesta: id,
+      idOrganizador: 99,
+      titulo: id === 1 ? 'Recogida de Alimentos' : 'Abrigos para invierno',
+      descripcion: 'Esta es una propuesta urgente que has seleccionado desde el Home. ¡Ayuda ahora!',
+      lugar: id === 1 ? 'Madrid Centro' : 'Zona Norte',
+      fechaInicio: new Date(),
+      fechaFin: new Date(new Date().setDate(new Date().getDate() + 5)), // 5 días después
+      estadoPropuesta: 'publicada',
+      idTipoBien: id === 1 ? 1 : 3, // 1: Alimentos, 3: Ropa
+      imagen: id === 1 
+        ? 'https://placehold.co/600x400/orange/white?text=Comida' 
+        : 'https://placehold.co/600x400/blue/white?text=Ropa'
+    });
+
+    const modal = await this.modalCtrl.create({
+      component: PropuestaDetalleComponent,
+      componentProps: {
+        propuesta: datosSimulados
+      }
+    });
+
+    await modal.present();
+  }
+
 }

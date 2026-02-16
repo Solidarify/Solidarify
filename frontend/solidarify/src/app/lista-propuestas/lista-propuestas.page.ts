@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { Observable, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ModalController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { Usuario } from '../services/usuario'; 
+import { Observable, combineLatest, of, BehaviorSubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, tap, startWith, catchError } from 'rxjs/operators';
+import { Auth } from '../services/auth';
 import { Propuesta } from '../services/propuesta';
 import { PropuestaModel } from '../models/propuesta.model';
-import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component'; // Ajusta ruta si es necesario
 
 @Component({
   selector: 'app-lista-propuestas',
@@ -18,149 +17,142 @@ import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta
 })
 export class ListaPropuestasPage implements OnInit {
   
+  private auth = inject(Auth);
+  private propuestaService = inject(Propuesta);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
+  private modalCtrl = inject(ModalController);
+
   propuestas$!: Observable<PropuestaModel[]>;
-  filtroForm!: FormGroup;
-  currentUser: any = null;
   loading = true;
   totalPropuestas = 0;
+  
   mode: 'mine' | 'explore' = 'explore';
   pageTitle = 'Explorar propuestas';
-  userRole: string = '';
-  userId: number = 0;
+  filtroForm: FormGroup;
+  
+  // TRIGGER DE RECARGA MANUAL (Para recargar tras cerrar modal)
+  private refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private fb: FormBuilder,
-    private usuarioService: Usuario,
-    private propuestaService: Propuesta,
-    private modalCtrl: ModalController 
-  ) { }
-
-  ngOnInit() {
-    // ✅ SUSCRIBIRSE al usuario actual (igual que HomePage)
-    this.usuarioService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.userRole = user?.roles?.[0] || '';
-      this.userId = user?.idUsuario || 0;
-      console.log('👤 Usuario en ListaPropuestas:', this.userRole, this.userId);
+  constructor() {
+    this.filtroForm = this.fb.group({
+      search: [''],
+      tipoBien: [''],
+      lugar: [''],
+      estado: ['publicada'], 
+      fechaInicio: ['']
     });
+  }
 
-    this.activatedRoute.paramMap.subscribe(params => {
-      this.mode = (params.get('mode') as 'mine' | 'explore') || 'explore';
+
+ngOnInit() {
+  console.log('🏁 Inicializando ListaPropuestasPage (Modo Simple)...');
+  this.loading = true;
+
+  this.route.queryParamMap.pipe(
+    switchMap(params => {
+      const modeParam = params.get('mode');
+      this.mode = (modeParam === 'mine') ? 'mine' : 'explore';
+      this.configurarPagina();
       
-      // ✅ Validar permisos ANTES de cargar
-      if (this.mode === 'mine' && !this.tienePermisoMisPropuestas()) {
-        console.log('❌ Sin permisos para Mis propuestas');
-        this.router.navigate(['/explorar']);
+      console.log('🔗 Modo detectado:', this.mode);
+
+      return this.filtroForm.valueChanges.pipe(
+        startWith(this.filtroForm.value), 
+        debounceTime(400),
+        switchMap(filtros => {
+          console.log('🔍 Ejecutando búsqueda...');
+          this.loading = true; 
+
+          if (this.mode === 'mine') {
+            const user = this.auth.currentUser();
+            if (!user) return of([]); 
+            return this.propuestaService.getFiltradas({ ...filtros, organizador: user.idUsuario });
+          } else {
+            return this.propuestaService.getFiltradas({ ...filtros, estado: 'publicada' });
+          }
+        })
+      );
+    })
+  ).subscribe({
+    next: (resultados) => {
+      console.log('✅ Resultados recibidos:', resultados.length);
+      this.propuestas$ = of(resultados); 
+      this.totalPropuestas = resultados.length;
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Error:', err);
+      this.loading = false;
+    }
+  });
+}
+
+
+
+  private configurarPagina() {
+    if (this.mode === 'mine') {
+      if (!this.auth.isAuthenticated()) {
+        this.router.navigate(['/login']);
         return;
       }
       
-      this.pageTitle = this.mode === 'mine' ? 'Mis propuestas' : 'Explorar propuestas';
-      this.initFiltroForm();
-      this.cargarPropuestasIniciales();
-    });
-  }
-
-  // ✅ NUEVA validación de permisos
-  tienePermisoMisPropuestas(): boolean {
-    const rolesPermitidos = ['ORGANIZADOR', 'ONG', 'ADMIN'];
-    return rolesPermitidos.includes(this.userRole as any);
-  }
-
-  get searchControl(): FormControl {
-    return this.filtroForm.get('search') as FormControl;
-  }
-
-  initFiltroForm() {
-    const initialFilters: any = {
-      search: '',
-      tipoBien: '',
-      lugar: '',
-      estado: 'publicada',
-      fechaInicio: ''
-    };
-
-    //MIS PROPUESTAS: filtrar por organizador del usuario actual
-    if (this.mode === 'mine' && this.userId > 0) {
-      initialFilters.organizador = this.userId;
-      console.log('🔍 Filtro organizador:', this.userId);
-    }
-
-    this.filtroForm = this.fb.group(initialFilters);
-
-    this.filtroForm.valueChanges.pipe(
-      debounceTime(500), 
-      distinctUntilChanged(), 
-      switchMap(filtros => {
-        this.loading = true;
-        
-        //Forzar filtro organizador en "mis propuestas"
-        if (this.mode === 'mine' && this.userId > 0) {
-          filtros.organizador = this.userId;
-        }
-        
-        return this.propuestaService.getFiltradas(filtros);
-      })
-    ).subscribe(propuestas => {
-      this.propuestas$ = of(propuestas);
-      this.totalPropuestas = propuestas.length;
-      this.loading = false;
-    });
-
-  }
-
-  cargarPropuestasIniciales() {
-    this.loading = true;
-    
-    if (this.mode === 'mine' && this.userId > 0) {
-      // ✅ ORGANIZADOR/ONG: sus propias propuestas
-      console.log('📋 Cargando MIS propuestas para ID:', this.userId);
-      this.propuestaService.getByOrganizador(this.userId).subscribe(propuestas => {
-        this.propuestas$ = of(propuestas);
-        this.totalPropuestas = propuestas.length;
-        this.loading = false;
-      });
-
+      const esOrganizador = this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
+      if (!esOrganizador) {
+        this.router.navigate(['/lista-propuestas', { mode: 'explore' }]); // Redirigir a explorar
+        return;
+      }
+      this.pageTitle = 'Mis propuestas';
     } else {
-      // ✅ EXPLORAR o Usuario normal: solo públicas
-      console.log('🔍 Cargando propuestas públicas');
-      this.propuestaService.getPublicas().subscribe(propuestas => {
-        this.propuestas$ = of(propuestas);
-        this.totalPropuestas = propuestas.length;
-        this.loading = false;
-      });
+      this.pageTitle = 'Explorar propuestas';
     }
   }
+
+  // --- ACCIONES ---
 
   async verDetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({
       component: PropuestaDetalleComponent,
-      componentProps: { propuesta }, //Pasa modelo tipado
+      componentProps: { propuesta },
       breakpoints: [0, 1],
       initialBreakpoint: 1,
       cssClass: 'propuesta-modal-sheet'
     });
 
-    modal.onDidDismiss().then(result => {
-      if (result.data?.propuesta) {
-        this.cargarPropuestasIniciales();
-      }
-    });
-    
     await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    // Si el modal devuelve 'refresh: true' (ej. al editar/borrar), recargamos
+    if (data?.refresh) {
+      this.refreshTrigger$.next();
+    }
   }
 
   limpiarFiltros() {
-    const base: any = { estado: 'publicada' };
-    if (this.mode === 'mine' && this.userId > 0) {
-      base.organizador = this.userId;
-    }
-    
-    this.filtroForm.reset(base);
+    this.filtroForm.reset({
+      search: '',
+      tipoBien: '',
+      lugar: '',
+      estado: this.mode === 'mine' ? '' : 'publicada', // En 'mine' queremos ver todas
+      fechaInicio: ''
+    });
   }
 
-  trackById(index: number, propuesta: PropuestaModel) {
-    return propuesta.idPropuesta;
+  // --- GETTERS & HELPERS ---
+  
+  get searchControl(): FormControl {
+    return this.filtroForm.get('search') as FormControl;
   }
+
+  trackById(index: number, item: PropuestaModel) {
+    return item.idPropuesta;
+  }
+
+
+get esUsuario(): boolean {
+  return this.auth.hasRole('USUARIO');
+}
+
+
 }

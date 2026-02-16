@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { Usuario } from '../services/usuario';  
-import { finalize } from 'rxjs/operators';  
+import { AlertController, LoadingController } from '@ionic/angular';
+import { finalize } from 'rxjs/operators';
+import { Auth } from '../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -11,48 +12,66 @@ import { finalize } from 'rxjs/operators';
   standalone: false,
 })
 export class LoginPage implements OnInit {
+  
+  private fb = inject(FormBuilder);
+  private auth = inject(Auth);   
+  private router = inject(Router);
+  private alertCtrl = inject(AlertController);
+  private loadingCtrl = inject(LoadingController);
+
   loginForm: FormGroup;
   loginLoading = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private usuarioService: Usuario,     
-    private router: Router
-  ) {
+  constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['ORGANIZADOR', Validators.required]  
+      password: ['', [Validators.required, Validators.minLength(3)]], 
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    if (this.auth.isAuthenticated()) {
+      this.router.navigate(['/home'], { replaceUrl: true });
+    }
+  }
 
   get emailField() { return this.loginForm.get('email')!; }
   get passwordField() { return this.loginForm.get('password')!; }
-  get roleField() { return this.loginForm.get('role')!; }
 
- onSubmit() {
-  if (this.loginForm.valid) {
+  async onSubmit() {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
     this.loginLoading = true;
     const { email, password } = this.loginForm.value;
 
-    this.usuarioService.login(email, password).subscribe({
-      next: (user) => {
+    const loading = await this.loadingCtrl.create({
+      message: 'Iniciando sesión...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    this.auth.login({ email, password }).pipe(
+      finalize(() => {
         this.loginLoading = false;
-        if (user) {
-          this.router.navigate(['/home'], { replaceUrl: true });
-        } else {
-          console.log('Login falló');
-        }
+        loading.dismiss();
+      })
+    ).subscribe({
+      next: (response) => {
+        console.log('Login exitoso:', response);
+        this.router.navigate(['/home'], { replaceUrl: true });
       },
-      error: (err) => {
-        this.loginLoading = false;
-        console.error('Error:', err);
+      error: async (err) => {
+        console.error('Login error:', err);
+        const alert = await this.alertCtrl.create({
+          header: 'Fallo de acceso',
+          message: 'Email o contraseña incorrectos.',
+          buttons: ['OK']
+        });
+        await alert.present();
       }
     });
   }
-}
-
-
 }

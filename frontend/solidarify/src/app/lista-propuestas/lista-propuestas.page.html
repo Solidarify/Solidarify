@@ -4,12 +4,11 @@
     <div class="stats-content">
       <div class="stat-text">
         <h2>{{totalPropuestas}}</h2>
-        <p>{{ userRole === 'Usuario' ? 'Propuestas públicas' : pageTitle }} 
-        disponibles</p>
+        <p>{{ esUsuario ? 'Propuestas públicas' : pageTitle }} disponibles</p>
       </div>
-      <!-- Ocultar filtros avanzados para Usuario -->
+      
       <ion-button 
-        *ngIf="userRole !== 'Usuario'" 
+        *ngIf="!esUsuario" 
         fill="outline" 
         shape="round" 
         color="primary" 
@@ -32,32 +31,41 @@
   <div class="list-header" *ngIf="!loading">
     <ion-label>{{pageTitle}} <span>({{totalPropuestas}})</span></ion-label>
   </div>
+
   <ion-list lines="none" *ngIf="!loading">
-    <ion-item *ngFor="let propuesta of (propuestas$ | async); trackBy: trackById" 
-              button 
-              detail="false"
-              class="propuesta-item"
-              (click)="verDetalle(propuesta)">
+    <ng-container *ngIf="propuestas$ | async as propuestas">
       
-      <div class="tipo-avatar" slot="start">
-        <ion-icon name="gift-outline"></ion-icon>
+      <ion-item *ngFor="let propuesta of propuestas; trackBy: trackById" 
+                button 
+                detail="false"
+                class="propuesta-item"
+                (click)="verDetalle(propuesta)">
+        
+        <div class="tipo-avatar" slot="start">
+          <ion-icon name="gift-outline"></ion-icon>
+        </div>
+
+        <ion-label class="propuesta-label">
+          <h2>{{propuesta.titulo}}</h2>
+          
+          <div class="info-row">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{propuesta.lugar}}</span>
+          </div>
+
+          <div class="fechas">
+            {{propuesta.fechaInicio | date:'d MMM'}} - {{propuesta.fechaFin | date:'d MMM'}}
+          </div>
+        </ion-label>
+
+        <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
+      </ion-item>
+      
+      <div *ngIf="propuestas.length === 0" class="empty-state ion-padding text-center">
+        <p>No se encontraron propuestas.</p>
       </div>
 
-      <ion-label class="propuesta-label">
-        <h2>{{propuesta.titulo}}</h2>
-        
-        <div class="info-row">
-          <ion-icon name="location-outline"></ion-icon>
-          <span>{{propuesta.lugar}}</span>
-        </div>
-
-        <div class="fechas">
-          {{propuesta.fechaInicio | date:'d MMM'}} - {{propuesta.fechaFin | date:'d MMM'}}
-        </div>
-      </ion-label>
-
-      <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-    </ion-item>
+    </ng-container>
   </ion-list>
 
   <div class="loading-center" *ngIf="loading">

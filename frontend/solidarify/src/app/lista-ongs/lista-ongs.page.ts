@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { Observable, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ModalController } from '@ionic/angular';
+import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, startWith, tap, catchError, map, delay } from 'rxjs/operators';
+
+import { Auth } from '../services/auth';
 import { PerfilOng } from '../services/perfil-ong';
 import { PerfilONGModel } from '../models/perfil-ong.model';
 import { OngDetalleComponent } from '../modals/ong-detalle/ong-detalle.component';
-import { Usuario } from '../services/usuario';
 
 @Component({
   selector: 'app-lista-ongs',
@@ -15,125 +16,98 @@ import { Usuario } from '../services/usuario';
   standalone: false
 })
 export class ListaOngsPage implements OnInit {
+  
+  private auth = inject(Auth);
+  private perfilOngService = inject(PerfilOng);
+  private fb = inject(FormBuilder);
+  private modalCtrl = inject(ModalController);
 
   ongs$!: Observable<PerfilONGModel[]>;
-  filtroForm!: FormGroup;
-  currentUser: any = null;
   loading = true;
   totalOngs = 0;
-  pageTitle = 'Explorar ONGs';
-  userRole: string = '';
+  
+  pageTitle = 'Directorio de ONGs';
+  filtroForm: FormGroup;
+  
+  private refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
-  constructor(
-    private fb: FormBuilder,
-    private perfilOngService: PerfilOng,
-    private modalCtrl: ModalController,
-    private usuarioService: Usuario
-  ) {}
-
-  ngOnInit() {
-    this.usuarioService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.userRole = user?.roles?.[0] || '';
-      console.log('👤 Usuario en ListaOngs:', this.userRole);
+  constructor() {
+    this.filtroForm = this.fb.group({
+      search: [''] 
     });
-
-    this.pageTitle = 'Explorar ONGs';
-    this.initFiltroForm();
-    this.cargarOngsIniciales();
   }
 
-  /*
-  get isAdmin(): boolean {
-    return this.userRole === 'ADMIN';
-  }
-  */
+ ngOnInit() {
+  console.log('🏁 Inicializando ListaOngsPage...');
+
+  this.filtroForm.get('search')!.valueChanges.pipe(
+    startWith(''),
+    debounceTime(400),
+    distinctUntilChanged(),
+    tap(val => {
+      console.log('⚡ Stream activo. Valor:', val);
+      this.loading = true;
+    }),
+    switchMap(termino => {
+      console.log('🔄 Llamando al servicio...');
+      if (termino && termino.trim().length > 0) {
+        return this.perfilOngService.searchByName(termino.trim());
+      } else {
+        return this.perfilOngService.getAll();
+      }
+    })
+  ).subscribe({
+    next: (resultados) => {
+      console.log('✅ Datos recibidos:', resultados.length);
+      this.ongs$ = of(resultados); 
+      this.totalOngs = resultados.length;
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Error fatal:', err);
+      this.loading = false;
+    }
+  });
+}
+
 
   get searchControl(): FormControl {
     return this.filtroForm.get('search') as FormControl;
   }
 
-  get estadoControl(): FormControl {
-    return this.filtroForm.get('estadoVerificacion') as FormControl;
-  }
-
-  initFiltroForm() {
-    const initialFilters: any = {
-      search: ''
-    };
-
-    this.filtroForm = this.fb.group(initialFilters);
-
-    this.filtroForm.valueChanges.pipe(
-      debounceTime(500), 
-      distinctUntilChanged(), 
-      switchMap(filtros => {
-        this.loading = true;
-        return this.filtrarOngs(filtros.search);
-      })
-    ).subscribe(ongs => {
-      this.ongs$ = of(ongs);
-      this.totalOngs = ongs.length;
-      this.loading = false;
-    });
-  }
-
-  private filtrarOngs(search: string): Observable<PerfilONGModel[]> {
-    return this.perfilOngService.getAll().pipe(
-      switchMap(ongs => {
-        if (search && search.trim().length > 0) {
-          const term = search.toLowerCase();
-          const filtradas = ongs.filter(o =>
-            o.nombreLegal.toLowerCase().includes(term) ||
-            o.cif.toLowerCase().includes(term) ||
-            (o.descripcion || '').toLowerCase().includes(term)
-          );
-          return of(filtradas);
-        }
-        return of(ongs);
-      })
-    );
-  }
-
-  cargarOngsIniciales() {
-    this.loading = true;
-    console.log('🔍 Cargando ONGs públicas');
-    this.perfilOngService.getAll().subscribe(ongs => {
-      this.ongs$ = of(ongs);
-      this.totalOngs = ongs.length;
-      this.loading = false;
-    });
+  get esAdmin(): boolean {
+    return this.auth.hasRole('ADMIN');
   }
 
   limpiarFiltros() {
-    this.filtroForm.reset({
-      search: '',
-      estadoVerificacion: ''
-    });
+    this.filtroForm.setValue({ search: '' }); 
   }
 
-  async verDetalle(ong: PerfilONGModel) {
-    const modal = await this.modalCtrl.create({
-      component: OngDetalleComponent,
-      componentProps: { 
-        ong,
-        isAdmin: this.userRole === 'ADMIN'
-      },
-      breakpoints: [0, 1],
-      initialBreakpoint: 1,
-      cssClass: 'ong-modal-sheet'
-    });
 
-    modal.onDidDismiss().then(result => {
-      if (result.data?.ong) {
-        this.cargarOngsIniciales();
-      }
-    });
-    
-    await modal.present();
+async verDetalle(ong: PerfilONGModel) {
+  const modal = await this.modalCtrl.create({
+    component: OngDetalleComponent,
+    componentProps: { 
+      ong, 
+      isAdmin: this.esAdmin 
+    },
+    breakpoints: [0, 1],
+    initialBreakpoint: 1,
+    cssClass: 'ong-modal-sheet'
+  });
+
+  await modal.present();
+  
+  const { data } = await modal.onDidDismiss();
+  
+  if (data?.refresh) {
+    console.log('🔄 Recargando lista tras cambios...');
+    this.filtroForm.get('search')?.updateValueAndValidity();
   }
+}
 
-  trackById(index: number, ong: PerfilONGModel) {
-    return ong.idUsuario;
+
+  trackById(index: number, item: PerfilONGModel) {
+    return item.idUsuario;
   }
 }

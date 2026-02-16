@@ -149,3 +149,21 @@ ion-footer {
     margin: 4px 16px;
   }
 }
+
+
+.user-toolbar {
+  padding-left: 16px;
+  h3 { margin: 0; font-size: 1.1rem; font-weight: 600; color: white; }
+  p.role-badge { margin: 4px 0 10px 0; font-size: 0.8rem; opacity: 0.9; color: var(--ion-color-light); }
+}
+
+.menu-badge {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.menu-spacer {
+  height: 20px;
+  border-top: 1px solid var(--ion-color-light-shade);
+  margin-top: 20px;
+}
