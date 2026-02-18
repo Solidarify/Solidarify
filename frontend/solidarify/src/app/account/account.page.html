@@ -1,284 +1,168 @@
-<ion-content fullscreen="true" class="account-fullscreen">
+<ion-content [fullscreen]="true" class="bg-gradient">
   
-  <div *ngIf="loading()" class="loading-container">
-    <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Cargando perfil...</p>
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="loading-overlay">
+    <ion-spinner name="bubbles" color="light"></ion-spinner>
+    <p>Cargando tu espacio...</p>
   </div>
 
-  <div *ngIf="!loading() && !usuario()" class="no-user">
-    <ion-icon name="person-outline" class="no-user-icon"></ion-icon>
-    <h3>Inicia sesión</h3>
-    <p>Para ver y editar tu perfil</p>
-    <ion-button routerLink="/login" color="primary" shape="round">Entrar</ion-button>
+  <!-- NO USER -->
+  <div *ngIf="!loading() && !usuario()" class="no-user-state">
+    <div class="icon-circle">
+      <ion-icon name="person"></ion-icon>
+    </div>
+    <h3>¡Hola, desconocido!</h3>
+    <p>Inicia sesión para gestionar tu perfil y unirte a causas solidarias.</p>
+    <ion-button routerLink="/login" class="btn-login" shape="round">
+      Iniciar Sesión
+      <ion-icon name="arrow-forward" slot="end"></ion-icon>
+    </ion-button>
   </div>
 
-  <div *ngIf="!loading() && usuario()" class="account-container">
+  <!-- PERFIL USUARIO -->
+  <div *ngIf="!loading() && usuario()" class="profile-wrapper fade-in">
     
-    <div class="hero-section">
-      <div class="avatar-section">
-        <ion-avatar>
-          <img [src]="avatarUrl" alt="Foto de perfil" />
-        </ion-avatar>
-      </div>
+    <!-- 1. HERO HEADER (Fondo curvo + Avatar) -->
+    <div class="profile-header">
+      <div class="header-bg"></div>
       
-      <div class="user-info">
-        <h1>{{ usuario()?.nombre }}</h1> 
-        <p class="email">{{ usuario()?.email }}</p>
+      <div class="user-summary">
         
-        <div class="badges-container">
-          <div class="badges">
-            <ion-chip *ngFor="let rol of rolesVisuales" [class]="rol.toLowerCase()" size="small">
-              {{ rol | titlecase }}
-            </ion-chip>
-            <ion-chip class="activo" color="success" size="small">
-              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-              Activo
-            </ion-chip>
-          </div>
+        <!-- AVATAR CLICABLE: Al tocar abre opciones de foto -->
+        <div class="avatar-container" (click)="cambiarFoto()">
+          <!-- Muestra imagen de perfil (Base64) o avatar por defecto -->
+          <img [src]="avatarUrl" alt="Avatar" class="avatar-img" />
           
-          <ion-button *ngIf="!modoEdicion" 
-                       (click)="activarEdicion()" 
-                       fill="clear" 
-                       size="small" 
-                       color="light"
-                       class="edit-btn">
+          <!-- Badge de cámara para indicar que se puede cambiar -->
+          <div class="edit-badge">
+            <ion-icon name="camera"></ion-icon>
+          </div>
+        </div>
+        
+        <h1 class="user-name">{{ usuario()?.nombre }}</h1>
+        <p class="user-role">
+          {{ rolesVisuales[0] | titlecase }} 
+          <span class="status-dot"></span> Activo
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. TARJETAS DE INFORMACIÓN -->
+    <div class="cards-container">
+      
+      <!-- Datos Personales -->
+      <div class="glass-card">
+        <div class="card-header">
+          <ion-icon name="person-circle-outline" class="card-icon"></ion-icon>
+          <h3>Información Personal</h3>
+          
+          <!-- Botón de Editar Datos (Lápiz) -->
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="activarEdicion()" 
+            *ngIf="!modoEdicion">
             <ion-icon name="create-outline" slot="icon-only"></ion-icon>
-            <span>Editar</span>
           </ion-button>
         </div>
-      </div>
-    </div>
-
-    <div class="account-card">
-      
-      <div class="section">
-        <h2>Datos personales</h2>
         
-        <div class="info-grid">
-          <div class="info-item">
-            <ion-icon name="person-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Nombre</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="usuarioEditado!.nombre" 
-              class="input-edit"
-              type="text"
-              placeholder="Tu nombre completo" />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado!.nombre" 
-                class="input-edit"
-                placeholder="Tu nombre completo">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</span>
-            </div>
+        <div class="info-list">
+          <!-- Nombre -->
+          <div class="info-row">
+            <div class="label">Nombre completo</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.nombre" class="input-modern" type="text">
           </div>
 
-          <div class="info-item">
-            <ion-icon name="mail-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Email</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="usuarioEditado!.email" 
-              class="input-edit"
-              type="email"
-              placeholder="tu@email.com" />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado!.email" 
-                type="email"
-                class="input-edit"
-                placeholder="tu@email.com">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</span>
-            </div>
+          <!-- Email -->
+          <div class="info-row">
+            <div class="label">Correo electrónico</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.email" class="input-modern" type="email">
           </div>
 
-          <div class="info-item">
-            <ion-icon name="call-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Teléfono</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="usuarioEditado!.telefono" 
-              class="input-edit"
-              type="tel"
-              placeholder="600 000 000" />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="usuarioEditado!.telefono" 
-                type="tel"
-                class="input-edit"
-                placeholder="600 000 000">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">
-                {{ usuario()?.telefono || 'No especificado' }}
-              </span>
-            </div>
+          <!-- Teléfono -->
+          <div class="info-row">
+            <div class="label">Teléfono</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.telefono || 'Sin especificar' }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.telefono" class="input-modern" type="tel" placeholder="+34 000 000 000">
           </div>
         </div>
       </div>
 
-      <div *ngIf="esONG()" class="section">
-        <h2>Datos de la ONG</h2>
-        <div class="info-grid">
-          <div class="info-item full-width">
-            <ion-icon name="business-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Nombre legal</span>
-              <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="perfilONGEditado!.nombreLegal" 
-                class="input-edit"
-                placeholder="Nombre legal de la organización">
-              </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.nombreLegal }}</span>
-            </div>
+      <!-- Datos ONG (Solo si es ONG) -->
+      <div class="glass-card ong-card" *ngIf="esONG()">
+        <div class="card-header">
+          <ion-icon name="heart-circle-outline" class="card-icon"></ion-icon>
+          <h3>Datos de la ONG</h3>
+          <div class="verified-tag" [class.verified]="perfilONG()?.isVerified">
+            {{ perfilONG()?.isVerified ? 'Verificada' : 'Pendiente' }}
+          </div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <div class="label">Organización</div>
+            <div *ngIf="!modoEdicion" class="value">{{ perfilONG()?.nombreLegal }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.nombreLegal" class="input-modern">
           </div>
 
-          <div class="info-item">
-            <ion-icon name="card-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">CIF</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="perfilONGEditado!.cif" 
-              class="input-edit"
-              type="text"
-              placeholder="G12345678" />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="perfilONGEditado!.cif" 
-                class="input-edit"
-                placeholder="G12345678">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.cif }}</span>
-            </div>
+          <div class="info-row">
+            <div class="label">CIF</div>
+            <div *ngIf="!modoEdicion" class="value mono">{{ perfilONG()?.cif }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.cif" class="input-modern">
           </div>
-
-          <div class="info-item">
-            <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Estado verificación</span>
-              <span class="value badge-verificacion" 
-                    [class]="perfilONG()?.isVerified ? 'verificado' : 'pendiente'">
-                {{ perfilONG()?.estadoVerificacion | titlecase }}
-              </span>
-            </div>
-          </div>
-
-          <div class="info-item full-width">
-            <ion-icon name="location-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Dirección</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="perfilONGEditado!.direccion" 
-              class="input-edit"
-              type="text"
-              placeholder="Dirección completa" />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="perfilONGEditado!.direccion" 
-                class="input-edit"
-                placeholder="Dirección completa">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.direccion || 'No especificada' }}</span>
-            </div>
-          </div>
-
-          <div class="info-item full-width">
-            <ion-icon name="globe-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Sitio web</span>
-              <input *ngIf="modoEdicion" 
-              [(ngModel)]="perfilONGEditado!.web" 
-              class="input-edit"
-              type="url"
-              placeholder="https://..." />
-              <!-- <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="perfilONGEditado!.web" 
-                type="url"
-                class="input-edit"
-                placeholder="https://...">
-              </ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.web || 'No especificado' }}</span>
-            </div>
+          
+          <div class="info-row full">
+            <div class="label">Sitio Web</div>
+            <div *ngIf="!modoEdicion" class="value link">{{ perfilONG()?.web || '-' }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.web" class="input-modern" placeholder="https://...">
           </div>
         </div>
       </div>
 
-      <div *ngIf="esOrganizador()" class="section">
-        <h2>Datos del Organizador</h2>
-        <div class="info-grid">
-          <div class="info-item full-width">
-            <ion-icon name="people-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Nombre organización</span>
-              <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="organizadorEditado!.nombre" 
-                class="input-edit"
-                placeholder="Nombre de la organización">
-              </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.nombre }}</span>
-            </div>
+       <!-- Datos ORGANIZADOR (Solo si es Organizador) -->
+       <div class="glass-card org-card" *ngIf="esOrganizador()">
+        <div class="card-header">
+          <ion-icon name="briefcase-outline" class="card-icon"></ion-icon>
+          <h3>Datos Organizador</h3>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <div class="label">Entidad</div>
+            <div *ngIf="!modoEdicion" class="value">{{ organizador()?.nombre }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="organizadorEditado!.nombre" class="input-modern">
           </div>
 
-          <div class="info-item">
-            <ion-icon name="card-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">CIF</span>
-              <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="organizadorEditado!.cif" 
-                class="input-edit"
-                placeholder="G12345678">
-              </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.cif }}</span>
-            </div>
-          </div>
-
-          <div class="info-item full-width">
-            <ion-icon name="map-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Zona responsable</span>
-              <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="organizadorEditado!.zonaResponsable" 
-                class="input-edit"
-                placeholder="Zona geográfica">
-              </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.zonaResponsable || 'No especificada' }}</span>
-            </div>
-          </div>
-
-          <div class="info-item">
-            <ion-icon name="call-outline" color="primary"></ion-icon>
-            <div>
-              <span class="label">Teléfono directo</span>
-              <ion-input 
-                *ngIf="modoEdicion" 
-                [(ngModel)]="organizadorEditado!.telefonoDirecto" 
-                type="tel"
-                class="input-edit"
-                placeholder="600 000 000">
-              </ion-input>
-              <span *ngIf="!modoEdicion" class="value">{{ organizador()?.telefonoDirecto || 'No especificado' }}</span>
-            </div>
+          <div class="info-row">
+            <div class="label">Zona</div>
+            <div *ngIf="!modoEdicion" class="value">{{ organizador()?.zonaResponsable }}</div>
+            <input *ngIf="modoEdicion" [(ngModel)]="organizadorEditado!.zonaResponsable" class="input-modern">
           </div>
         </div>
       </div>
+
+      <!-- Botón Cerrar Sesión (Solo visible si NO editas) -->
+      <div class="logout-container" *ngIf="!modoEdicion">
+        <ion-button fill="outline" color="danger" class="btn-logout" (click)="logout()">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Cerrar Sesión
+        </ion-button>
+      </div>
+
     </div>
 
-    <div *ngIf="modoEdicion" class="edit-buttons-fixed">
-      <ion-button fill="clear" color="medium" (click)="cancelarEdicion()" size="small">
-        <ion-icon name="close-outline" slot="start"></ion-icon>
+    <!-- BARRA DE ACCIONES FLOTANTE (Solo en modo edición de DATOS TEXTO) -->
+    <div class="actions-bar" *ngIf="modoEdicion">
+      <ion-button fill="clear" color="dark" (click)="cancelarEdicion()">
         Cancelar
       </ion-button>
-      <ion-button color="success" (click)="guardarCambios()" size="small">
-        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-        Guardar cambios
+      <ion-button color="dark" shape="round" (click)="guardarCambios()" class="save-btn">
+        Guardar
       </ion-button>
     </div>
 
   </div>
+
 </ion-content>

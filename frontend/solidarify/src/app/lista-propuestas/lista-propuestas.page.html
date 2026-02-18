@@ -1,76 +1,105 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="bg-light">
   
-  <div class="stats-card">
+  <!-- 1. HERO SECTION (Tarjeta de Estadísticas) -->
+  <div class="stats-card fade-in-down">
     <div class="stats-content">
       <div class="stat-text">
-        <h2>{{totalPropuestas}}</h2>
-        <p>{{ esUsuario ? 'Propuestas públicas' : pageTitle }} disponibles</p>
+        <div class="stat-number">
+          {{ totalPropuestas }}
+        </div>
+        <p class="stat-label">
+          {{ esUsuario ? 'Propuestas Activas' : pageTitle }}
+        </p>
       </div>
       
+      <!-- Botón de refrescar sutil -->
       <ion-button 
         *ngIf="!esUsuario" 
-        fill="outline" 
-        shape="round" 
-        color="primary" 
+        fill="clear" 
+        class="refresh-btn" 
         (click)="limpiarFiltros()">
         <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
+
+    <!-- Decoración de fondo -->
+    <div class="deco-circle"></div>
   </div>
 
-  <div class="filtros-card">
-    <ion-item lines="none">
-      <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
-      <ion-input 
+  <!-- 2. BARRA DE BÚSQUEDA FLOTANTE -->
+  <div class="filtros-container fade-in-up">
+    <div class="search-bar">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input 
+        type="text" 
         [formControl]="searchControl" 
-        placeholder="¿Qué buscas hoy?">
-      </ion-input>
-    </ion-item>
+        placeholder="¿Qué quieres donar hoy?" 
+        class="native-input"
+      />
+    </div>
   </div>
 
+  <!-- 3. CABECERA DE LISTA -->
   <div class="list-header" *ngIf="!loading">
-    <ion-label>{{pageTitle}} <span>({{totalPropuestas}})</span></ion-label>
+    <h3>Explorar <span>({{ totalPropuestas }})</span></h3>
   </div>
 
-  <ion-list lines="none" *ngIf="!loading">
+  <!-- 4. LISTA DE PROPUESTAS (Diseño Tarjeta Moderna) -->
+  <div class="propuestas-list" *ngIf="!loading">
     <ng-container *ngIf="propuestas$ | async as propuestas">
       
-      <ion-item *ngFor="let propuesta of propuestas; trackBy: trackById" 
-                button 
-                detail="false"
-                class="propuesta-item"
-                (click)="verDetalle(propuesta)">
+      <!-- ITEM DE PROPUESTA -->
+      <div 
+        *ngFor="let propuesta of propuestas; trackBy: trackById" 
+        class="propuesta-card scale-in"
+        (click)="verDetalle(propuesta)">
         
-        <div class="tipo-avatar" slot="start">
-          <ion-icon name="gift-outline"></ion-icon>
+        <!-- Columna Izquierda: Icono/Imagen -->
+        <div class="card-icon-box">
+          <img *ngIf="propuesta.imagen" [src]="propuesta.imagen" alt="img" class="card-img">
+          <ion-icon *ngIf="!propuesta.imagen" name="gift-outline"></ion-icon>
         </div>
 
-        <ion-label class="propuesta-label">
-          <h2>{{propuesta.titulo}}</h2>
+        <!-- Columna Central: Info -->
+        <div class="card-info">
+          <h2 class="card-title">{{ propuesta.titulo }}</h2>
           
-          <div class="info-row">
-            <ion-icon name="location-outline"></ion-icon>
-            <span>{{propuesta.lugar}}</span>
+          <div class="card-meta">
+            <div class="meta-item location">
+              <ion-icon name="location-sharp"></ion-icon>
+              <span>{{ propuesta.lugar || 'Ubicación pendiente' }}</span>
+            </div>
           </div>
 
-          <div class="fechas">
-            {{propuesta.fechaInicio | date:'d MMM'}} - {{propuesta.fechaFin | date:'d MMM'}}
+          <div class="card-tags">
+            <span class="tag-date">
+              {{ propuesta.fechaInicio | date:'d MMM' }} - {{ propuesta.fechaFin | date:'d MMM' }}
+            </span>
           </div>
-        </ion-label>
+        </div>
 
-        <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-      </ion-item>
+        <!-- Columna Derecha: Flecha -->
+        <div class="card-action">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+      </div>
       
-      <div *ngIf="propuestas.length === 0" class="empty-state ion-padding text-center">
-        <p>No se encontraron propuestas.</p>
+      <!-- EMPTY STATE (Si no hay resultados) -->
+      <div *ngIf="propuestas.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="search"></ion-icon>
+        </div>
+        <p>No encontramos propuestas con ese criterio.</p>
+        <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
     </ng-container>
-  </ion-list>
+  </div>
 
-  <div class="loading-center" *ngIf="loading">
+  <!-- LOADING STATE -->
+  <div class="loading-container" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Buscando propuestas...</p>
+    <p>Buscando causas solidarias...</p>
   </div>
 
 </ion-content>

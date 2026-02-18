@@ -4,6 +4,7 @@ export class UsuarioModel {
     email: string;
     passwordHash: string;
     telefono?: string;
+    fotoPerfil?: string;
     activo: boolean;
     createdAt?: Date;
     updatedAt?: Date;
@@ -15,6 +16,7 @@ export class UsuarioModel {
         this.email = data.email?.toLowerCase().trim() ?? '';
         this.passwordHash = data.passwordHash ?? '';
         this.telefono = data.telefono?.trim() ?? undefined;
+        this.fotoPerfil = data.fotoPerfil;
         this.activo = data.activo ?? true;
         this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
         this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
@@ -28,6 +30,7 @@ export class UsuarioModel {
             email: api?.Email || api?.email,
             passwordHash: api?.Password_Hash || api?.passwordHash,
             telefono: api?.Telefono || api?.telefono,
+            fotoPerfil: api?.Foto_Perfil || api?.fotoPerfil,
             activo: api?.Activo !== undefined ? api.Activo : true,
             createdAt: api?.CreatedAt || api?.createdAt,
             updatedAt: api?.Updated_At || api?.updatedAt,

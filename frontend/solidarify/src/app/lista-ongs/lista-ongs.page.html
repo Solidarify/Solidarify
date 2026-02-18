@@ -1,80 +1,113 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="bg-light">
   
-  <div class="stats-card">
+  <!-- 1. HERO SECTION (Tarjeta de Estadísticas) -->
+  <div class="stats-card fade-in-down">
     <div class="stats-content">
       <div class="stat-text">
-        <h2>{{totalOngs}}</h2>
-        <p>ONGs registradas</p>
+        <div class="stat-number">
+          {{ totalOngs }}
+        </div>
+        <p class="stat-label">
+          ONGs Aliadas
+        </p>
       </div>
       
+      <!-- Botón limpiar filtros -->
       <ion-button 
         *ngIf="searchControl.value" 
-        fill="outline" 
-        shape="round" 
-        color="primary" 
+        fill="clear" 
+        class="refresh-btn" 
         (click)="limpiarFiltros()">
-        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
       </ion-button>
+    </div>
+
+    <!-- Decoración de fondo -->
+    <div class="deco-circle"></div>
+  </div>
+
+  <!-- 2. BARRA DE BÚSQUEDA FLOTANTE -->
+  <div class="filtros-container fade-in-up">
+    <div class="search-bar">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input 
+        type="text" 
+        [formControl]="searchControl" 
+        placeholder="Buscar fundación..." 
+        class="native-input"
+      />
     </div>
   </div>
 
-  <div class="filtros-card">
-    <ion-item lines="none">
-      <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
-      <ion-input 
-        [formControl]="searchControl" 
-        placeholder="Buscar por nombre...">
-      </ion-input>
-    </ion-item>
-  </div>
-
+  <!-- 3. CABECERA DE LISTA -->
   <div class="list-header" *ngIf="!loading">
-    <ion-label>{{pageTitle}}</ion-label>
+    <h3>Directorio <span>Solidario</span></h3>
   </div>
 
-  <ion-list lines="none" *ngIf="!loading">
+  <!-- 4. LISTA DE ONGS (Diseño Tarjeta Moderna) -->
+  <div class="ongs-list" *ngIf="!loading">
     
     <ng-container *ngIf="ongs$ | async as ongs">
       
-      <ion-item *ngFor="let ong of ongs; trackBy: trackById" 
-                button 
-                detail="false"
-                class="ong-item"
-                (click)="verDetalle(ong)">
+      <!-- ITEM DE ONG -->
+      <div *ngFor="let ong of ongs; trackBy: trackById" 
+           class="ong-card scale-in"
+           (click)="verDetalle(ong)">
         
-        <div class="tipo-avatar" slot="start">
-          <ion-icon name="business" color="primary"></ion-icon>
+        <!-- Estado lateral (barra de color) -->
+        <div class="status-stripe" [ngClass]="{
+          'verificado': ong.isVerified,
+          'pendiente': !ong.isVerified
+        }"></div>
+
+        <!-- Columna Izquierda: Logo/Avatar -->
+        <div class="card-icon-box">
+          <div class="avatar-circle">
+             <!-- Usamos las iniciales si no hay logo, o un icono -->
+             <span class="initials">{{ ong.nombreLegal.substring(0,2) | uppercase }}</span>
+          </div>
+          <!-- Badge de verificación superpuesto -->
+          <div class="verified-badge" *ngIf="ong.isVerified">
+            <ion-icon name="checkmark-circle"></ion-icon>
+          </div>
         </div>
 
-        <ion-label class="ong-label">
-          <h2>
-            {{ong.nombreLegal}}
-            <ion-icon *ngIf="ong.isVerified" name="checkmark-circle" color="success" style="font-size: 0.8em;"></ion-icon>
-          </h2>
+        <!-- Columna Central: Info -->
+        <div class="card-info">
+          <h2 class="card-title">{{ ong.nombreLegal }}</h2>
           
-          <div class="info-row" *ngIf="ong.web">
-            <ion-icon name="globe-outline"></ion-icon>
-            <span>{{ong.web}}</span>
+          <div class="card-desc" *ngIf="ong.descripcion">
+            {{ ong.descripcion }}
           </div>
 
-          <p class="descripcion-corta" *ngIf="ong.descripcion">
-            {{ong.descripcion}}
-          </p>
-        </ion-label>
+          <div class="card-meta" *ngIf="ong.web">
+            <ion-icon name="globe-outline"></ion-icon>
+            <span class="web-link">{{ ong.web | slice:0:30 }}...</span>
+          </div>
+        </div>
 
-        <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
-      </ion-item>
+        <!-- Columna Derecha: Flecha -->
+        <div class="card-action">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+      </div>
 
-      <div *ngIf="ongs.length === 0" class="empty-state ion-padding text-center">
-        <p>No se encontraron organizaciones.</p>
+      <!-- EMPTY STATE -->
+      <div *ngIf="ongs.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+        <p>No encontramos esa ONG.</p>
+        <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
     </ng-container>
-  </ion-list>
+  </div>
 
-  <div class="loading-center" *ngIf="loading">
+  <!-- LOADING STATE -->
+  <div class="loading-container" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Cargando directorio...</p>
+    <p>Conectando con ONGs...</p>
   </div>
 
 </ion-content>

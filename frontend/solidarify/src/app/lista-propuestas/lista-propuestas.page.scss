@@ -1,149 +1,213 @@
+/* --- FONDO GENERAL --- */
+ion-content {
+  --background: #f8fafc; /* Gris muy claro */
+}
 
-// ion-content {
-// }
+/* --- HERO & STATS (Verde) --- */
+.stats-card {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  border-radius: 0 0 30px 30px;
+  padding: 20px 24px 60px; /* Espacio extra para el buscador flotante */
+  color: white;
+  position: relative;
+  margin: 0;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
 
-// .stats-card {
-//   margin: 16px;
-//   border-radius: 20px;
-//   box-shadow: 0 8px 25px rgba(var(--ion-color-dark-rgb), 0.08);
-//   background: var(--ion-card-background);
+  .stats-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
 
-//   .stats-content {
-//     display: flex;
-//     justify-content: space-between;
-//     align-items: center;
-//     padding: 24px;
-
-//     .stat-text {
-//       h2 { 
-//         color: var(--ion-color-primary);
-//         font-weight: 700; 
-//         font-size: 2.5rem;
-//         margin: 0;
-//         line-height: 1;
-//       }
-//       p { 
-//         color: var(--ion-color-medium); 
-//         margin: 4px 0 0; 
-//         font-size: 0.9rem;
-//       }
-//     }
-//   }
-// }
-
-// .filtros-card {
-//   margin: 0 16px 16px;
-//   border-radius: 20px;
-//   background: var(--ion-card-background);
-//   box-shadow: none; 
-//   border: 1px solid var(--ion-color-step-100); 
-
-//   ion-item {
-//     --inner-padding-end: 0;
-//     --background: transparent;
-//     margin-bottom: 0; 
-    
-//     ion-icon {
-//       color: var(--ion-color-primary);
-//       margin-right: 8px;
-//     }
-//   }
-// }
-
-// .list-header {
-//   margin: 24px 16px 8px;
-//   padding: 0;
+  .stat-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    color: white; /* Asegurar blanco */
+  }
   
-//   ion-label {
-//     color: var(--ion-color-dark);
-//     font-weight: 700;
-//     font-size: 1.2rem;
-    
-//     span {
-//       color: var(--ion-color-medium);
-//       font-weight: 400;
-//       font-size: 0.9rem;
-//     }
-//   }
-// }
+  .stat-label {
+    opacity: 0.9;
+    font-size: 1rem;
+    margin: 4px 0 0;
+    font-weight: 500;
+    color: white;
+  }
 
-// .propuesta-item {
-//   margin: 12px 16px;
-//   border-radius: 16px;
-//   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-//   --background: var(--ion-card-background);
-//   overflow: hidden;
+  .refresh-btn {
+    --color: white;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    --padding-start: 0; --padding-end: 0;
+  }
+}
 
-//   transition: transform 0.2s ease;
-//   &:active {
-//     transform: scale(0.98);
-//   }
+/* --- BUSCADOR FLOTANTE --- */
+.filtros-container {
+  padding: 0 20px;
+  margin-top: -35px; /* Sube sobre el hero */
+  position: relative;
+  z-index: 10;
+  margin-bottom: 25px;
 
-//   .tipo-avatar {
-//     margin-right: 16px;
-//     background: var(--ion-color-primary-tint);
-//     width: 48px;
-//     height: 48px;
-//     border-radius: 12px;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
+  .search-bar {
+    background: white;
+    border-radius: 16px;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 
-//     ion-icon { 
-//       font-size: 24px; 
-//       color: var(--ion-color-primary-contrast); 
-//     }
-//   }
+    .search-icon {
+      color: #10b981;
+      font-size: 22px;
+      margin-right: 10px;
+    }
 
-//   .propuesta-label {
-//     h2 { 
-//       font-weight: 700; 
-//       color: var(--ion-color-dark); 
-//       font-size: 1rem;
-//       margin-bottom: 4px;
-//     }
-    
-//     .info-row {
-//       display: flex;
-//       align-items: center;
-//       gap: 6px;
-//       margin-bottom: 4px;
-      
-//       ion-icon {
-//         font-size: 14px;
-//         color: var(--ion-color-medium);
-//       }
-//       span {
-//         color: var(--ion-color-medium); 
-//         font-size: 0.85rem; 
-//       }
-//     }
+    .native-input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      height: 44px;
+      font-size: 1rem;
+      color: #334155; /* Texto oscuro para lo que escribes */
+      outline: none;
 
-//     .fechas { 
-//       display: inline-block;
-//       margin-top: 6px;
-//       padding: 4px 8px;
-//       background: var(--ion-color-light);
-//       border-radius: 6px;
-//       color: var(--ion-color-primary); 
-//       font-size: 11px; 
-//       font-weight: 700;
-//       letter-spacing: 0.5px;
-//       text-transform: uppercase;
-//     }
-//   }
-// }
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
+  }
+}
 
-// .loading-center {
-//   height: 50vh;
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: center;
-//   align-items: center;
+/* --- CABECERA DE LISTA --- */
+.list-header {
+  padding: 0 24px;
+  margin-bottom: 12px;
   
-//   p {
-//     color: var(--ion-color-medium);
-//     margin-top: 16px;
-//     font-size: 0.9rem;
-//   }
-// }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b; /* Título oscuro */
+    margin: 0;
+    
+    span { color: #10b981; }
+  }
+}
+
+/* --- LISTA DE PROPUESTAS --- */
+.propuestas-list {
+  padding: 0 20px 40px;
+}
+
+.propuesta-card {
+  background: white; /* Fondo blanco puro */
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* Sombra suave */
+  border: 1px solid rgba(0,0,0,0.02); /* Borde sutil */
+  position: relative;
+  transition: transform 0.2s;
+  
+  &:active { transform: scale(0.98); }
+
+  /* Icono/Imagen Izquierda */
+  .card-icon-box {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    background: #ecfdf5; /* Fondo verde muy claro */
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    ion-icon { font-size: 28px; color: #10b981; }
+    
+    .card-img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+  }
+
+  /* Info Central */
+  .card-info {
+    flex: 1;
+    min-width: 0;
+
+    /* TÍTULO: Color Oscuro Fuerte */
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b !important; /* FORZAMOS COLOR OSCURO */
+      margin: 0 0 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* UBICACIÓN: Color Gris Medio */
+    .card-meta {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+
+      .meta-item {
+        display: flex; align-items: center; gap: 4px;
+        font-size: 0.85rem; 
+        color: #64748b !important; /* Gris legible */
+        
+        ion-icon { color: #94a3b8; font-size: 14px; }
+      }
+    }
+
+    /* FECHA: Badge Gris Claro */
+    .card-tags {
+      .tag-date {
+        background: #f1f5f9;
+        color: #475569; /* Texto gris oscuro */
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.3px;
+      }
+    }
+  }
+
+  /* Flecha Derecha */
+  .card-action {
+    color: #cbd5e1;
+    font-size: 20px;
+    margin-left: 8px;
+  }
+}
+
+/* --- EMPTY STATE --- */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 48px; color: #cbd5e1; margin-bottom: 10px;
+  }
+  
+  p {
+    color: #94a3b8; /* Gris suave */
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+}
+
+/* --- ANIMACIONES --- */
+.scale-in { animation: scaleIn 0.3s ease-out; }
+.fade-in-down { animation: fadeInDown 0.5s ease-out; }
+.fade-in-up { animation: fadeInUp 0.5s ease-out; }
+
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes fadeInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

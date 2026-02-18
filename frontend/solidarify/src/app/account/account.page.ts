@@ -1,6 +1,7 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 // SERVICIOS
 import { Auth } from '../services/auth';
@@ -27,6 +28,7 @@ export class AccountPage {
   private organizadorService = inject(Organizador);
   private alertCtrl = inject(AlertController);
   private loadingCtrl = inject(LoadingController);
+  private actionSheetCtrl = inject(ActionSheetController);
 
   usuario = signal<UsuarioModel | null>(null);
   perfilONG = signal<PerfilONGModel | null>(null);
@@ -42,8 +44,7 @@ export class AccountPage {
 
   constructor() {
     effect(async () => {
-      const currentUser = this.auth.currentUser(); // Dependencia reactiva
-
+      const currentUser = this.auth.currentUser();
       if (currentUser) {
         this.loading.set(true);
         await this.cargarDatosAdicionales(currentUser);
@@ -60,7 +61,6 @@ export class AccountPage {
   private async cargarDatosAdicionales(user: UsuarioModel) {
     try {
       this.usuario.set(user);
-      
       this.actualizarRolesVisuales();
 
       const promises: Promise<any>[] = [];
@@ -73,16 +73,16 @@ export class AccountPage {
         );
       }
 
-        if (this.auth.hasRole('ORGANIZADOR') && user.idUsuario) { 
-      promises.push(
-        firstValueFrom(this.organizadorService.getById(user.idUsuario))
-          .then(o => this.organizador.set(o))
-          .catch(() => this.organizador.set(null))
-      );
-    }
+      if (this.auth.hasRole('ORGANIZADOR') && user.idUsuario) { 
+        promises.push(
+          firstValueFrom(this.organizadorService.getById(user.idUsuario))
+            .then(o => this.organizador.set(o))
+            .catch(() => this.organizador.set(null))
+        );
+      }
 
       await Promise.all(promises);
-      this.resetEdicion(); 
+      this.resetEdicion();
 
     } catch (e) {
       console.error('Error carga reactiva:', e);
@@ -99,10 +99,20 @@ export class AccountPage {
     if (this.auth.hasRole('USUARIO')) this.rolesVisuales.push('USUARIO');
   }
 
+  // ⬇️ NUEVA FUNCIÓN: Devuelve foto de perfil o avatar generado
   get avatarUrl(): string {
     const u = this.usuario();
+    
+    // Si tiene foto en Base64, usar esa
+    if (u?.fotoPerfil) {
+      return u.fotoPerfil.startsWith('data:image') 
+        ? u.fotoPerfil 
+        : `data:image/jpeg;base64,${u.fotoPerfil}`;
+    }
+    
+    // Si no, generar avatar con iniciales
     return u 
-      ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=0D8ABC&color=fff&size=128`
+      ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=10b981&color=fff&size=256`
       : '';
   }
 
@@ -131,16 +141,108 @@ export class AccountPage {
     if (o) this.organizadorEditado = new OrganizadorModel(o);
   }
 
+  // ⬇️ NUEVA FUNCIÓN: Cambiar foto de perfil
+  async cambiarFoto() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Cambiar foto de perfil',
+      buttons: [
+        {
+          text: '📷 Hacer foto',
+          handler: () => this.tomarFoto(CameraSource.Camera)
+        },
+        {
+          text: '🖼️ Elegir de galería',
+          handler: () => this.tomarFoto(CameraSource.Photos)
+        },
+        {
+          text: '🗑️ Eliminar foto',
+          role: 'destructive',
+          handler: () => this.eliminarFoto()
+        },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  private async tomarFoto(source: CameraSource) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 70,
+        allowEditing: true,
+        resultType: CameraResultType.Base64,
+        source: source,
+        width: 512,
+        height: 512
+      });
+
+      if (image.base64String) {
+        const base64Image = `data:image/${image.format};base64,${image.base64String}`;
+        await this.guardarFotoPerfil(base64Image);
+      }
+
+    } catch (error) {
+      console.error('Error capturando imagen:', error);
+      this.mostrarAlerta('Error', 'No se pudo capturar la imagen.');
+    }
+  }
+
+  private async eliminarFoto() {
+    const confirm = await this.alertCtrl.create({
+      header: 'Eliminar foto',
+      message: '¿Quieres eliminar tu foto de perfil?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => this.guardarFotoPerfil(null)
+        }
+      ]
+    });
+
+    await confirm.present();
+  }
+
+  private async guardarFotoPerfil(base64: string | null) {
+    const u = this.usuario();
+    if (!u) return;
+
+    const loading = await this.loadingCtrl.create({ message: 'Guardando foto...' });
+    await loading.present();
+
+    try {
+      const usuarioActualizado = new UsuarioModel({
+        ...u,
+        fotoPerfil: base64 || undefined
+      });
+
+      const updated = await firstValueFrom(
+        this.usuarioService.update(u.idUsuario, usuarioActualizado)
+      );
+
+      this.auth.currentUser.set(updated);
+      this.mostrarAlerta('¡Listo!', 'Foto actualizada correctamente.');
+
+    } catch (error) {
+      console.error('Error guardando foto:', error);
+      this.mostrarAlerta('Error', 'No se pudo guardar la foto.');
+    } finally {
+      loading.dismiss();
+    }
+  }
+
   async guardarCambios() {
     const confirm = await this.alertCtrl.create({
       header: 'Confirmar cambios',
       message: '¿Estás seguro de guardar estos cambios?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Guardar',
-          handler: () => this.ejecutarGuardado()
-        }
+        { text: 'Guardar', handler: () => this.ejecutarGuardado() }
       ]
     });
     await confirm.present();
@@ -158,7 +260,7 @@ export class AccountPage {
         this.usuarioService.update(u.idUsuario, this.usuarioEditado)
       );
       
-      this.auth.currentUser.set(updatedUser); 
+      this.auth.currentUser.set(updatedUser);
       
       const p = this.perfilONG();
       if (this.esONG() && p && this.perfilONGEditado) {
@@ -185,6 +287,10 @@ export class AccountPage {
     } finally {
       loading.dismiss();
     }
+  }
+
+  logout() {
+    this.auth.logout();
   }
 
   private async mostrarAlerta(header: string, message: string) {

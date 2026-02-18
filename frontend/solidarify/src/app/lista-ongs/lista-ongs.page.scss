@@ -1,91 +1,241 @@
-.ong-item {
-  margin: 12px 16px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --background: var(--ion-card-background);
-  overflow: hidden;
+/* --- FONDO GENERAL --- */
+ion-content {
+  --background: #f8fafc;
+}
 
-  transition: transform 0.2s ease;
-  &:active {
-    transform: scale(0.98);
+/* --- HERO & STATS (Azul Institucional) --- */
+.stats-card {
+  /* Gradiente Azul-Violeta para diferenciar de propuestas */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 0 0 30px 30px;
+  padding: 20px 24px 50px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+
+  .stats-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
   }
 
-  .tipo-avatar {
-    margin-right: 16px;
-    background: var(--ion-color-primary-tint);
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+  .stat-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  
+  .stat-label {
+    opacity: 0.9;
+    font-size: 1rem;
+    margin: 4px 0 0;
+    font-weight: 500;
+  }
+
+  .refresh-btn {
+    --color: white;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    --padding-start: 0; --padding-end: 0;
+  }
+
+  /* Círculo decorativo */
+  .deco-circle {
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+}
+
+/* --- BUSCADOR FLOTANTE --- */
+.filtros-container {
+  padding: 0 20px;
+  margin-top: -35px;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 20px;
+
+  .search-bar {
+    background: white;
+    border-radius: 16px;
+    padding: 6px 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 
-    ion-icon {
-      font-size: 24px;
-      color: var(--ion-color-primary-contrast);
+    .search-icon {
+      color: #3b82f6; /* Azul a juego con el hero */
+      font-size: 22px;
+      margin-right: 10px;
     }
-  }
 
-  .ong-label {
-    h2 {
-      font-weight: 700;
-      color: var(--ion-color-dark);
+    .native-input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      height: 44px;
       font-size: 1rem;
-      margin-bottom: 4px;
-    }
+      color: #334155;
+      outline: none;
+      font-family: inherit;
 
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
-
-      ion-icon {
-        font-size: 14px;
-        color: var(--ion-color-medium);
-      }
-      span {
-        color: var(--ion-color-medium);
-        font-size: 0.85rem;
-      }
-    }
-
-    .estado-chip {
-      display: inline-block;
-      margin-top: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-
-      &.verificado {
-        background: var(--ion-color-success-tint);
-        color: #111827;
-      }
-      &.pendiente {
-        background: var(--ion-color-warning-tint);
-        color: #111827;
-      }
-      &.rechazado {
-        background: var(--ion-color-danger-tint);
-        color: #111827;
-      }
+      &::placeholder { color: #94a3b8; }
     }
   }
 }
 
-.loading-center {
-  height: 50vh;
+/* --- CABECERA --- */
+.list-header {
+  padding: 0 24px;
+  margin-bottom: 12px;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    
+    span { color: #3b82f6; }
+  }
+}
+
+/* --- LISTA DE ONGS --- */
+.ongs-list {
+  padding: 0 20px 40px;
+}
+
+.ong-card {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+  
+  &:active { transform: scale(0.98); }
 
-  p {
-    color: var(--ion-color-medium);
-    margin-top: 16px;
-    font-size: 0.9rem;
+  /* Barra lateral de estado */
+  .status-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    
+    &.verificado { background: #10b981; }
+    &.pendiente { background: #f59e0b; }
+  }
+
+  /* Icono/Avatar */
+  .card-icon-box {
+    position: relative;
+    margin-right: 16px;
+    padding-left: 8px; /* Espacio para la barra de color */
+
+    .avatar-circle {
+      width: 56px; height: 56px;
+      background: #eff6ff; /* Azul muy claro */
+      color: #3b82f6;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    .verified-badge {
+      position: absolute;
+      bottom: -2px; right: -2px;
+      background: white;
+      border-radius: 50%;
+      padding: 2px;
+      
+      ion-icon { 
+        color: #10b981; 
+        font-size: 18px; 
+      }
+    }
+  }
+
+  /* Info */
+  .card-info {
+    flex: 1;
+    min-width: 0;
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .card-meta {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; color: #3b82f6;
+      
+      ion-icon { font-size: 14px; }
+      .web-link { text-decoration: underline; text-decoration-color: #bfdbfe; }
+    }
+  }
+
+  .card-action {
+    color: #cbd5e1;
+    font-size: 20px;
+    margin-left: 8px;
   }
 }
+
+/* --- EMPTY STATE --- */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 48px; color: #cbd5e1; margin-bottom: 10px;
+  }
+  
+  p {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+}
+
+/* --- LOADING --- */
+.loading-container {
+  height: 40vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  
+  p { color: #94a3b8; margin-top: 15px; font-size: 0.9rem; }
+}
+
+/* --- ANIMACIONES --- */
+.scale-in { animation: scaleIn 0.3s ease-out; }
+.fade-in-down { animation: fadeInDown 0.5s ease-out; }
+.fade-in-up { animation: fadeInUp 0.5s ease-out; }
+
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes fadeInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
