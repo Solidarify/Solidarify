@@ -3,8 +3,8 @@
   --sol-primary-dark: #059669;  
   --sol-bg-dark: #ecfdf5;      
   --sol-surface:  #f9fafb;   
-  --sol-text-light: rgba(0, 0, 0, 0.295);    
-  --sol-text-muted: #9ca3af;    
+  --sol-text-light: #064e3b;    
+  --sol-text-muted: #064e3b;    
   --sol-error: #ef4444;         
 }
 
@@ -83,7 +83,7 @@ ion-item {
   }
 
   ion-select {
-    --placeholder-color: var(--sol-text-muted);
+    --placeholder-color: #064e3b;
   }
 
   ion-select-option{

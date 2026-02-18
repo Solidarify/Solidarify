@@ -31,7 +31,33 @@
 
 <ion-content class="ion-padding-bottom">
   
-  <div class="hero-image-container">
+  <!-- NUEVO: Input URL de imagen al INICIO -->
+  <div class="image-url-section" *ngIf="modoEdicion">
+    <div class="section-header">
+      <ion-icon name="image-outline" class="section-icon"></ion-icon>
+      <h3>Imagen de la propuesta</h3>
+    </div>
+    <ion-item lines="none" class="image-url-input">
+      <ion-input 
+        [(ngModel)]="propuestaEditada.imagen" 
+        placeholder="https://ejemplo.com/imagen.jpg"
+        class="input-edit"
+        type="url">
+      </ion-input>
+    </ion-item>
+  </div>
+
+  <!-- Hero image DESPUÉS del input -->
+  <div class="hero-image-container hero-image">
+    <div class="badge-estado" [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'">
+      {{ propuestaEditada.estadoPropuesta | titlecase }}
+    </div>
+    <img [src]="propuestaEditada.imagen || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Solidarify'" 
+         alt="Imagen de la propuesta" 
+         class="main-img">
+  </div>
+
+  <!-- <div class="hero-image-container hero-image">
     <div class="badge-estado" [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'">
       {{ propuestaEditada.estadoPropuesta | titlecase }}
     </div>
@@ -43,16 +69,20 @@
     <div class="edit-overlay" *ngIf="modoEdicion">
       <ion-item lines="none" class="transparent-item">
         <ion-icon name="image-outline" slot="start" color="light"></ion-icon>
-        <ion-input [(ngModel)]="propuestaEditada.imagen" placeholder="URL de la imagen..." color="light"></ion-input>
+        <ion-input [(ngModel)]="propuestaEditada.imagen" class="input-edit" placeholder="URL de la imagen..." color="light"></ion-input>
       </ion-item>
     </div>
-  </div>
+  </div> -->
 
   <div class="content-container ion-padding">
     
     <div class="header-section">
-      <ion-item *ngIf="modoEdicion" lines="none" class="input-item">
+      <ion-item *ngIf="modoEdicion" lines="none" class="input-item titulo-propuesta">
         <ion-label position="stacked">Título</ion-label>
+        <!-- <input [(ngModel)]="propuestaEditada.titulo"
+        class="input-edit"
+        type="text"
+        placeholder="Título de la campaña" /> -->
         <ion-input [(ngModel)]="propuestaEditada.titulo" placeholder="Título de la campaña"></ion-input>
       </ion-item>
       
@@ -78,7 +108,12 @@
             <ion-icon name="location-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Lugar</span>
-              <ion-input *ngIf="modoEdicion" [(ngModel)]="propuestaEditada.lugar" class="input-inline"></ion-input>
+              <input *ngIf="modoEdicion"
+              [(ngModel)]="propuestaEditada.lugar"
+              class="input-edit"
+              type="text"
+              placeholder="Lugar" />
+              <!-- <ion-input *ngIf="modoEdicion" [(ngModel)]="propuestaEditada.lugar" class="input-inline input-edit"></ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ propuestaEditada.lugar || 'Sin especificar' }}</span>
             </div>
           </div>
@@ -91,7 +126,7 @@
               <span class="label">Tipo de Ayuda</span>
               
               <div *ngIf="modoEdicion">
-                <ion-select interface="popover" [(ngModel)]="propuestaEditada.idTipoBien" placeholder="Seleccionar">
+                <ion-select interface="popover" class="input-edit menu" [(ngModel)]="propuestaEditada.idTipoBien" placeholder="Seleccionar">
                   <ion-select-option [value]="1">Alimentos</ion-select-option>
                   <ion-select-option [value]="2">Ropa</ion-select-option>
                   <ion-select-option [value]="3">Juguetes</ion-select-option>
@@ -125,13 +160,18 @@
 
     <div class="descripcion-section">
       <h3>Sobre esta campaña</h3>
+      <textarea *ngIf="modoEdicion"
+        [(ngModel)]="propuestaEditada.descripcion"
+        rows="4"
+        class="textarea-edit"
+        placeholder="Describe en detalle qué se necesita..."></textarea>
 
-      <ion-textarea *ngIf="modoEdicion" 
+      <!-- <ion-textarea *ngIf="modoEdicion" 
                     [(ngModel)]="propuestaEditada.descripcion" 
                     rows="6" 
                     class="textarea-edit"
                     placeholder="Describe en detalle qué se necesita...">
-      </ion-textarea>
+      </ion-textarea> -->
       
       <p *ngIf="!modoEdicion" class="descripcion-text">
         {{ propuestaEditada.descripcion || 'No hay descripción disponible.' }}

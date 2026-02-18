@@ -1,149 +1,149 @@
 
-ion-content {
-}
+// ion-content {
+// }
 
-.stats-card {
-  margin: 16px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(var(--ion-color-dark-rgb), 0.08);
-  background: var(--ion-card-background);
+// .stats-card {
+//   margin: 16px;
+//   border-radius: 20px;
+//   box-shadow: 0 8px 25px rgba(var(--ion-color-dark-rgb), 0.08);
+//   background: var(--ion-card-background);
 
-  .stats-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px;
+//   .stats-content {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     padding: 24px;
 
-    .stat-text {
-      h2 { 
-        color: var(--ion-color-primary);
-        font-weight: 700; 
-        font-size: 2.5rem;
-        margin: 0;
-        line-height: 1;
-      }
-      p { 
-        color: var(--ion-color-medium); 
-        margin: 4px 0 0; 
-        font-size: 0.9rem;
-      }
-    }
-  }
-}
+//     .stat-text {
+//       h2 { 
+//         color: var(--ion-color-primary);
+//         font-weight: 700; 
+//         font-size: 2.5rem;
+//         margin: 0;
+//         line-height: 1;
+//       }
+//       p { 
+//         color: var(--ion-color-medium); 
+//         margin: 4px 0 0; 
+//         font-size: 0.9rem;
+//       }
+//     }
+//   }
+// }
 
-.filtros-card {
-  margin: 0 16px 16px;
-  border-radius: 20px;
-  background: var(--ion-card-background);
-  box-shadow: none; 
-  border: 1px solid var(--ion-color-step-100); 
+// .filtros-card {
+//   margin: 0 16px 16px;
+//   border-radius: 20px;
+//   background: var(--ion-card-background);
+//   box-shadow: none; 
+//   border: 1px solid var(--ion-color-step-100); 
 
-  ion-item {
-    --inner-padding-end: 0;
-    --background: transparent;
-    margin-bottom: 0; 
+//   ion-item {
+//     --inner-padding-end: 0;
+//     --background: transparent;
+//     margin-bottom: 0; 
     
-    ion-icon {
-      color: var(--ion-color-primary);
-      margin-right: 8px;
-    }
-  }
-}
+//     ion-icon {
+//       color: var(--ion-color-primary);
+//       margin-right: 8px;
+//     }
+//   }
+// }
 
-.list-header {
-  margin: 24px 16px 8px;
-  padding: 0;
+// .list-header {
+//   margin: 24px 16px 8px;
+//   padding: 0;
   
-  ion-label {
-    color: var(--ion-color-dark);
-    font-weight: 700;
-    font-size: 1.2rem;
+//   ion-label {
+//     color: var(--ion-color-dark);
+//     font-weight: 700;
+//     font-size: 1.2rem;
     
-    span {
-      color: var(--ion-color-medium);
-      font-weight: 400;
-      font-size: 0.9rem;
-    }
-  }
-}
+//     span {
+//       color: var(--ion-color-medium);
+//       font-weight: 400;
+//       font-size: 0.9rem;
+//     }
+//   }
+// }
 
-.propuesta-item {
-  margin: 12px 16px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --background: var(--ion-card-background);
-  overflow: hidden;
+// .propuesta-item {
+//   margin: 12px 16px;
+//   border-radius: 16px;
+//   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+//   --background: var(--ion-card-background);
+//   overflow: hidden;
 
-  transition: transform 0.2s ease;
-  &:active {
-    transform: scale(0.98);
-  }
+//   transition: transform 0.2s ease;
+//   &:active {
+//     transform: scale(0.98);
+//   }
 
-  .tipo-avatar {
-    margin-right: 16px;
-    background: var(--ion-color-primary-tint);
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+//   .tipo-avatar {
+//     margin-right: 16px;
+//     background: var(--ion-color-primary-tint);
+//     width: 48px;
+//     height: 48px;
+//     border-radius: 12px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
 
-    ion-icon { 
-      font-size: 24px; 
-      color: var(--ion-color-primary-contrast); 
-    }
-  }
+//     ion-icon { 
+//       font-size: 24px; 
+//       color: var(--ion-color-primary-contrast); 
+//     }
+//   }
 
-  .propuesta-label {
-    h2 { 
-      font-weight: 700; 
-      color: var(--ion-color-dark); 
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
+//   .propuesta-label {
+//     h2 { 
+//       font-weight: 700; 
+//       color: var(--ion-color-dark); 
+//       font-size: 1rem;
+//       margin-bottom: 4px;
+//     }
     
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
+//     .info-row {
+//       display: flex;
+//       align-items: center;
+//       gap: 6px;
+//       margin-bottom: 4px;
       
-      ion-icon {
-        font-size: 14px;
-        color: var(--ion-color-medium);
-      }
-      span {
-        color: var(--ion-color-medium); 
-        font-size: 0.85rem; 
-      }
-    }
+//       ion-icon {
+//         font-size: 14px;
+//         color: var(--ion-color-medium);
+//       }
+//       span {
+//         color: var(--ion-color-medium); 
+//         font-size: 0.85rem; 
+//       }
+//     }
 
-    .fechas { 
-      display: inline-block;
-      margin-top: 6px;
-      padding: 4px 8px;
-      background: var(--ion-color-light);
-      border-radius: 6px;
-      color: var(--ion-color-primary); 
-      font-size: 11px; 
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-  }
-}
+//     .fechas { 
+//       display: inline-block;
+//       margin-top: 6px;
+//       padding: 4px 8px;
+//       background: var(--ion-color-light);
+//       border-radius: 6px;
+//       color: var(--ion-color-primary); 
+//       font-size: 11px; 
+//       font-weight: 700;
+//       letter-spacing: 0.5px;
+//       text-transform: uppercase;
+//     }
+//   }
+// }
 
-.loading-center {
-  height: 50vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+// .loading-center {
+//   height: 50vh;
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   align-items: center;
   
-  p {
-    color: var(--ion-color-medium);
-    margin-top: 16px;
-    font-size: 0.9rem;
-  }
-}
+//   p {
+//     color: var(--ion-color-medium);
+//     margin-top: 16px;
+//     font-size: 0.9rem;
+//   }
+// }

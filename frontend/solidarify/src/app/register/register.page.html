@@ -9,7 +9,7 @@
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <ion-item lines="none" class="ion-margin-bottom">
         <ion-label position="stacked">Rol *</ion-label>
-        <ion-select  formControlName="role">
+        <ion-select formControlName="role">
           <ion-select-option value="ORGANIZADOR">Organizador</ion-select-option>
           <ion-select-option value="ONG">ONG</ion-select-option>
           <ion-select-option value="USER">Usuario</ion-select-option>

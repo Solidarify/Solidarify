@@ -59,12 +59,17 @@
             <ion-icon name="person-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Nombre</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="usuarioEditado!.nombre" 
+              class="input-edit"
+              type="text"
+              placeholder="Tu nombre completo" />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="usuarioEditado!.nombre" 
                 class="input-edit"
                 placeholder="Tu nombre completo">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</span>
             </div>
           </div>
@@ -73,13 +78,18 @@
             <ion-icon name="mail-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Email</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="usuarioEditado!.email" 
+              class="input-edit"
+              type="email"
+              placeholder="tu@email.com" />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="usuarioEditado!.email" 
                 type="email"
                 class="input-edit"
                 placeholder="tu@email.com">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</span>
             </div>
           </div>
@@ -88,13 +98,18 @@
             <ion-icon name="call-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Teléfono</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="usuarioEditado!.telefono" 
+              class="input-edit"
+              type="tel"
+              placeholder="600 000 000" />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="usuarioEditado!.telefono" 
                 type="tel"
                 class="input-edit"
                 placeholder="600 000 000">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">
                 {{ usuario()?.telefono || 'No especificado' }}
               </span>
@@ -124,12 +139,17 @@
             <ion-icon name="card-outline" color="primary"></ion-icon>
             <div>
               <span class="label">CIF</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="perfilONGEditado!.cif" 
+              class="input-edit"
+              type="text"
+              placeholder="G12345678" />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="perfilONGEditado!.cif" 
                 class="input-edit"
                 placeholder="G12345678">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.cif }}</span>
             </div>
           </div>
@@ -149,12 +169,17 @@
             <ion-icon name="location-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Dirección</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="perfilONGEditado!.direccion" 
+              class="input-edit"
+              type="text"
+              placeholder="Dirección completa" />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="perfilONGEditado!.direccion" 
                 class="input-edit"
                 placeholder="Dirección completa">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.direccion || 'No especificada' }}</span>
             </div>
           </div>
@@ -163,13 +188,18 @@
             <ion-icon name="globe-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Sitio web</span>
-              <ion-input 
+              <input *ngIf="modoEdicion" 
+              [(ngModel)]="perfilONGEditado!.web" 
+              class="input-edit"
+              type="url"
+              placeholder="https://..." />
+              <!-- <ion-input 
                 *ngIf="modoEdicion" 
                 [(ngModel)]="perfilONGEditado!.web" 
                 type="url"
                 class="input-edit"
                 placeholder="https://...">
-              </ion-input>
+              </ion-input> -->
               <span *ngIf="!modoEdicion" class="value">{{ perfilONG()?.web || 'No especificado' }}</span>
             </div>
           </div>

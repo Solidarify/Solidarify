@@ -40,7 +40,8 @@
 
   <div class="content-container ion-padding">
 
-    <ion-item *ngIf="modoEdicion" lines="none">
+    <ion-item *ngIf="modoEdicion"  class="titulo-ong" lines="none">
+      <ion-label position="stacked">Nombre Legal</ion-label>
       <ion-input [(ngModel)]="ongEditada.nombreLegal" placeholder="Nombre legal"></ion-input>
     </ion-item>
 
