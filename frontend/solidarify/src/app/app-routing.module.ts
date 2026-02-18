@@ -24,9 +24,14 @@ const routes: Routes = [
   {
     path: 'gestion-ongs',
     loadChildren: () => import('./admin/gestion-ongs/gestion-ongs.module').then( m => m.GestionOngsPageModule)
-  },  {
+  },
+  {
     path: 'gestion-propuestas',
     loadChildren: () => import('./admin/gestion-propuestas/gestion-propuestas.module').then( m => m.GestionPropuestasPageModule)
+  },
+  {
+    path: 'statistic', 
+    loadChildren: () => import('./statistic/statistic.module').then(m => m.StatisticPageModule) 
   }
 
 
