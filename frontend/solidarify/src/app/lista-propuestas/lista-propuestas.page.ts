@@ -32,7 +32,6 @@ export class ListaPropuestasPage implements OnInit {
   pageTitle = 'Explorar propuestas';
   filtroForm: FormGroup;
   
-  // TRIGGER DE RECARGA MANUAL (Para recargar tras cerrar modal)
   private refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
   constructor() {

@@ -1,11 +1,13 @@
-import { Component, OnInit, inject, effect } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { ModalController } from '@ionic/angular';
-import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
+import { AlertController, ModalController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
+
+// Servicios y Modelos
+import { Propuesta } from '../services/propuesta';
+import { Auth } from '../services/auth';
 import { PropuestaModel } from '../models/propuesta.model';
-import { Auth } from '../services/auth'; 
-import { UsuarioModel } from '../models/usuario.model';
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
   selector: 'app-home',
@@ -15,35 +17,123 @@ import { UsuarioModel } from '../models/usuario.model';
 })
 export class HomePage implements OnInit {
   
-    private modalCtrl = inject(ModalController);
+  // INYECCIONES
+  private modalCtrl = inject(ModalController);
   private auth = inject(Auth);
   private router = inject(Router);
   private alertCtrl = inject(AlertController);
+  private propuestaService = inject(Propuesta);
 
+  // ESTADO DE USUARIO
   currentUser = this.auth.currentUser; 
   isLoggedIn = this.auth.isAuthenticated; 
 
-  constructor() {
-    
-  }
+  // ESTADO DE DATOS
+  propuestasUrgentes: PropuestaModel[] = [];
+  cargando = true;
 
-  ngOnInit() {
+  constructor() {}
+
+  async ngOnInit() {
     console.log('🏠 HomePage iniciada');
-  }
-  
-  get canCreateProposal(): boolean {
-    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
+    await this.cargarUrgentes();
   }
 
-  get canViewMyProposals(): boolean {
-    // Mis propuestas: Organizadores y ONGs (para ver sus asignaciones) y Admin
-    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
+  // --- LÓGICA DE CARGA DE DATOS ---
+
+  async cargarUrgentes() {
+    this.cargando = true;
+    try {
+      // 1. Obtenemos todas las propuestas
+      const todas = await firstValueFrom(this.propuestaService.getAll());
+      
+      const hoy = new Date();
+      const enSieteDias = new Date();
+      enSieteDias.setDate(hoy.getDate() + 7);
+
+      // 2. Filtramos: Activas Y que caduquen en los próximos 7 días
+      this.propuestasUrgentes = todas.filter(p => {
+        // Aseguramos que fechaFin sea objeto Date
+        const fechaFin = new Date(p.fechaFin);
+        return p.estadoPropuesta === 'publicada' && 
+               fechaFin >= hoy && 
+               fechaFin <= enSieteDias;
+      });
+
+    } catch (error) {
+      console.error('Error cargando home:', error);
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  get canViewOngs(): boolean {
-    return true; 
+  getDiasRestantes(fechaFin: Date | string | undefined): number {
+    if (!fechaFin) return 0;
+    const fin = new Date(fechaFin).getTime();
+    const hoy = new Date().getTime();
+    const diff = Math.ceil((fin - hoy) / (1000 * 3600 * 24));
+    return diff > 0 ? diff : 0;
   }
 
+  // --- NAVEGACIÓN Y MODALES ---
+
+  async irADetalle(propuesta: PropuestaModel) {
+    const modal = await this.modalCtrl.create({
+      component: PropuestaDetalleComponent,
+      componentProps: { propuesta } // Pasamos el objeto real
+    });
+    
+    await modal.present();
+    
+    // Si al cerrar el modal nos dicen que recarguemos (ej: se editó), recargamos
+    const { data } = await modal.onWillDismiss();
+    if (data?.refresh) {
+      this.cargarUrgentes();
+    }
+  }
+
+  navigateTo(route: string): void {
+    console.log('🚀 Navegando a:', route);
+    
+    switch(route) {
+      case '/crear-propuesta':
+        if (!this.canCreateProposal) { 
+          this.showPermissionAlert('crear');
+          return;
+        }
+        this.router.navigate([route]);
+        break;
+
+      case '/lista-propuestas/explore':
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+        break;
+
+      case '/lista-propuestas/mine':
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+        break;
+        
+      case '/lista-propuestas':
+        if (this.canViewMyProposals) {
+          this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+        } else {
+          this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+        }
+        break;
+              
+      case '/account':
+        if (!this.isLoggedIn()) { 
+          this.showPermissionAlert('perfil');
+          this.router.navigate(['/login']);
+          return; 
+        }
+        this.router.navigate([route]);
+        break;
+
+      default:
+        this.router.navigate([route]);
+        break;
+    }
+  }
 
   logout() {
     console.log('🚪 Cerrando sesión...');
@@ -51,49 +141,25 @@ export class HomePage implements OnInit {
     this.router.navigate(['/login']);
   }
 
-navigateTo(route: string): void {
-  console.log('🚀 Navegando a:', route);
-  
-  switch(route) {
-    case '/crear-propuesta':
-      if (!this.canCreateProposal) { 
-        this.showPermissionAlert('crear');
-        return;
-      }
-      this.router.navigate([route]);
-      break;
+  // --- PERMISOS (GETTERS) ---
 
-    case '/lista-propuestas/explore':
-      this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
-      break;
-
-    case '/lista-propuestas/mine':
-      this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
-      break;
-      
-    case '/lista-propuestas':
-      if (this.canViewMyProposals) {
-        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
-      } else {
-        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
-      }
-      break;
-            
-    case '/account':
-      if (!this.isLoggedIn()) { 
-        this.showPermissionAlert('perfil');
-        this.router.navigate(['/login']);
-        return; 
-      }
-      this.router.navigate([route]);
-      break;
-
-    default:
-      this.router.navigate([route]);
-      break;
+  get canCreateProposal(): boolean {
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
   }
-}
 
+  get canViewMyProposals(): boolean {
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
+  }
+
+  get canViewOngs(): boolean {
+    return true; 
+  }
+
+  get canExplore(): boolean {
+    return true; 
+  }
+
+  // --- ALERTAS E INFO ---
 
   private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise<void> {
     const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
@@ -153,38 +219,4 @@ navigateTo(route: string): void {
     });
     await alert.present();
   }
-
-
-get canExplore(): boolean {
-  return true; 
-}
-
-async irADetalle(id: number) {
-    
-    // 1. Simular datos según el ID clicado
-    const datosSimulados = new PropuestaModel({
-      idPropuesta: id,
-      idOrganizador: 99,
-      titulo: id === 1 ? 'Recogida de Alimentos' : 'Abrigos para invierno',
-      descripcion: 'Esta es una propuesta urgente que has seleccionado desde el Home. ¡Ayuda ahora!',
-      lugar: id === 1 ? 'Madrid Centro' : 'Zona Norte',
-      fechaInicio: new Date(),
-      fechaFin: new Date(new Date().setDate(new Date().getDate() + 5)), // 5 días después
-      estadoPropuesta: 'publicada',
-      idTipoBien: id === 1 ? 1 : 3, // 1: Alimentos, 3: Ropa
-      imagen: id === 1 
-        ? 'https://placehold.co/600x400/orange/white?text=Comida' 
-        : 'https://placehold.co/600x400/blue/white?text=Ropa'
-    });
-
-    const modal = await this.modalCtrl.create({
-      component: PropuestaDetalleComponent,
-      componentProps: {
-        propuesta: datosSimulados
-      }
-    });
-
-    await modal.present();
-  }
-
 }

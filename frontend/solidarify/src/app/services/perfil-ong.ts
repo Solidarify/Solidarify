@@ -142,23 +142,27 @@ export class PerfilOng {
   }
 
 
-  verificar(idUsuario: number, aprobado: boolean): Observable<PerfilONGModel> {
-    if (this.USE_MOCK) {
-      const idx = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
-      if (idx !== -1 && this.ongsFake[idx].isPending) {
-        this.ongsFake[idx].estadoVerificacion = aprobado ? 'verificado' : 'rechazado';
-        this.ongsFake[idx].idAdminVerificador = 1; 
-        this.saveToStorage();
-        return of(this.ongsFake[idx]).pipe(delay(700));
-      }
-      return throwError(() => new Error('No se puede verificar'));
-    }
+verificar(idUsuario: number, aprobado: boolean): Observable<PerfilONGModel> {
+  if (this.USE_MOCK) {
+    const idx = this.ongsFake.findIndex(o => o.idUsuario === idUsuario);
     
-    const action = aprobado ? 'aprobar' : 'rechazar';
-    return this.http.patch<any>(`${this.API_URL}/${idUsuario}/${action}`, {}).pipe(
-      map(i => new PerfilONGModel(i))
-    );
+    if (idx !== -1) { 
+      
+      this.ongsFake[idx].estadoVerificacion = aprobado ? 'verificado' : 'rechazado';
+      this.ongsFake[idx].idAdminVerificador = 1;
+      this.saveToStorage();
+      
+      return of(this.ongsFake[idx]).pipe(delay(700));
+    }
+    return throwError(() => new Error('ONG no encontrada'));
   }
+  
+  const action = aprobado ? 'aprobar' : 'rechazar';
+  return this.http.patch<any>(`${this.API_URL}/${idUsuario}/${action}`, {}).pipe(
+    map(i => new PerfilONGModel(i))
+  );
+}
+
 
   countVerificadas(): number {
     return this.ongsFake.filter(o => o.isVerified).length;

@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true" class="bg-light">
-  
+   <ng-container *ngIf="isLoggedIn()">  
   <div class="header-section ion-padding">
     <div class="saludo">
       <p>Hola, <strong>Usuario</strong> 👋</p>
@@ -30,32 +30,57 @@
     </div>
   </div>
 
+  <!-- CARRUSEL DE URGENTES -->
   <div class="section-title ion-padding-top ion-padding-horizontal">
     <h3>📢 Urgente esta semana</h3>
-    <span class="see-all">Ver todo</span>
+    <span class="see-all" routerLink="/lista-propuestas">Ver todo</span>
   </div>
 
   <div class="urgent-scroll">
-    <div class="urgent-card" (click)="irADetalle(1)">
-      <div class="card-img" style="background-image: url('https://placehold.co/300x200/orange/white?text=Comida');">
-        <span class="badge">🔥 24h restan</span>
+    
+    <!-- Skeleton Loading (Se muestra mientras carga) -->
+    <ng-container *ngIf="cargando">
+      <div class="urgent-card skeleton" *ngFor="let i of [1,2,3]">
+        <ion-skeleton-text animated style="width: 100%; height: 120px;"></ion-skeleton-text>
+        <div class="card-info">
+          <ion-skeleton-text animated style="width: 80%;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 50%;"></ion-skeleton-text>
+        </div>
       </div>
+    </ng-container>
+
+    <!-- Estado Vacío (Si no hay urgentes) -->
+    <div class="empty-state" *ngIf="!cargando && propuestasUrgentes.length === 0">
+      <p>🎉 ¡Todo tranquilo por ahora!</p>
+      <small>No hay urgencias para esta semana</small>
+    </div>
+
+    <!-- Lista Real -->
+    <div class="urgent-card" 
+         *ngFor="let prop of propuestasUrgentes" 
+         (click)="irADetalle(prop)">
+         
+      <!-- Imagen con fallback -->
+      <div class="card-img" 
+           [style.background-image]="'url(' + (prop.imagen || 'assets/placeholder.jpg') + ')'">
+        
+        <!-- Badge dinámico de días restantes -->
+        <span class="badge" [class.danger]="getDiasRestantes(prop.fechaFin) <= 2">
+          🔥 {{ getDiasRestantes(prop.fechaFin) }} días
+        </span>
+      </div>
+
       <div class="card-info">
-        <h4>Recogida de Alimentos</h4>
-        <p><ion-icon name="location-outline"></ion-icon> Madrid Centro</p>
+        <h4>{{ prop.titulo }}</h4>
+        <p>
+          <ion-icon name="location-outline"></ion-icon> 
+          {{ prop.lugar || 'Ubicación remota' }}
+        </p>
       </div>
     </div>
 
-    <div class="urgent-card" (click)="irADetalle(2)">
-      <div class="card-img" style="background-image: url('https://placehold.co/300x200/blue/white?text=Ropa');">
-        <span class="badge">Nuevo</span>
-      </div>
-      <div class="card-info">
-        <h4>Abrigos para invierno</h4>
-        <p><ion-icon name="location-outline"></ion-icon> Zona Norte</p>
-      </div>
-    </div>
   </div>
+
 
   <div class="section-title ion-padding-top ion-padding-horizontal">
     <h3>Explorar</h3>
@@ -97,5 +122,132 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+</ng-container>
+  <!-- ========================================== -->
+  <!-- VISTA 2: LANDING PAGE "EVENTOS SOLIDARIOS" -->
+  <!-- ========================================== -->
+  <ng-container *ngIf="!isLoggedIn()">
+    
+    <!-- FONDO ANIMADO -->
+    <div class="background-mesh">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+
+    <div class="landing-content">
+
+      <!-- HERO: MENSAJE CORRECTO -->
+      <div class="hero-premium">
+        <div class="badge-pill bounce-in">
+          📍 Encuentra dónde ayudar cerca de ti
+        </div>
+        
+        <h1 class="slide-up-1">
+          Tu agenda de <br>
+          <span class="text-gradient">eventos solidarios.</span>
+        </h1>
+        
+        <p class="slide-up-2">
+          No recojemos donaciones online. Te decimos <strong>cuándo y dónde</strong> 
+          se organizan recogidas oficiales en tu ciudad para que lleves tu ayuda en persona.
+        </p>
+
+        <div class="cta-group slide-up-3">
+          <ion-button class="btn-glow" routerLink="/lista-propuestas" [queryParams]="{mode: 'explore'}">
+            Ver Eventos Activos
+            <ion-icon name="map-outline" slot="end"></ion-icon>
+          </ion-button>
+          
+          <div class="login-link" routerLink="/login">
+            Soy Organizador / ONG
+          </div>
+        </div>
+      </div>
+
+      <!-- TICKER: EJEMPLOS REALES -->
+      <div class="marquee-container rotate-in">
+        <div class="marquee-content">
+          <span>🥫 Recogida de Alimentos (Plaza Mayor, 10:00)</span>
+          <span>🎒 Material Escolar (Colegio San José, Jueves)</span>
+          <span>🧥 Ropa de Invierno (Centro Cívico, Sábado)</span>
+          <span>🧸 Juguetes Navidad (Parque Oeste, Domingo)</span>
+          <!-- Repetir loop -->
+          <span>🥫 Recogida de Alimentos (Plaza Mayor, 10:00)</span>
+          <span>🎒 Material Escolar (Colegio San José, Jueves)</span>
+        </div>
+      </div>
+
+      <!-- SECCIÓN EDUCATIVA: ¿QUIÉN ERES TÚ? -->
+      <div class="role-explanation">
+        <h2 class="section-title">¿Cómo participas tú?</h2>
+        
+        <!-- ROL 1: CIUDADANO -->
+        <div class="role-card citizen">
+          <div class="icon-circle bg-blue">
+            <ion-icon name="people"></ion-icon>
+          </div>
+          <div class="role-info">
+            <h3>Quiero Ayudar</h3>
+            <p>Busca eventos cercanos en el mapa, mira qué necesitan (arroz, mantas...) y acércate el día de la recogida.</p>
+            <span class="mini-tag">Sin registro obligatorio</span>
+          </div>
+        </div>
+
+        <!-- ROL 2: ORGANIZADOR -->
+        <div class="role-card organizer">
+          <div class="icon-circle bg-purple">
+            <ion-icon name="megaphone"></ion-icon>
+          </div>
+          <div class="role-info">
+            <h3>Soy Organizador</h3>
+            <p>Crea un punto de recogida. Define lugar, fecha y tipo de ayuda. Nosotros avisamos a la comunidad.</p>
+            <span class="mini-tag">Requiere cuenta</span>
+          </div>
+        </div>
+
+        <!-- ROL 3: ONG -->
+        <div class="role-card ong">
+          <div class="icon-circle bg-green">
+            <ion-icon name="heart"></ion-icon>
+          </div>
+          <div class="role-info">
+            <h3>Soy una ONG</h3>
+            <p>Valida eventos creados por organizadores y garantiza que la ayuda llega a buen puerto.</p>
+            <span class="mini-tag">Verificación oficial</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS FLOTANTES: VENTAJAS -->
+      <div class="glass-grid">
+        <div class="glass-card float-slow">
+          <div class="emoji">📍</div>
+          <h3>Físico y Real</h3>
+          <p>Nada de envíos. Entrega tu ayuda mano a mano en el punto de recogida.</p>
+        </div>
+        
+        <div class="glass-card float-fast">
+          <div class="emoji">✅</div>
+          <h3>Verificado</h3>
+          <p>Cada evento está respaldado por una ONG o un Organizador validado.</p>
+        </div>
+      </div>
+
+      <!-- CTA FINAL -->
+      <div class="final-cta-box">
+        <h3>¿Organizas una recogida en tu barrio?</h3>
+        <p>Publícala gratis en 2 minutos y consigue más participación.</p>
+        <ion-button expand="block" color="dark" shape="round" routerLink="/register">
+          Crear Evento Ahora
+        </ion-button>
+      </div>
+
+      <div class="footer-simple">
+        Solidarify 2026 © Conectando comunidades
+      </div>
+
+    </div>
+  </ng-container>
 
 </ion-content>

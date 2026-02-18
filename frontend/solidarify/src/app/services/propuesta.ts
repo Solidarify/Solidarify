@@ -11,25 +11,30 @@ export class Propuesta {
 
   private http = inject(HttpClient);
   
+  // CONFIG
   private readonly USE_MOCK = true;
   private readonly API_URL = 'http://localhost:3000/api/propuestas';
   private readonly STORAGE_KEY = 'propuestasFake';
 
+  // DATOS MOCK
   private propuestasFake: PropuestaModel[] = [
     PropuestaModel.fromApi({
       Id_Propuesta: 1, Id_Organizador: 2, Id_Tipo_Bien: 1, Titulo: 'Campaña de alimentos barrio Norte', 
       Descripcion: 'Recogida de alimentos...', Fecha_Inicio: '2025-01-15T09:00:00Z', Fecha_Fin: '2025-02-01T20:00:00Z', 
-      Fecha_Publicacion: '2025-01-05T10:00:00Z', Estado_Propuesta: 'publicada', Lugar: 'Centro Cívico La Isleta'
+      Fecha_Publicacion: '2025-01-05T10:00:00Z', Estado_Propuesta: 'publicada', Lugar: 'Centro Cívico La Isleta',
+      idOngAsignada: null
     }),
     PropuestaModel.fromApi({
       Id_Propuesta: 2, Id_Organizador: 3, Id_Tipo_Bien: 2, Titulo: 'Vuelta al cole solidaria', 
       Descripcion: 'Material escolar...', Fecha_Inicio: '2025-08-20T09:00:00Z', Fecha_Fin: '2025-09-10T20:00:00Z', 
-      Fecha_Publicacion: '2025-08-01T09:00:00Z', Estado_Propuesta: 'publicada', Lugar: 'Centro Cultural Vecindario'
+      Fecha_Publicacion: '2025-08-01T09:00:00Z', Estado_Propuesta: 'borrador', Lugar: 'Centro Cultural Vecindario'  
+      , idOngAsignada: null
     }),
     PropuestaModel.fromApi({
       Id_Propuesta: 3, Id_Organizador: 4, Id_Tipo_Bien: 3, Titulo: 'Ropa de abrigo', 
       Descripcion: 'Ropa y mantas...', Fecha_Inicio: '2025-11-01T09:00:00Z', Fecha_Fin: '2025-12-15T20:00:00Z', 
       Fecha_Publicacion: '2025-10-10T10:30:00Z', Estado_Propuesta: 'publicada', Lugar: 'Plaza Principal San Mateo'
+       , idOngAsignada: null
     })
   ];
 
@@ -39,12 +44,15 @@ export class Propuesta {
 
   getAll(): Observable<PropuestaModel[]> {
     if (this.USE_MOCK) {
-      console.log('MOCK: Cargando todas las propuestas...');
       return of([...this.propuestasFake]).pipe(delay(500));
     }
     return this.http.get<any[]>(this.API_URL).pipe(
       map(items => items.map(item => PropuestaModel.fromApi(item)))
     );
+  }
+
+  getAllAdmin(): Observable<PropuestaModel[]> {
+    return this.getAll(); 
   }
 
   getPublicas(): Observable<PropuestaModel[]> {
@@ -63,16 +71,6 @@ export class Propuesta {
     }
     return this.http.get<any>(`${this.API_URL}/${id}`).pipe(
       map(item => PropuestaModel.fromApi(item))
-    );
-  }
-
-  getByOrganizador(idOrganizador: number): Observable<PropuestaModel[]> {
-    if (this.USE_MOCK) {
-      const filtered = this.propuestasFake.filter(p => p.idOrganizador === idOrganizador);
-      return of(filtered).pipe(delay(400));
-    }
-    return this.http.get<any[]>(`${this.API_URL}`, { params: { organizador_id: idOrganizador } }).pipe(
-      map(items => items.map(item => PropuestaModel.fromApi(item)))
     );
   }
 
@@ -125,20 +123,52 @@ export class Propuesta {
     return this.http.delete<boolean>(`${this.API_URL}/${id}`);
   }
 
-
-
-  publicar(id: number): Observable<PropuestaModel> {
+  cambiarEstadoAdmin(id: number, nuevoEstado: string): Observable<PropuestaModel> {
     if (this.USE_MOCK) {
-     
-      return this.update(id, { 
-        estadoPropuesta: 'publicada', 
-        fechaPublicacion: new Date() 
-      });
+        return this.update(id, { estadoPropuesta: nuevoEstado });
     }
-
-    return this.http.patch<any>(`${this.API_URL}/${id}/publicar`, {}).pipe(
-      map(item => PropuestaModel.fromApi(item))
+    return this.http.patch<any>(`${this.API_URL}/${id}/estado`, { estado: nuevoEstado }).pipe(
+        map(item => PropuestaModel.fromApi(item))
     );
+  }
+
+  asignarOngManual(idPropuesta: number, idOng: number): Observable<PropuestaModel> {
+    if (this.USE_MOCK) {
+        const index = this.propuestasFake.findIndex(p => p.idPropuesta === idPropuesta);
+        if (index !== -1) {
+            this.propuestasFake[index].idOngAsignada = idOng;
+            this.propuestasFake[index].estadoPropuesta = 'asignada'; 
+            this.saveToStorage();
+            return of(this.propuestasFake[index]).pipe(delay(500));
+        }
+        return throwError(() => new Error('Propuesta no encontrada'));
+    }
+    return this.http.post<any>(`${this.API_URL}/${idPropuesta}/asignar`, { idOng }).pipe(
+        map(item => PropuestaModel.fromApi(item))
+    );
+  }
+
+
+  private loadFromStorage() {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        this.propuestasFake = parsed.map((p: any) => new PropuestaModel(p));
+      } catch (e) {
+        console.warn('Error storage, usando defaults');
+        this.saveToStorage(); 
+      }
+    } else {
+      this.saveToStorage();
+    }
+  }
+
+  private saveToStorage() {
+    const unique = this.propuestasFake.filter((p, index, self) => 
+      index === self.findIndex(t => t.idPropuesta === p.idPropuesta)
+    );
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(unique));
   }
 
   getFiltradas(filtros: any): Observable<PropuestaModel[]> {
@@ -168,26 +198,4 @@ export class Propuesta {
     );
   }
 
-
-  private loadFromStorage() {
-    const saved = localStorage.getItem(this.STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        this.propuestasFake = parsed.map((p: any) => new PropuestaModel(p));
-      } catch (e) {
-        console.warn('Error al cargar localStorage, usando defaults');
-        this.saveToStorage(); 
-      }
-    } else {
-      this.saveToStorage();
-    }
-  }
-
-  private saveToStorage() {
-    const unique = this.propuestasFake.filter((p, index, self) => 
-      index === self.findIndex(t => t.idPropuesta === p.idPropuesta)
-    );
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(unique));
-  }
 }

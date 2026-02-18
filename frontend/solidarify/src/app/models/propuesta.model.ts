@@ -1,3 +1,8 @@
+export interface OngSimplificada {
+  id: number;
+  nombre: string;
+}
+
 export class PropuestaModel {
   idPropuesta?: number;
   idOrganizador: number;
@@ -14,6 +19,9 @@ export class PropuestaModel {
   estadoPropuesta: string;
   lugar: string;
   imagen?: string;
+  
+  idOngAsignada: number;
+  ongAsignada?: OngSimplificada; 
 
   constructor(data: Partial<PropuestaModel> = {}) {
     this.idPropuesta = data.idPropuesta;
@@ -26,7 +34,11 @@ export class PropuestaModel {
     this.estadoPropuesta = data.estadoPropuesta ?? 'borrador';
     this.lugar = data.lugar ?? '';
     this.imagen = data.imagen ?? '';
+    this.idOngAsignada = data.idOngAsignada ?? 0;
     
+    // Asignamos el objeto de la ONG si viene en los datos
+    this.ongAsignada = data.ongAsignada;
+
     // Campos opcionales
     this.fechaPublicacion = data.fechaPublicacion ? new Date(data.fechaPublicacion) : undefined;
     this.fechaAsignacion = data.fechaAsignacion ? new Date(data.fechaAsignacion) : undefined;
@@ -36,6 +48,27 @@ export class PropuestaModel {
   }
 
   static fromApi(api: any): PropuestaModel {
+    // Lógica para construir el objeto ongAsignada desde la respuesta de la API
+    // Opción A: La API devuelve un objeto anidado 'Ong' o 'ong_asignada'
+    // Opción B: La API devuelve campos planos como 'nombre_ong_asignada'
+    
+    let ongObj: OngSimplificada | undefined = undefined;
+
+    if (api?.Ong || api?.ongAsignada) {
+       // Si viene anidado
+       const source = api.Ong || api.ongAsignada;
+       ongObj = {
+         id: source.id || source.Id_Usuario,
+         nombre: source.nombre || source.Nombre || source.Nombre_Legal
+       };
+    } else if (api?.Nombre_Ong_Asignada || api?.nombreOngAsignada) {
+       // Si viene plano (solo el nombre) pero tenemos el ID
+       ongObj = {
+         id: api.Id_Ong_Asignada || api.idOngAsignada || 0,
+         nombre: api.Nombre_Ong_Asignada || api.nombreOngAsignada
+       };
+    }
+
     return new PropuestaModel({
       idPropuesta: api?.Id_Propuesta || api?.idPropuesta,
       idOrganizador: api?.Id_Organizador || api?.idOrganizador,
@@ -51,7 +84,11 @@ export class PropuestaModel {
       motivoCancelacion: api?.Motivo_Cancelacion || api?.motivoCancelacion,
       estadoPropuesta: api?.Estado_Propuesta || api?.estadoPropuesta,
       lugar: api?.Lugar || api?.lugar,
-      imagen: api?.Imagen || api?.imagen
+      imagen: api?.Imagen || api?.imagen,
+      idOngAsignada: api?.Id_Ong_Asignada || api?.idOngAsignada,
+      
+      // Asignamos lo que construimos arriba
+      ongAsignada: ongObj
     });
   }
 

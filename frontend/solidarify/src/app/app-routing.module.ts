@@ -16,7 +16,20 @@ const routes: Routes = [
   {
     path: 'lista-ongs',
     loadChildren: () => import('./lista-ongs/lista-ongs.module').then( m => m.ListaOngsPageModule)
+  },
+  {
+    path: 'gestion-ongs',
+    loadChildren: () => import('./admin/gestion-ongs/gestion-ongs.module').then( m => m.GestionOngsPageModule)
+  },
+  {
+    path: 'gestion-ongs',
+    loadChildren: () => import('./admin/gestion-ongs/gestion-ongs.module').then( m => m.GestionOngsPageModule)
+  },  {
+    path: 'gestion-propuestas',
+    loadChildren: () => import('./admin/gestion-propuestas/gestion-propuestas.module').then( m => m.GestionPropuestasPageModule)
   }
+
+
 ];
 
 

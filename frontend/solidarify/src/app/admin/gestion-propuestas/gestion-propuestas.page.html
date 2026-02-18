@@ -1,0 +1,95 @@
+<ion-header class="ion-no-border">
+ 
+  <ion-toolbar color="light" class="filter-toolbar">
+    <!-- Mismo estilo 'ios' para consistencia visual -->
+    <ion-segment [(ngModel)]="filtroEstado" scrollable mode="ios" value="todos">
+      <ion-segment-button value="todos">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="publicada">
+        <ion-label>Activas 🚀</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="asignada">
+        <ion-label>Asignadas 🤝</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="borrador">
+        <ion-label>Borrador 📝</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-light">
+  <ion-list class="ion-padding bg-transparent">
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="propuestasFiltradas.length === 0" class="empty-state bounce-in">
+      <div class="icon-circle">
+        <ion-icon name="file-tray-outline"></ion-icon>
+      </div>
+      <h3>Sin Propuestas</h3>
+      <p>No hay propuestas en estado <strong>{{ filtroEstado | uppercase }}</strong>.</p>
+    </div>
+
+    <!-- LISTA DE TARJETAS PRO -->
+    <ion-card *ngFor="let p of propuestasFiltradas" 
+              class="propuesta-card slide-in" 
+              [ngClass]="p.estadoPropuesta">
+      
+      <div class="card-status-bar"></div> <!-- Barra lateral de color -->
+
+      <!-- Badge Flotante (Esquina Superior Derecha) -->
+      <div class="status-badge" [ngClass]="p.estadoPropuesta">
+        {{ p.estadoPropuesta | titlecase }}
+      </div>
+
+      <!-- Cabecera con Imagen y Título -->
+      <ion-item lines="none" class="card-header-item">
+        <ion-thumbnail slot="start">
+          <img [src]="p.imagen || 'https://placehold.co/100x100?text=Sin+Foto'" alt="propuesta">
+        </ion-thumbnail>
+        
+        <ion-label>
+          <h2 class="propuesta-title">{{ p.titulo }}</h2>
+          <p class="propuesta-desc">{{ p.descripcion }}</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-card-content>
+        
+        <!-- Grid de Información Extra -->
+        <div class="info-grid">
+          <!-- Si está asignada -->
+          <div class="info-item" *ngIf="p.ongAsignada">
+            <ion-icon name="business" color="tertiary"></ion-icon>
+            <span>Asignada a: <strong>{{ p.ongAsignada.nombre }}</strong></span>
+          </div>
+
+          <!-- Si NO está asignada -->
+          <div class="info-item" *ngIf="!p.ongAsignada && p.estadoPropuesta === 'publicada'">
+            <ion-icon name="time" color="warning"></ion-icon>
+            <span>Esperando asignación...</span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Footer y Acciones -->
+        <div class="actions">
+          <div class="date-info">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ p.fechaInicio | date:'shortDate' }}
+          </div>
+          
+          <ion-button fill="solid" size="small" shape="round" color="dark" (click)="gestionar(p)">
+            <ion-icon name="settings-sharp" slot="start"></ion-icon>
+            Administrar
+          </ion-button>
+        </div>
+
+      </ion-card-content>
+
+    </ion-card>
+
+  </ion-list>
+</ion-content>
