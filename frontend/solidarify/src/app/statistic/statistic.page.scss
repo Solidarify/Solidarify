@@ -7,13 +7,35 @@
     .highlight { color: var(--ion-color-primary, #10b981); } }
 }
 
-.stats-container .impact-card {
-  background: linear-gradient(135deg, var(--ion-color-primary, #10b981), var(--ion-color-primary-shade, #059669));
-  border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; color: white;
-  box-shadow: 0 10px 25px -5px rgba(16,185,129,0.4); margin-bottom: 10px;
-  .stat-item { text-align: center; .number { font-size: 1.5rem; font-weight: 800; display: block; } 
-    .label { font-size: 0.8rem; opacity: 0.9; } }
-  .divider { width: 1px; background: rgba(255,255,255,0.3); }
+
+.impact-card {
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-around;
+  color: white;
+  box-shadow: 0 10px 25px -5px rgba(var(--ion-color-primary-rgb), 0.4);
+  margin-bottom: 10px;
+
+  .stat-item {
+    text-align: center;
+    
+    .number {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    .label {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    background: rgba(255,255,255,0.3);
+  }
 }
 
 .section-title { display: flex; justify-content: space-between; align-items: center; 
