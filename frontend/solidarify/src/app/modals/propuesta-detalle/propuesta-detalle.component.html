@@ -9,7 +9,7 @@
     <ion-title>{{ modoEdicion ? 'Editar Propuesta' : 'Detalle' }}</ion-title>
     
     <ion-buttons slot="end">
-      <ion-button color="primary">
+      <ion-button color="primary" *ngIf="!modoEdicion">
         <ion-icon name="share-social-outline" slot="icon-only"></ion-icon>
       </ion-button>
 
@@ -31,62 +31,72 @@
 
 <ion-content class="ion-padding-bottom">
   
-  <!-- NUEVO: Input URL de imagen al INICIO -->
-  <div class="image-url-section" *ngIf="modoEdicion">
+  <div class="image-url-section ion-padding-horizontal ion-margin-top" *ngIf="modoEdicion">
     <div class="section-header">
-      <ion-icon name="image-outline" class="section-icon"></ion-icon>
-      <h3>Imagen de la propuesta</h3>
+      <ion-icon name="image-outline" color="primary"></ion-icon>
+      <ion-label color="primary">Imagen de portada</ion-label>
     </div>
-    <ion-item lines="none" class="image-url-input">
+    <ion-item class="custom-input">
       <ion-input 
         [(ngModel)]="propuestaEditada.imagen" 
-        placeholder="https://ejemplo.com/imagen.jpg"
-        class="input-edit"
-        type="url">
+        placeholder="https://ejemplo.com/foto.jpg"
+        type="url"
+        clearInput="true">
       </ion-input>
     </ion-item>
   </div>
 
-  <!-- Hero image DESPUÉS del input -->
   <div class="hero-image-container hero-image">
-    <div class="badge-estado" [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'">
-      {{ propuestaEditada.estadoPropuesta | titlecase }}
+    <!-- El badge se ajusta visualmente si está pendiente -->
+    <div class="badge-estado" 
+         [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'"
+         [style.background]="propuestaEditada.estadoPropuesta === 'pendiente_ong' ? '#f59e0b' : ''">
+      {{ propuestaEditada.estadoPropuesta === 'pendiente_ong' ? 'Pendiente ONG' : (propuestaEditada.estadoPropuesta | titlecase) }}
     </div>
     <img [src]="propuestaEditada.imagen || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Solidarify'" 
          alt="Imagen de la propuesta" 
          class="main-img">
   </div>
 
-  <!-- <div class="hero-image-container hero-image">
-    <div class="badge-estado" [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'">
-      {{ propuestaEditada.estadoPropuesta | titlecase }}
+  <!-- BANNERS DE NOTIFICACIÓN SOBRE SOLICITUDES DE ONG -->
+  
+  <!-- A) Aviso para la ONG que debe aceptar o rechazar -->
+  <div class="ion-padding" *ngIf="esLaOngSolicitada && esSolicitudPendiente" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; margin: 15px;">
+    <div style="display: flex; align-items: flex-start; gap: 10px;">
+      <ion-icon name="alert-circle" style="color: #f59e0b; font-size: 24px; margin-top: 2px;"></ion-icon>
+      <div>
+        <h4 style="margin: 0 0 5px 0; color: #92400e; font-weight: 700; font-size: 1rem;">Solicitud de Vinculación</h4>
+        <p style="margin: 0; color: #b45309; font-size: 0.9rem;">El organizador solicita que tu ONG sea la receptora y aval oficial de esta campaña.</p>
+      </div>
     </div>
+  </div>
 
-    <img [src]="propuestaEditada.imagen || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Solidarify'" 
-         alt="Imagen de la propuesta" 
-         class="main-img">
-
-    <div class="edit-overlay" *ngIf="modoEdicion">
-      <ion-item lines="none" class="transparent-item">
-        <ion-icon name="image-outline" slot="start" color="light"></ion-icon>
-        <ion-input [(ngModel)]="propuestaEditada.imagen" class="input-edit" placeholder="URL de la imagen..." color="light"></ion-input>
-      </ion-item>
+  <!-- B) Aviso para el Organizador de que está esperando respuesta -->
+  <div class="ion-padding" *ngIf="esMiPropuesta && esSolicitudPendiente" style="background-color: #e0f2fe; border-left: 4px solid #3b82f6; margin: 15px;">
+    <div style="display: flex; align-items: flex-start; gap: 10px;">
+      <ion-icon name="time-outline" style="color: #3b82f6; font-size: 24px; margin-top: 2px;"></ion-icon>
+      <div>
+        <h4 style="margin: 0 0 5px 0; color: #1e40af; font-weight: 700; font-size: 1rem;">Solicitud Enviada</h4>
+        <p style="margin: 0; color: #1d4ed8; font-size: 0.9rem;">Esta propuesta está esperando la validación de la ONG que solicitaste.</p>
+      </div>
     </div>
-  </div> -->
+  </div>
+
+  <!-- FIN BANNERS DE NOTIFICACIÓN -->
+
 
   <div class="content-container ion-padding">
     
     <div class="header-section">
-      <ion-item *ngIf="modoEdicion" lines="none" class="input-item titulo-propuesta">
-        <ion-label position="stacked">Título</ion-label>
-        <!-- <input [(ngModel)]="propuestaEditada.titulo"
-        class="input-edit"
-        type="text"
-        placeholder="Título de la campaña" /> -->
-        <ion-input [(ngModel)]="propuestaEditada.titulo" placeholder="Título de la campaña"></ion-input>
-      </ion-item>
-      
-      <h1 *ngIf="!modoEdicion" class="titulo">{{ propuestaEditada.titulo }}</h1>
+      <ng-container *ngIf="modoEdicion; else verTitulo">
+        <ion-item class="custom-input ion-margin-bottom">
+          <ion-label position="stacked">Título de la campaña</ion-label>
+          <ion-input [(ngModel)]="propuestaEditada.titulo" placeholder="Ej: Recogida de alimentos..."></ion-input>
+        </ion-item>
+      </ng-container>
+      <ng-template #verTitulo>
+        <h1 class="titulo">{{ propuestaEditada.titulo }}</h1>
+      </ng-template>
     </div>
     
     <div class="organizador-row">
@@ -108,13 +118,12 @@
             <ion-icon name="location-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Lugar</span>
-              <input *ngIf="modoEdicion"
-              [(ngModel)]="propuestaEditada.lugar"
-              class="input-edit"
-              type="text"
-              placeholder="Lugar" />
-              <!-- <ion-input *ngIf="modoEdicion" [(ngModel)]="propuestaEditada.lugar" class="input-inline input-edit"></ion-input> -->
-              <span *ngIf="!modoEdicion" class="value">{{ propuestaEditada.lugar || 'Sin especificar' }}</span>
+              <ng-container *ngIf="modoEdicion; else verLugar">
+                <ion-input [(ngModel)]="propuestaEditada.lugar" class="input-inline" placeholder="Ciudad/Zona"></ion-input>
+              </ng-container>
+              <ng-template #verLugar>
+                <span class="value">{{ propuestaEditada.lugar || 'Sin especificar' }}</span>
+              </ng-template>
             </div>
           </div>
         </ion-col>
@@ -125,8 +134,8 @@
             <div>
               <span class="label">Tipo de Ayuda</span>
               
-              <div *ngIf="modoEdicion">
-                <ion-select interface="popover" class="input-edit menu" [(ngModel)]="propuestaEditada.idTipoBien" placeholder="Seleccionar">
+              <ng-container *ngIf="modoEdicion; else verTipo">
+                <ion-select interface="popover" [(ngModel)]="propuestaEditada.idTipoBien" class="select-inline">
                   <ion-select-option [value]="1">Alimentos</ion-select-option>
                   <ion-select-option [value]="2">Ropa</ion-select-option>
                   <ion-select-option [value]="3">Juguetes</ion-select-option>
@@ -134,9 +143,11 @@
                   <ion-select-option [value]="5">Higiene</ion-select-option>
                   <ion-select-option [value]="10">Otros</ion-select-option>
                 </ion-select>
-              </div>
-
-              <span *ngIf="!modoEdicion" class="value">{{ tipoBienNombre || 'Varios' }}</span>
+              </ng-container>
+              
+              <ng-template #verTipo>
+                <span class="value">{{ tipoBienNombre }}</span>
+              </ng-template>
             </div>
           </div>
         </ion-col>
@@ -149,7 +160,7 @@
               <span class="value">
                 {{ propuestaEditada.fechaInicio | date:'d MMM y' }} - {{ propuestaEditada.fechaFin | date:'d MMM y' }}
               </span>
-              <p *ngIf="modoEdicion" class="note-mini">(Las fechas no son editables)</p>
+              <p *ngIf="modoEdicion" class="note-mini">(Las fechas no se pueden modificar)</p>
             </div>
           </div>
         </ion-col>
@@ -160,41 +171,58 @@
 
     <div class="descripcion-section">
       <h3>Sobre esta campaña</h3>
-      <textarea *ngIf="modoEdicion"
-        [(ngModel)]="propuestaEditada.descripcion"
-        rows="4"
-        class="textarea-edit"
-        placeholder="Describe en detalle qué se necesita..."></textarea>
-
-      <!-- <ion-textarea *ngIf="modoEdicion" 
-                    [(ngModel)]="propuestaEditada.descripcion" 
-                    rows="6" 
-                    class="textarea-edit"
-                    placeholder="Describe en detalle qué se necesita...">
-      </ion-textarea> -->
       
-      <p *ngIf="!modoEdicion" class="descripcion-text">
-        {{ propuestaEditada.descripcion || 'No hay descripción disponible.' }}
-      </p>
+      <ng-container *ngIf="modoEdicion; else verDesc">
+        <ion-item class="custom-input area-item">
+          <ion-textarea 
+            [(ngModel)]="propuestaEditada.descripcion" 
+            rows="6" 
+            placeholder="Describe detalladamente en qué consiste la ayuda..."
+            autoGrow="true">
+          </ion-textarea>
+        </ion-item>
+      </ng-container>
+
+      <ng-template #verDesc>
+        <p class="descripcion-text">
+          {{ propuestaEditada.descripcion || 'No hay descripción disponible para esta propuesta.' }}
+        </p>
+      </ng-template>
     </div>
 
   </div>
 </ion-content>
 
+<!-- FOOTER -->
 <ion-footer class="ion-no-border" *ngIf="!modoEdicion">
   <ion-toolbar>
+    
+    <!-- SI LA ONG ESTÁ VIENDO UNA SOLICITUD PENDIENTE: Muestra botones de decisión -->
+    <div style="display: flex; gap: 10px; padding: 5px 15px;" *ngIf="esLaOngSolicitada && esSolicitudPendiente">
+      <ion-button expand="block" shape="round" color="danger" fill="outline" style="flex: 1;" (click)="responderSolicitud(false)">
+        Rechazar
+      </ion-button>
+      <ion-button expand="block" shape="round" color="success" style="flex: 1;" (click)="responderSolicitud(true)">
+        Aceptar
+      </ion-button>
+    </div>
+
+    <!-- DE LO CONTRARIO: Muestra el botón normal de contacto -->
     <ion-button 
+      *ngIf="!(esLaOngSolicitada && esSolicitudPendiente)"
       expand="block" 
       shape="round" 
       class="ion-margin action-btn" 
       (click)="contactar()" 
-      [disabled]="esMiPropuesta"
+      [disabled]="esMiPropuesta || esSolicitudPendiente" 
       [color]="esMiPropuesta ? 'medium' : 'primary'">
       
-      <span *ngIf="!esMiPropuesta">Contactar / Participar</span>
+      <span *ngIf="!esMiPropuesta && !esSolicitudPendiente">Contactar / Participar</span>
       <span *ngIf="esMiPropuesta">Esta es tu propuesta</span>
+      <span *ngIf="!esMiPropuesta && esSolicitudPendiente">Campaña en espera de ONG</span>
       
       <ion-icon name="chatbubble-ellipses-outline" slot="end"></ion-icon>
     </ion-button> 
+
   </ion-toolbar>
 </ion-footer>

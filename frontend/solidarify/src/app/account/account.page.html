@@ -6,7 +6,7 @@
     <p>Cargando tu espacio...</p>
   </div>
 
-  <!-- NO USER -->
+  <!-- NO USER STATE -->
   <div *ngIf="!loading() && !usuario()" class="no-user-state">
     <div class="icon-circle">
       <ion-icon name="person"></ion-icon>
@@ -22,25 +22,21 @@
   <!-- PERFIL USUARIO -->
   <div *ngIf="!loading() && usuario()" class="profile-wrapper fade-in">
     
-    <!-- 1. HERO HEADER (Fondo curvo + Avatar) -->
+    <!-- 1. HERO HEADER -->
     <div class="profile-header">
       <div class="header-bg"></div>
       
       <div class="user-summary">
-        
-        <!-- AVATAR CLICABLE: Al tocar abre opciones de foto -->
+        <!-- AVATAR -->
         <div class="avatar-container" (click)="cambiarFoto()">
-          <!-- Muestra imagen de perfil (Base64) o avatar por defecto -->
           <img [src]="avatarUrl" alt="Avatar" class="avatar-img" />
-          
-          <!-- Badge de cámara para indicar que se puede cambiar -->
           <div class="edit-badge">
             <ion-icon name="camera"></ion-icon>
           </div>
         </div>
         
         <h1 class="user-name">{{ usuario()?.nombre }}</h1>
-        <p class="user-role">
+        <p class="user-role" *ngIf="rolesVisuales.length > 0">
           {{ rolesVisuales[0] | titlecase }} 
           <span class="status-dot"></span> Activo
         </p>
@@ -50,48 +46,55 @@
     <!-- 2. TARJETAS DE INFORMACIÓN -->
     <div class="cards-container">
       
-      <!-- Datos Personales -->
+      <!-- TARJETA: DATOS PERSONALES -->
       <div class="glass-card">
         <div class="card-header">
           <ion-icon name="person-circle-outline" class="card-icon"></ion-icon>
           <h3>Información Personal</h3>
           
-          <!-- Botón de Editar Datos (Lápiz) -->
+          <!-- Botón Editar -->
           <ion-button 
             fill="clear" 
             size="small" 
             (click)="activarEdicion()" 
             *ngIf="!modoEdicion">
-            <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+            <ion-icon name="create-outline" slot="icon-only" color="medium"></ion-icon>
           </ion-button>
         </div>
         
-        <div class="info-list">
+        <div class="info-list" *ngIf="usuarioEditado"> <!-- Aseguramos que existe el objeto editado -->
+          
           <!-- Nombre -->
           <div class="info-row">
             <div class="label">Nombre completo</div>
             <div *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.nombre" class="input-modern" type="text">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.nombre" class="input-modern"></ion-input>
+            </ion-item>
           </div>
 
-          <!-- Email -->
+          <!-- Email (Readonly usualmente, pero editable aquí si quieres) -->
           <div class="info-row">
             <div class="label">Correo electrónico</div>
             <div *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.email" class="input-modern" type="email">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.email" type="email" class="input-modern"></ion-input>
+            </ion-item>
           </div>
 
           <!-- Teléfono -->
           <div class="info-row">
             <div class="label">Teléfono</div>
             <div *ngIf="!modoEdicion" class="value">{{ usuario()?.telefono || 'Sin especificar' }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="usuarioEditado!.telefono" class="input-modern" type="tel" placeholder="+34 000 000 000">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.telefono" type="tel" placeholder="+34..." class="input-modern"></ion-input>
+            </ion-item>
           </div>
         </div>
       </div>
 
-      <!-- Datos ONG (Solo si es ONG) -->
-      <div class="glass-card ong-card" *ngIf="esONG()">
+      <!-- TARJETA: DATOS ONG -->
+      <div class="glass-card ong-card" *ngIf="esONG() && perfilONG() && perfilONGEditado">
         <div class="card-header">
           <ion-icon name="heart-circle-outline" class="card-icon"></ion-icon>
           <h3>Datos de la ONG</h3>
@@ -104,25 +107,31 @@
           <div class="info-row">
             <div class="label">Organización</div>
             <div *ngIf="!modoEdicion" class="value">{{ perfilONG()?.nombreLegal }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.nombreLegal" class="input-modern">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.nombreLegal" class="input-modern"></ion-input>
+            </ion-item>
           </div>
 
           <div class="info-row">
             <div class="label">CIF</div>
             <div *ngIf="!modoEdicion" class="value mono">{{ perfilONG()?.cif }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.cif" class="input-modern">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.cif" class="input-modern"></ion-input>
+            </ion-item>
           </div>
           
           <div class="info-row full">
             <div class="label">Sitio Web</div>
             <div *ngIf="!modoEdicion" class="value link">{{ perfilONG()?.web || '-' }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="perfilONGEditado!.web" class="input-modern" placeholder="https://...">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.web" placeholder="https://..." class="input-modern"></ion-input>
+            </ion-item>
           </div>
         </div>
       </div>
 
-       <!-- Datos ORGANIZADOR (Solo si es Organizador) -->
-       <div class="glass-card org-card" *ngIf="esOrganizador()">
+       <!-- TARJETA: DATOS ORGANIZADOR -->
+       <div class="glass-card org-card" *ngIf="esOrganizador() && organizador() && organizadorEditado">
         <div class="card-header">
           <ion-icon name="briefcase-outline" class="card-icon"></ion-icon>
           <h3>Datos Organizador</h3>
@@ -132,18 +141,22 @@
           <div class="info-row">
             <div class="label">Entidad</div>
             <div *ngIf="!modoEdicion" class="value">{{ organizador()?.nombre }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="organizadorEditado!.nombre" class="input-modern">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="organizadorEditado.nombre" class="input-modern"></ion-input>
+            </ion-item>
           </div>
 
           <div class="info-row">
             <div class="label">Zona</div>
             <div *ngIf="!modoEdicion" class="value">{{ organizador()?.zonaResponsable }}</div>
-            <input *ngIf="modoEdicion" [(ngModel)]="organizadorEditado!.zonaResponsable" class="input-modern">
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="organizadorEditado.zonaResponsable" class="input-modern"></ion-input>
+            </ion-item>
           </div>
         </div>
       </div>
 
-      <!-- Botón Cerrar Sesión (Solo visible si NO editas) -->
+      <!-- BOTÓN LOGOUT -->
       <div class="logout-container" *ngIf="!modoEdicion">
         <ion-button fill="outline" color="danger" class="btn-logout" (click)="logout()">
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
@@ -153,7 +166,7 @@
 
     </div>
 
-    <!-- BARRA DE ACCIONES FLOTANTE (Solo en modo edición de DATOS TEXTO) -->
+    <!-- BARRA FLOTANTE DE ACCIONES -->
     <div class="actions-bar" *ngIf="modoEdicion">
       <ion-button fill="clear" color="dark" (click)="cancelarEdicion()">
         Cancelar

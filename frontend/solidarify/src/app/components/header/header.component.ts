@@ -4,29 +4,16 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  standalone: false,
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
+  standalone: false
 })
 export class HeaderComponent {
-  @Input() authMode!: string;
-  @Input() isLoggedIn!: boolean;
-  @Input() currentUser: any;
+  @Input() isLoggedIn = false;
+  @Input() currentUser: any = null;
 
   @Output() onLogout = new EventEmitter<void>();
 
   constructor(private router: Router) {}
-
-  showLogin() { 
-    this.router.navigate(['/login']);
-  }
-
-  showRegister() { 
-    this.router.navigate(['/register']);
-  }
-
-  logout() { 
-    this.onLogout.emit(); 
-  }
 
   goToHome() {
     this.router.navigate(['/home']);

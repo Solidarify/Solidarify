@@ -33,3 +33,39 @@
     }
   }
 }
+
+
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+.logo-title {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+/* Avatar circular pequeño en el header */
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+ion-button {
+  --color: white;
+  
+  ion-icon {
+    font-size: 24px;
+  }
+}

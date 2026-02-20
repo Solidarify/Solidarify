@@ -17,7 +17,7 @@ export class PropuestaDetalleComponent implements OnInit {
   private toastCtrl = inject(ToastController);
   private alertCtrl = inject(AlertController);
   private propuestaService = inject(Propuesta);
-  private auth = inject(Auth); 
+  public auth = inject(Auth); 
 
   @Input() propuesta!: PropuestaModel; 
 
@@ -40,6 +40,29 @@ export class PropuestaDetalleComponent implements OnInit {
   get esMiPropuesta(): boolean {
     const user = this.auth.currentUser();
     return user?.idUsuario === this.propuesta.idOrganizador;
+  }
+
+  // --- NUEVOS GETTERS PARA LA LÓGICA DE ONG ---
+  get esLaOngSolicitada(): boolean {
+    const userId = this.auth.currentUser()?.idUsuario;
+    return this.auth.hasRole('ONG') && this.propuesta.idOngAsignada === userId;
+  }
+
+  get esSolicitudPendiente(): boolean {
+    return this.propuesta.estadoPropuesta === 'pendiente_ong';
+  }
+  // ---------------------------------------------
+
+  get tipoBienNombre(): string {
+    const map: {[key: number]: string} = {
+      1: 'Alimentos',
+      2: 'Ropa',
+      3: 'Juguetes',
+      4: 'Material Escolar',
+      5: 'Higiene',
+      10: 'Otros'
+    };
+    return map[this.propuestaEditada.idTipoBien] || 'Varios';
   }
 
   activarEdicion() {
@@ -85,7 +108,6 @@ export class PropuestaDetalleComponent implements OnInit {
     }
   }
 
-
   cerrar() {
     this.modalCtrl.dismiss();
   }
@@ -101,8 +123,39 @@ export class PropuestaDetalleComponent implements OnInit {
       return;
     }
 
-    // Lógica futura: Abrir chat o enviar email
     this.mostrarToast(`Solicitud de contacto enviada al organizador`, 'success');
+  }
+
+  async responderSolicitud(acepta: boolean) {
+    const headerText = acepta ? 'Aceptar Campaña' : 'Rechazar Solicitud';
+    const messageText = acepta 
+      ? '¿Estás seguro de que tu ONG respaldará esta campaña de recogida?' 
+      : 'Esta propuesta volverá a quedar sin ONG asignada.';
+
+    const alert = await this.alertCtrl.create({
+      header: headerText,
+      message: messageText,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: acepta ? 'Sí, Aceptar' : 'Sí, Rechazar',
+          role: 'confirm',
+          handler: () => {
+            this.propuestaService.responderSolicitudOng(this.propuesta.idPropuesta!, acepta).subscribe({
+              next: () => {
+                this.mostrarToast(acepta ? '¡Campaña vinculada con tu ONG!' : 'Solicitud rechazada.', 'success');
+                this.modalCtrl.dismiss({ refresh: true });
+              },
+              error: (err) => {
+                console.error("Error respondiendo", err);
+                this.mostrarToast('Ocurrió un error al procesar tu respuesta.', 'danger');
+              }
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   private async mostrarToast(message: string, color: 'success' | 'danger' | 'warning' | 'medium') {
@@ -115,20 +168,4 @@ export class PropuestaDetalleComponent implements OnInit {
     });
     await toast.present();
   }
-
-get tipoBienNombre(): string {
-  // PropuestaModel ya tiene una lógica para esto
-  const map: {[key: number]: string} = {
-    1: 'Alimentos',
-    2: 'Ropa',
-    3: 'Juguetes',
-    4: 'Material Escolar',
-    5: 'Higiene',
-    10: 'Otros'
-  };
-  
-  return map[this.propuestaEditada.idTipoBien] || 'Varios';
-}
-
- 
 }

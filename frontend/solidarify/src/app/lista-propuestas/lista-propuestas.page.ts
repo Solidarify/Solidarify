@@ -2,12 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
-import { Observable, combineLatest, of, BehaviorSubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, map, tap, startWith, catchError } from 'rxjs/operators';
+import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
+import { debounceTime, switchMap, startWith, catchError, tap } from 'rxjs/operators';
 import { Auth } from '../services/auth';
 import { Propuesta } from '../services/propuesta';
 import { PropuestaModel } from '../models/propuesta.model';
-import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component'; // Ajusta ruta si es necesario
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
   selector: 'app-lista-propuestas',
@@ -24,7 +24,8 @@ export class ListaPropuestasPage implements OnInit {
   private fb = inject(FormBuilder);
   private modalCtrl = inject(ModalController);
 
-  propuestas$!: Observable<PropuestaModel[]>;
+  propuestas$: Observable<PropuestaModel[]> = of([]); 
+  
   loading = true;
   totalPropuestas = 0;
   
@@ -44,51 +45,50 @@ export class ListaPropuestasPage implements OnInit {
     });
   }
 
-
-ngOnInit() {
-  console.log('🏁 Inicializando ListaPropuestasPage (Modo Simple)...');
-  this.loading = true;
-
-  this.route.queryParamMap.pipe(
-    switchMap(params => {
+  ngOnInit() {
+    console.log('🏁 Inicializando ListaPropuestasPage...');
+    
+    this.route.queryParamMap.subscribe(params => {
       const modeParam = params.get('mode');
       this.mode = (modeParam === 'mine') ? 'mine' : 'explore';
       this.configurarPagina();
       
-      console.log('🔗 Modo detectado:', this.mode);
+      this.refreshTrigger$.next();
+    });
 
-      return this.filtroForm.valueChanges.pipe(
-        startWith(this.filtroForm.value), 
-        debounceTime(400),
-        switchMap(filtros => {
-          console.log('🔍 Ejecutando búsqueda...');
-          this.loading = true; 
-
-          if (this.mode === 'mine') {
-            const user = this.auth.currentUser();
-            if (!user) return of([]); 
-            return this.propuestaService.getFiltradas({ ...filtros, organizador: user.idUsuario });
+    this.propuestas$ = combineLatest([
+      this.filtroForm.valueChanges.pipe(startWith(this.filtroForm.value), debounceTime(400)),
+      this.refreshTrigger$
+    ]).pipe(
+      tap(() => this.loading = true), 
+      switchMap(([filtros, _]) => {
+        let request$: Observable<PropuestaModel[]>;
+        if (this.mode === 'mine') {
+          const user = this.auth.currentUser();
+          if (!user) {
+            request$ = of([]); 
           } else {
-            return this.propuestaService.getFiltradas({ ...filtros, estado: 'publicada' });
+            request$ = this.propuestaService.getFiltradas({ ...filtros, organizador: user.idUsuario });
           }
-        })
-      );
-    })
-  ).subscribe({
-    next: (resultados) => {
-      console.log('✅ Resultados recibidos:', resultados.length);
-      this.propuestas$ = of(resultados); 
-      this.totalPropuestas = resultados.length;
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('❌ Error:', err);
-      this.loading = false;
-    }
-  });
-}
+        } else {
+          request$ = this.propuestaService.getFiltradas({ ...filtros, estado: 'publicada' });
+        }
 
-
+        return request$.pipe(
+          tap(resultados => {
+            this.loading = false;
+            this.totalPropuestas = resultados.length;
+            console.log('✅ Resultados encontrados:', resultados.length);
+          }),
+          catchError(err => {
+            console.error('❌ Error HTTP:', err);
+            this.loading = false; 
+            return of([]); 
+          })
+        );
+      })
+    );
+  }
 
   private configurarPagina() {
     if (this.mode === 'mine') {
@@ -99,16 +99,17 @@ ngOnInit() {
       
       const esOrganizador = this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
       if (!esOrganizador) {
-        this.router.navigate(['/lista-propuestas', { mode: 'explore' }]); // Redirigir a explorar
+        this.router.navigate(['/lista-propuestas', { mode: 'explore' }]);
         return;
       }
+      
       this.pageTitle = 'Mis propuestas';
+      this.filtroForm.patchValue({ estado: '' }, { emitEvent: false });
     } else {
       this.pageTitle = 'Explorar propuestas';
+      this.filtroForm.patchValue({ estado: 'publicada' }, { emitEvent: false });
     }
   }
-
-  // --- ACCIONES ---
 
   async verDetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({
@@ -122,7 +123,6 @@ ngOnInit() {
     await modal.present();
 
     const { data } = await modal.onDidDismiss();
-    // Si el modal devuelve 'refresh: true' (ej. al editar/borrar), recargamos
     if (data?.refresh) {
       this.refreshTrigger$.next();
     }
@@ -133,12 +133,10 @@ ngOnInit() {
       search: '',
       tipoBien: '',
       lugar: '',
-      estado: this.mode === 'mine' ? '' : 'publicada', // En 'mine' queremos ver todas
+      estado: this.mode === 'mine' ? '' : 'publicada',
       fechaInicio: ''
     });
   }
-
-  // --- GETTERS & HELPERS ---
   
   get searchControl(): FormControl {
     return this.filtroForm.get('search') as FormControl;
@@ -148,10 +146,7 @@ ngOnInit() {
     return item.idPropuesta;
   }
 
-
-get esUsuario(): boolean {
-  return this.auth.hasRole('USUARIO');
-}
-
-
+  get esUsuario(): boolean {
+    return this.auth.hasRole('USER'); 
+  }
 }

@@ -44,13 +44,15 @@
     <h3>Explorar <span>({{ totalPropuestas }})</span></h3>
   </div>
 
-  <!-- 4. LISTA DE PROPUESTAS (Diseño Tarjeta Moderna) -->
-  <div class="propuestas-list" *ngIf="!loading">
-    <ng-container *ngIf="propuestas$ | async as propuestas">
+  <!-- NOS SUSCRIBIMOS UNA SOLA VEZ AL OBSERVABLE -->
+  <ng-container *ngIf="propuestas$ | async as propuestasList">
+    
+    <!-- 4. LISTA DE PROPUESTAS (Diseño Tarjeta Moderna) -->
+    <div class="propuestas-list" *ngIf="!loading">
       
       <!-- ITEM DE PROPUESTA -->
       <div 
-        *ngFor="let propuesta of propuestas; trackBy: trackById" 
+        *ngFor="let propuesta of propuestasList; trackBy: trackById" 
         class="propuesta-card scale-in"
         (click)="verDetalle(propuesta)">
         
@@ -85,7 +87,7 @@
       </div>
       
       <!-- EMPTY STATE (Si no hay resultados) -->
-      <div *ngIf="propuestas.length === 0" class="empty-state">
+      <div *ngIf="propuestasList.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon name="search"></ion-icon>
         </div>
@@ -93,8 +95,9 @@
         <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
-    </ng-container>
-  </div>
+    </div>
+
+  </ng-container>
 
   <!-- LOADING STATE -->
   <div class="loading-container" *ngIf="loading">

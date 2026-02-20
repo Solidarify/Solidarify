@@ -231,3 +231,32 @@ ion-content {
 .fade-in { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+
+/* Reset de estilos para inputs dentro de tarjetas */
+.input-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  --min-height: auto;
+  margin-top: 5px;
+  
+  /* El estilo visual lo da el input-modern */
+  .input-modern {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    --background: #f8fafc;
+    --color: #1e293b;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    width: 100%;
+    
+    &.has-focus {
+      border-color: #10b981;
+      --background: white;
+    }
+  }
+}

@@ -2,14 +2,10 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-
-// SERVICIOS
 import { Auth } from '../services/auth';
 import { Usuario } from '../services/usuario';
 import { PerfilOng } from '../services/perfil-ong';
 import { Organizador } from '../services/organizador';
-
-// MODELOS
 import { UsuarioModel } from '../models/usuario.model';
 import { PerfilONGModel } from '../models/perfil-ong.model';
 import { OrganizadorModel } from '../models/organizador.model';
@@ -22,7 +18,7 @@ import { OrganizadorModel } from '../models/organizador.model';
 })
 export class AccountPage {
   
-  private auth = inject(Auth);
+  public auth = inject(Auth); 
   private usuarioService = inject(Usuario);
   private ongService = inject(PerfilOng);
   private organizadorService = inject(Organizador);
@@ -58,26 +54,37 @@ export class AccountPage {
     });
   }
 
-  private async cargarDatosAdicionales(user: UsuarioModel) {
+   private async cargarDatosAdicionales(user: UsuarioModel) {
     try {
       this.usuario.set(user);
       this.actualizarRolesVisuales();
 
       const promises: Promise<any>[] = [];
 
+      // CARGA ONG
       if (this.auth.hasRole('ONG')) {
         promises.push(
           firstValueFrom(this.ongService.getById(user.idUsuario))
-            .then(p => this.perfilONG.set(p))
-            .catch(() => this.perfilONG.set(null))
+            .then(p => {
+               if(!p) p = new PerfilONGModel({ idUsuario: user.idUsuario });
+               this.perfilONG.set(p);
+            })
+            .catch(() => {
+               this.perfilONG.set(new PerfilONGModel({ idUsuario: user.idUsuario }));
+            })
         );
       }
 
       if (this.auth.hasRole('ORGANIZADOR') && user.idUsuario) { 
         promises.push(
           firstValueFrom(this.organizadorService.getById(user.idUsuario))
-            .then(o => this.organizador.set(o))
-            .catch(() => this.organizador.set(null))
+            .then(o => {
+               if(!o) o = new OrganizadorModel({ idUsuario: user.idUsuario });
+               this.organizador.set(o);
+            })
+            .catch(() => {
+               this.organizador.set(new OrganizadorModel({ idUsuario: user.idUsuario }));
+            })
         );
       }
 
@@ -99,18 +106,15 @@ export class AccountPage {
     if (this.auth.hasRole('USUARIO')) this.rolesVisuales.push('USUARIO');
   }
 
-  // ⬇️ NUEVA FUNCIÓN: Devuelve foto de perfil o avatar generado
   get avatarUrl(): string {
     const u = this.usuario();
     
-    // Si tiene foto en Base64, usar esa
     if (u?.fotoPerfil) {
       return u.fotoPerfil.startsWith('data:image') 
         ? u.fotoPerfil 
         : `data:image/jpeg;base64,${u.fotoPerfil}`;
     }
     
-    // Si no, generar avatar con iniciales
     return u 
       ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=10b981&color=fff&size=256`
       : '';
@@ -141,7 +145,6 @@ export class AccountPage {
     if (o) this.organizadorEditado = new OrganizadorModel(o);
   }
 
-  // ⬇️ NUEVA FUNCIÓN: Cambiar foto de perfil
   async cambiarFoto() {
     const actionSheet = await this.actionSheetCtrl.create({
       header: 'Cambiar foto de perfil',
@@ -187,7 +190,9 @@ export class AccountPage {
 
     } catch (error) {
       console.error('Error capturando imagen:', error);
-      this.mostrarAlerta('Error', 'No se pudo capturar la imagen.');
+      if (String(error).indexOf('User cancelled') === -1) {
+          this.mostrarAlerta('Error', 'No se pudo capturar la imagen.');
+      }
     }
   }
 
@@ -225,7 +230,9 @@ export class AccountPage {
         this.usuarioService.update(u.idUsuario, usuarioActualizado)
       );
 
-      this.auth.currentUser.set(updated);
+      // AQUI ES DONDE ESTABA EL FALLO. Ahora usamos updateSessionData
+      this.auth.updateSessionData({ fotoPerfil: updated.fotoPerfil });
+      
       this.mostrarAlerta('¡Listo!', 'Foto actualizada correctamente.');
 
     } catch (error) {
@@ -248,7 +255,7 @@ export class AccountPage {
     await confirm.present();
   }
 
-  private async ejecutarGuardado() {
+   private async ejecutarGuardado() {
     const u = this.usuario();
     if (!u || !this.usuarioEditado) return;
 
@@ -260,20 +267,26 @@ export class AccountPage {
         this.usuarioService.update(u.idUsuario, this.usuarioEditado)
       );
       
-      this.auth.currentUser.set(updatedUser);
+      this.auth.updateSessionData({ 
+        nombre: updatedUser.nombre, 
+        email: updatedUser.email, 
+        telefono: updatedUser.telefono 
+      });
       
       const p = this.perfilONG();
       if (this.esONG() && p && this.perfilONGEditado) {
+        this.perfilONGEditado.idUsuario = u.idUsuario;
         const updatedOng = await firstValueFrom(
-          this.ongService.update(p.idUsuario!, this.perfilONGEditado)
+          this.ongService.createOrUpdate(this.perfilONGEditado)
         );
         this.perfilONG.set(updatedOng);
       }
 
       const o = this.organizador();
       if (this.esOrganizador() && o && this.organizadorEditado) {
+        this.organizadorEditado.idUsuario = u.idUsuario;
         const updatedOrg = await firstValueFrom(
-          this.organizadorService.update(o.idUsuario!, this.organizadorEditado)
+          this.organizadorService.createOrUpdate(this.organizadorEditado)
         );
         this.organizador.set(updatedOrg);
       }
@@ -283,11 +296,12 @@ export class AccountPage {
 
     } catch (error) {
       console.error('Error guardando:', error);
-      this.mostrarAlerta('Error', 'No se pudieron guardar los cambios.');
+      this.mostrarAlerta('Error', 'Revisa que todos los campos obligatorios (como el CIF) estén rellenos.');
     } finally {
       loading.dismiss();
     }
   }
+
 
   logout() {
     this.auth.logout();

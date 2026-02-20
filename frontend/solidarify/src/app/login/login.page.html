@@ -9,17 +9,17 @@
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         
         <ion-item lines="full" class="ion-margin-bottom">
-
           <ion-label position="floating">Email *</ion-label>
           <ion-input 
             formControlName="email" 
             type="email" 
-            placeholder="ej: org@donapp.com"
-            errorText="Email inválido"
-            [class.ion-invalid]="emailField.invalid && emailField.touched">
+            placeholder="ej: usuario@solidarify.com">
           </ion-input>
-          <ion-note slot="error" *ngIf="emailField.invalid && emailField.touched">
-            Email requerido y válido
+          <ion-note slot="error" *ngIf="emailField?.hasError('required') && emailField?.touched">
+            El email es obligatorio
+          </ion-note>
+          <ion-note slot="error" *ngIf="emailField?.hasError('email') && emailField?.touched">
+            Formato de email inválido
           </ion-note>
         </ion-item>
 
@@ -28,10 +28,12 @@
           <ion-input 
             formControlName="password" 
             type="password"
-            placeholder="******"
-            [class.ion-invalid]="passwordField.invalid && passwordField.touched">
+            placeholder="******">
           </ion-input>
-          <ion-note slot="error" *ngIf="passwordField.invalid && passwordField.touched">
+          <ion-note slot="error" *ngIf="passwordField?.hasError('required') && passwordField?.touched">
+            La contraseña es obligatoria
+          </ion-note>
+          <ion-note slot="error" *ngIf="passwordField?.hasError('minlength') && passwordField?.touched">
             Mínimo 3 caracteres
           </ion-note>
         </ion-item>
@@ -40,10 +42,9 @@
           expand="block" 
           type="submit" 
           color="primary" 
-          class="ion-margin-bottom submit-btn"
-          [disabled]="loginForm.invalid || loginLoading">
-          <ion-spinner name="crescent" *ngIf="loginLoading"></ion-spinner>
-          <span *ngIf="!loginLoading">Entrar</span>
+          class="ion-margin-top submit-btn"
+          [disabled]="loginForm.invalid">
+          Entrar
         </ion-button>
 
       </form>
@@ -52,7 +53,8 @@
         expand="block" 
         fill="clear" 
         color="medium"
-        routerLink="/register">
+        routerLink="/register"
+        class="ion-margin-top">
         ¿Nueva cuenta? Regístrate
       </ion-button>
 

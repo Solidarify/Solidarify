@@ -1,8 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'; 
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { finalize } from 'rxjs/operators';
 import { Auth } from '../services/auth';
 
 @Component({
@@ -20,7 +19,6 @@ export class LoginPage implements OnInit {
   private loadingCtrl = inject(LoadingController);
 
   loginForm: FormGroup;
-  loginLoading = false;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -35,8 +33,8 @@ export class LoginPage implements OnInit {
     }
   }
 
-  get emailField() { return this.loginForm.get('email')!; }
-  get passwordField() { return this.loginForm.get('password')!; }
+  get emailField() { return this.loginForm.get('email'); }
+  get passwordField() { return this.loginForm.get('password'); }
 
   async onSubmit() {
     if (this.loginForm.invalid) {
@@ -44,7 +42,6 @@ export class LoginPage implements OnInit {
       return;
     }
 
-    this.loginLoading = true;
     const { email, password } = this.loginForm.value;
 
     const loading = await this.loadingCtrl.create({
@@ -53,17 +50,14 @@ export class LoginPage implements OnInit {
     });
     await loading.present();
 
-    this.auth.login({ email, password }).pipe(
-      finalize(() => {
-        this.loginLoading = false;
-        loading.dismiss();
-      })
-    ).subscribe({
-      next: (response) => {
+    this.auth.login({email, password}).subscribe({
+      next: async (response) => {
+        await loading.dismiss();
         console.log('Login exitoso:', response);
         this.router.navigate(['/home'], { replaceUrl: true });
       },
       error: async (err) => {
+        await loading.dismiss();
         console.error('Login error:', err);
         const alert = await this.alertCtrl.create({
           header: 'Fallo de acceso',

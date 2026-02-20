@@ -1,6 +1,6 @@
 <ion-content [fullscreen]="true" class="bg-light">
   
-  <!-- 1. HERO SECTION (Tarjeta de Estadísticas) -->
+  <!-- 1. HERO SECTION -->
   <div class="stats-card fade-in-down">
     <div class="stats-content">
       <div class="stat-text">
@@ -12,7 +12,6 @@
         </p>
       </div>
       
-      <!-- Botón limpiar filtros -->
       <ion-button 
         *ngIf="searchControl.value" 
         fill="clear" 
@@ -21,12 +20,10 @@
         <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
-
-    <!-- Decoración de fondo -->
     <div class="deco-circle"></div>
   </div>
 
-  <!-- 2. BARRA DE BÚSQUEDA FLOTANTE -->
+  <!-- 2. BUSCADOR -->
   <div class="filtros-container fade-in-up">
     <div class="search-bar">
       <ion-icon name="search-outline" class="search-icon"></ion-icon>
@@ -39,42 +36,42 @@
     </div>
   </div>
 
-  <!-- 3. CABECERA DE LISTA -->
+  <!-- 3. CABECERA -->
   <div class="list-header" *ngIf="!loading">
     <h3>Directorio <span>Solidario</span></h3>
   </div>
 
-  <!-- 4. LISTA DE ONGS (Diseño Tarjeta Moderna) -->
-  <div class="ongs-list" *ngIf="!loading">
+  <!-- ============================================== -->
+  <!-- LA CLAVE: Nos suscribimos al observable AQUÍ   -->
+  <!-- ============================================== -->
+  <ng-container *ngIf="ongs$ | async as ongsList">
     
-    <ng-container *ngIf="ongs$ | async as ongs">
+    <!-- 4. LISTA DE ONGS (solo si no está cargando) -->
+    <div class="ongs-list" *ngIf="!loading">
       
-      <!-- ITEM DE ONG -->
-      <div *ngFor="let ong of ongs; trackBy: trackById" 
+      <div *ngFor="let ong of ongsList; trackBy: trackById" 
            class="ong-card scale-in"
            (click)="verDetalle(ong)">
         
-        <!-- Estado lateral (barra de color) -->
+        <!-- Estado -->
         <div class="status-stripe" [ngClass]="{
           'verificado': ong.isVerified,
           'pendiente': !ong.isVerified
         }"></div>
 
-        <!-- Columna Izquierda: Logo/Avatar -->
+        <!-- Icono -->
         <div class="card-icon-box">
           <div class="avatar-circle">
-             <!-- Usamos las iniciales si no hay logo, o un icono -->
-             <span class="initials">{{ ong.nombreLegal.substring(0,2) | uppercase }}</span>
+             <span class="initials">{{ (ong.displayName || ong.nombreLegal).substring(0,2) | uppercase }}</span>
           </div>
-          <!-- Badge de verificación superpuesto -->
           <div class="verified-badge" *ngIf="ong.isVerified">
             <ion-icon name="checkmark-circle"></ion-icon>
           </div>
         </div>
 
-        <!-- Columna Central: Info -->
+        <!-- Info -->
         <div class="card-info">
-          <h2 class="card-title">{{ ong.nombreLegal }}</h2>
+          <h2 class="card-title">{{ ong.displayName || ong.nombreLegal }}</h2>
           
           <div class="card-desc" *ngIf="ong.descripcion">
             {{ ong.descripcion }}
@@ -82,18 +79,18 @@
 
           <div class="card-meta" *ngIf="ong.web">
             <ion-icon name="globe-outline"></ion-icon>
-            <span class="web-link">{{ ong.web | slice:0:30 }}...</span>
+            <span class="web-link">Sitio Web</span>
           </div>
         </div>
 
-        <!-- Columna Derecha: Flecha -->
+        <!-- Flecha -->
         <div class="card-action">
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
       </div>
 
       <!-- EMPTY STATE -->
-      <div *ngIf="ongs.length === 0" class="empty-state">
+      <div *ngIf="ongsList.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon name="business-outline"></ion-icon>
         </div>
@@ -101,10 +98,11 @@
         <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
-    </ng-container>
-  </div>
+    </div>
 
-  <!-- LOADING STATE -->
+  </ng-container>
+
+  <!-- LOADING -->
   <div class="loading-container" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Conectando con ONGs...</p>

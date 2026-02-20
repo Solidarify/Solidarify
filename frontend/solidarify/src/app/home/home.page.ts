@@ -17,43 +17,76 @@ import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta
 })
 export class HomePage implements OnInit {
   
-  // INYECCIONES
   private modalCtrl = inject(ModalController);
   private auth = inject(Auth);
   private router = inject(Router);
   private alertCtrl = inject(AlertController);
   private propuestaService = inject(Propuesta);
 
-  // ESTADO DE USUARIO
   currentUser = this.auth.currentUser; 
   isLoggedIn = this.auth.isAuthenticated; 
 
-  // ESTADO DE DATOS
   propuestasUrgentes: PropuestaModel[] = [];
   cargando = true;
+
+  stats = {
+    ayudasCompletadas: 0,
+    ayudasEnCurso: 0
+  };
 
   constructor() {}
 
   async ngOnInit() {
     console.log('🏠 HomePage iniciada');
     await this.cargarUrgentes();
+    if (this.isLoggedIn()) {
+      await this.cargarEstadisticas();
+    }
   }
 
-  // --- LÓGICA DE CARGA DE DATOS ---
+  get avatarUrl(): string {
+    const u = this.currentUser();
+    
+    if (u?.fotoPerfil) {
+      return u.fotoPerfil.startsWith('data:image') 
+        ? u.fotoPerfil 
+        : `data:image/jpeg;base64,${u.fotoPerfil}`;
+    }
+    
+    return u 
+      ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=10b981&color=fff`
+      : '';
+  }
+
+  async cargarEstadisticas() {
+    const user = this.currentUser();
+    if (!user) return;
+
+    try {
+      const todas = await firstValueFrom(this.propuestaService.getAll());
+      
+      const misPropuestas = todas.filter(p => 
+        p.idOrganizador === user.idUsuario || p.idOngAsignada === user.idUsuario
+      );
+
+      this.stats.ayudasEnCurso = misPropuestas.filter(p => p.estadoPropuesta !== 'completada' && p.estadoPropuesta !== 'cancelada').length;
+      this.stats.ayudasCompletadas = misPropuestas.filter(p => p.estadoPropuesta === 'completada').length;
+
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  }
 
   async cargarUrgentes() {
     this.cargando = true;
     try {
-      // 1. Obtenemos todas las propuestas
       const todas = await firstValueFrom(this.propuestaService.getAll());
       
       const hoy = new Date();
       const enSieteDias = new Date();
       enSieteDias.setDate(hoy.getDate() + 7);
 
-      // 2. Filtramos: Activas Y que caduquen en los próximos 7 días
       this.propuestasUrgentes = todas.filter(p => {
-        // Aseguramos que fechaFin sea objeto Date
         const fechaFin = new Date(p.fechaFin);
         return p.estadoPropuesta === 'publicada' && 
                fechaFin >= hoy && 
@@ -61,7 +94,7 @@ export class HomePage implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error cargando home:', error);
+      console.error('Error cargando urgentes:', error);
     } finally {
       this.cargando = false;
     }
@@ -80,15 +113,15 @@ export class HomePage implements OnInit {
   async irADetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({
       component: PropuestaDetalleComponent,
-      componentProps: { propuesta } // Pasamos el objeto real
+      componentProps: { propuesta } 
     });
     
     await modal.present();
     
-    // Si al cerrar el modal nos dicen que recarguemos (ej: se editó), recargamos
     const { data } = await modal.onWillDismiss();
     if (data?.refresh) {
       this.cargarUrgentes();
+      if (this.isLoggedIn()) this.cargarEstadisticas(); 
     }
   }
 
@@ -119,7 +152,24 @@ export class HomePage implements OnInit {
           this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
         }
         break;
-              
+
+      case '/lista-ongs':
+        if (!this.canViewOngs) {
+          this.showPermissionAlert('ongs' as any); 
+          return;
+        }
+        this.router.navigate([route]).catch(err => {
+           console.error("Error navegando a lista-ongs. ¿Existe la ruta en app-routing.module.ts?", err);
+        });
+        break;
+        
+       case '/estadisticas':
+        if (!this.isLoggedIn()) {
+          this.showPermissionAlert('perfil');
+          return;
+        }
+        this.router.navigate(['/statistics']);
+        break;
       case '/account':
         if (!this.isLoggedIn()) { 
           this.showPermissionAlert('perfil');
@@ -136,13 +186,11 @@ export class HomePage implements OnInit {
   }
 
   logout() {
-    console.log('🚪 Cerrando sesión...');
     this.auth.logout();
     this.router.navigate(['/login']);
   }
 
   // --- PERMISOS (GETTERS) ---
-
   get canCreateProposal(): boolean {
     return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
   }
@@ -154,12 +202,6 @@ export class HomePage implements OnInit {
   get canViewOngs(): boolean {
     return true; 
   }
-
-  get canExplore(): boolean {
-    return true; 
-  }
-
-  // --- ALERTAS E INFO ---
 
   private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise<void> {
     const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
@@ -175,47 +217,6 @@ export class HomePage implements OnInit {
       header: 'Acceso restringido',
       message: `${message}\n\nTu rol actual: **${roles}**`,
       buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  async showInfo(option: 'crear' | 'mis' | 'explorar' | 'perfil' | 'ongs') {
-    let header = '', message = '';
-    const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
-
-    switch (option) {
-      case 'crear':
-        header = 'Crear propuesta';
-        message = this.canCreateProposal
-          ? `✅ Tienes permiso para crear campañas.`
-          : `❌ Requiere rol **ORGANIZADOR** o **ADMIN**.`;
-        break;
-      case 'mis':
-        header = 'Mis propuestas';
-        message = this.canViewMyProposals
-          ? `📋 Gestiona tus propuestas creadas o asignadas.`
-          : `❌ Panel de gestión para **ORGANIZADORES** y **ONGs**.`;
-        break;
-      case 'explorar':
-        header = 'Explorar';
-        message = `🔍 Busca iniciativas públicas para colaborar.`;
-        break;
-      case 'perfil':
-        header = 'Mi perfil';
-        message = this.isLoggedIn()
-          ? `👤 Configura tu cuenta de **${roles}**.`
-          : `❌ Inicia sesión para acceder.`;
-        break;
-      case 'ongs':
-        header = 'Directorio de ONGs';
-        message = `📋 Lista de organizaciones verificadas.`;
-        break;
-    }
-
-    const alert = await this.alertCtrl.create({
-      header,
-      message,
-      buttons: ['Entendido']
     });
     await alert.present();
   }

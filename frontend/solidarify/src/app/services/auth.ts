@@ -1,9 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
-import { tap, delay, map } from 'rxjs/operators';
+import { Observable, tap } from 'rxjs';
 import { UsuarioModel } from '../models/usuario.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,54 +12,31 @@ export class Auth {
   
   private http = inject(HttpClient);
   private router = inject(Router);
-  private readonly USE_MOCK = true; 
-  private readonly API_URL = 'http://localhost:3000/api/auth';
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
+  
+  private readonly API_URL = environment.apiUrl ? `${environment.apiUrl}/auth` : 'http://localhost:3000/api/auth';
+  
+  private readonly TOKEN_KEY = 'token';
+  private readonly USER_KEY = 'currentUser';
 
   currentUser = signal<UsuarioModel | null>(null);
   isAuthenticated = signal<boolean>(false);
-
-  // MOCK DATA
-  private mockUsers = [
-    { email: 'admin@donapp.com', password: '123', role: 'ADMIN', name: 'Admin General', id: 1 },
-    { email: 'org@donapp.com', password: '123', role: 'ORGANIZADOR', name: 'Organizador Norte', id: 2 },
-    { email: 'ong@donapp.com', password: '123', role: 'ONG', name: 'ONG Manos Verdes', id: 5 },
-    { email: 'user@donapp.com', password: '123', role: 'USUARIO', name: 'Juan Usuario', id: 10 }
-  ];
 
   constructor() {
     this.checkSession();
   }
 
+  // LOGIN REAL
   login(credentials: { email: string, password: string }): Observable<any> {
-    if (this.USE_MOCK) {
-      return of(null).pipe(
-        delay(1000),
-        map(() => {
-          const userFound = this.mockUsers.find(u => u.email === credentials.email && u.password === credentials.password);
-          
-          if (userFound) {
-            const userModel = new UsuarioModel({
-              idUsuario: userFound.id,
-              nombre: userFound.name,
-              email: userFound.email,
-              roles: [userFound.role], 
-              activo: true
-            });
-            return { token: 'fake-jwt-' + Date.now(), user: userModel };
-          } else {
-            throw new Error('Credenciales incorrectas');
-          }
-        }),
-        tap(response => this.saveSession(response.token, response.user))
-      );
-    }
-
-    // API REAL
     return this.http.post<any>(`${this.API_URL}/login`, credentials).pipe(
-      tap(response => this.saveSession(response.token, new UsuarioModel(response.user)))
+      tap(response => {
+        const user = new UsuarioModel(response.usuario);
+        this.saveSession(response.token, user);
+      })
     );
+  }
+
+  register(userData: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/register`, userData);
   }
 
   logout() {
@@ -73,6 +50,8 @@ export class Auth {
   private saveSession(token: string, user: UsuarioModel) {
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      console.log('Guardando sesión. Roles recibidos:', user.roles); 
+
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
   }
@@ -91,8 +70,27 @@ export class Auth {
     }
   }
 
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
   hasRole(role: string): boolean {
     const user = this.currentUser();
     return user?.roles?.includes(role) || false;
   }
+
+ 
+  public updateSessionData(updatedUser: Partial<UsuarioModel>) {
+    const currentUser = this.currentUser();
+    if (currentUser) {
+      const mergedUser = new UsuarioModel({ ...currentUser, ...updatedUser });
+      
+      this.currentUser.set(mergedUser);
+      
+      localStorage.setItem(this.USER_KEY, JSON.stringify(mergedUser));
+      
+      console.log('Sesión local actualizada con los nuevos datos.');
+    }
+  }
+
 }

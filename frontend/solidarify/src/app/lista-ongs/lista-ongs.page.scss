@@ -239,3 +239,25 @@ ion-content {
 @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes fadeInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+
+/* --- LOADING --- */
+.loading-container {
+  height: 40vh;
+  display: flex; 
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;
+  
+  p { 
+    color: #94a3b8; 
+    margin-top: 15px; 
+    font-size: 0.9rem; 
+  }
+}
+
+/* Ajuste Input Nativo */
+.native-input {
+  -webkit-appearance: none;
+  appearance: none;
+}

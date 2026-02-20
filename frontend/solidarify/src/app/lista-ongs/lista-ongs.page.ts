@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, startWith, tap, catchError, map, delay } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, startWith, tap, catchError } from 'rxjs/operators';
 
 import { Auth } from '../services/auth';
 import { PerfilOng } from '../services/perfil-ong';
@@ -22,7 +22,7 @@ export class ListaOngsPage implements OnInit {
   private fb = inject(FormBuilder);
   private modalCtrl = inject(ModalController);
 
-  ongs$!: Observable<PerfilONGModel[]>;
+  ongs$: Observable<PerfilONGModel[]> = of([]); 
   loading = true;
   totalOngs = 0;
   
@@ -37,39 +37,41 @@ export class ListaOngsPage implements OnInit {
     });
   }
 
- ngOnInit() {
-  console.log('🏁 Inicializando ListaOngsPage...');
+  ngOnInit() {
+    console.log('🏁 Inicializando ListaOngsPage...');
+    this.loading = true;
 
-  this.filtroForm.get('search')!.valueChanges.pipe(
-    startWith(''),
-    debounceTime(400),
-    distinctUntilChanged(),
-    tap(val => {
-      console.log('⚡ Stream activo. Valor:', val);
-      this.loading = true;
-    }),
-    switchMap(termino => {
-      console.log('🔄 Llamando al servicio...');
-      if (termino && termino.trim().length > 0) {
-        return this.perfilOngService.searchByName(termino.trim());
-      } else {
-        return this.perfilOngService.getAll();
-      }
-    })
-  ).subscribe({
-    next: (resultados) => {
-      console.log('✅ Datos recibidos:', resultados.length);
-      this.ongs$ = of(resultados); 
-      this.totalOngs = resultados.length;
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('❌ Error fatal:', err);
-      this.loading = false;
-    }
-  });
-}
-
+    this.ongs$ = combineLatest([
+      this.filtroForm.get('search')!.valueChanges.pipe(
+        startWith(''),
+        debounceTime(400),
+        distinctUntilChanged()
+      ),
+      this.refreshTrigger$
+    ]).pipe(
+      tap(([termino, _]) => {
+        console.log('⚡ Buscando ONG:', termino);
+        this.loading = true;
+      }),
+      switchMap(([termino, _]) => {
+        if (termino && termino.trim().length > 0) {
+          return this.perfilOngService.searchByName(termino.trim());
+        } else {
+          return this.perfilOngService.getAll();
+        }
+      }),
+      tap(resultados => {
+        console.log('✅ ONGs encontradas:', resultados.length);
+        this.totalOngs = resultados.length;
+        this.loading = false;
+      }),
+      catchError(err => {
+        console.error('❌ Error cargando ONGs:', err);
+        this.loading = false;
+        return of([]);
+      })
+    );
+  }
 
   get searchControl(): FormControl {
     return this.filtroForm.get('search') as FormControl;
@@ -83,29 +85,27 @@ export class ListaOngsPage implements OnInit {
     this.filtroForm.setValue({ search: '' }); 
   }
 
+  async verDetalle(ong: PerfilONGModel) {
+    const modal = await this.modalCtrl.create({
+      component: OngDetalleComponent,
+      componentProps: { 
+        ong, 
+        isAdmin: this.esAdmin 
+      },
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+      cssClass: 'ong-modal-sheet'
+    });
 
-async verDetalle(ong: PerfilONGModel) {
-  const modal = await this.modalCtrl.create({
-    component: OngDetalleComponent,
-    componentProps: { 
-      ong, 
-      isAdmin: this.esAdmin 
-    },
-    breakpoints: [0, 1],
-    initialBreakpoint: 1,
-    cssClass: 'ong-modal-sheet'
-  });
-
-  await modal.present();
-  
-  const { data } = await modal.onDidDismiss();
-  
-  if (data?.refresh) {
-    console.log('🔄 Recargando lista tras cambios...');
-    this.filtroForm.get('search')?.updateValueAndValidity();
+    await modal.present();
+    
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.refresh || data?.ong) {
+      console.log('🔄 Recargando lista tras cambios...');
+      this.refreshTrigger$.next();
+    }
   }
-}
-
 
   trackById(index: number, item: PerfilONGModel) {
     return item.idUsuario;
