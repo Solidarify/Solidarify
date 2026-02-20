@@ -44,10 +44,8 @@ export class StatisticPage implements OnInit {
           firstValueFrom(this.organizadorSvc.getAll())
         ]);
 
-      const totalUsuariosTodosTipos = usuarios.length + ongs.length + organizadores.length;
-
       this.stats = {
-        totalUsuarios: totalUsuariosTodosTipos, 
+        totalUsuarios: usuarios.length, 
         totalPropuestas: todas.length,
         propuestasPublicas: publicas.length,
         totalOngs: ongs.length,
