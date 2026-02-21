@@ -1,11 +1,8 @@
-/* --- FONDO GENERAL --- */
 ion-content {
   --background: #f8fafc;
 }
 
-/* --- HERO & STATS (Azul Institucional) --- */
 .stats-card {
-  /* Gradiente Azul-Violeta para diferenciar de propuestas */
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-radius: 0 0 30px 30px;
   padding: 20px 24px 50px;
