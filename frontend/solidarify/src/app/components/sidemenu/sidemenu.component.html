@@ -112,6 +112,9 @@
         <ion-item [routerLink]="['/lista-propuestas']" [queryParams]="{mode: 'mine'}" routerLinkActive="selected" routerDirection="root" detail="false">
           <ion-icon name="file-tray-full-outline" slot="start"></ion-icon>
           <ion-label>Mis Asignaciones</ion-label>
+          <ion-badge slot="end" color="warning" *ngIf="countPropuestasPendientes > 0">
+            {{ countPropuestasPendientes }}
+          </ion-badge>
         </ion-item>
       </ion-menu-toggle>
 

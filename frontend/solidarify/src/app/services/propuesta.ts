@@ -69,14 +69,15 @@ export class Propuesta {
 
   getFiltradas(filtros: any): Observable<PropuestaModel[]> {
     let params = new HttpParams();
-    
     if (filtros.search) params = params.set('q', filtros.search);
-    if (filtros.tipoBien) params = params.set('tipo_bien_id', filtros.tipoBien);
+    if (filtros.tipoBien) params = params.set('tipobien_id', filtros.tipoBien);
     if (filtros.lugar) params = params.set('lugar', filtros.lugar);
     if (filtros.estado) params = params.set('estado', filtros.estado);
     if (filtros.organizador) params = params.set('organizador_id', filtros.organizador);
+    if (filtros.idOngAsignada) params = params.set('ong_asignada', filtros.idOngAsignada);
 
-    return this.http.get<any[]>(`${this.API_URL}/buscar`, { params }).pipe(
+    return this.http.get<any[]>(`${this.API_URL}/buscar`, { params })
+    .pipe(
       map(items => items.map(item => PropuestaModel.fromApi(item)))
     );
   }

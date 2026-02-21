@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { ToastController } from '@ionic/angular';
-import { PerfilOng } from '../../services/perfil-ong'; // Solo si necesitas cargar estado extra
+import { PerfilOng } from '../../services/perfil-ong';
+import { Propuesta } from '../../services/propuesta';
 
 @Component({
   selector: 'app-sidemenu',
@@ -12,6 +13,8 @@ export class SidemenuComponent implements OnInit, OnChanges {
 
   private perfilOngService = inject(PerfilOng);
   private toastCtrl = inject(ToastController);
+private propuestaService = inject(Propuesta);
+
 
   @Input() currentUser: any = null;
   @Input() isLoggedIn = false;
@@ -25,7 +28,8 @@ export class SidemenuComponent implements OnInit, OnChanges {
   currentUserRole = '';
   ongEstadoVerificacion = '';
   countOngsPendientes = 0;
-
+countPropuestasPendientes = 0; 
+  
   constructor() { }
 
   ngOnInit() {
@@ -94,15 +98,24 @@ export class SidemenuComponent implements OnInit, OnChanges {
     });
   }
 
-  private cargarContadores() {
+ private cargarContadores() {
     if (this.isAdmin) {
       this.perfilOngService.getPendientes().subscribe({
         next: (ongs) => this.countOngsPendientes = ongs.length,
         error: () => this.countOngsPendientes = 0
       });
     }
-  }
 
+    if (this.isONG && this.currentUser?.idUsuario) {
+      this.propuestaService.getFiltradas({
+        estado: 'pendiente_ong',
+        idOngAsignada: this.currentUser.idUsuario
+      }).subscribe({
+        next: (propuestas) => this.countPropuestasPendientes = propuestas.length,
+        error: () => this.countPropuestasPendientes = 0
+      });
+    }
+  }
   async mostrarMensajePendiente(seccion: string) {
     const toast = await this.toastCtrl.create({
       message: `La sección "${seccion}" estará disponible próximamente`,

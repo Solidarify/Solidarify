@@ -213,7 +213,7 @@ export class AccountPage {
     await confirm.present();
   }
 
-  private async guardarFotoPerfil(base64: string | null) {
+   private async guardarFotoPerfil(base64: string | null) {
     const u = this.usuario();
     if (!u) return;
 
@@ -223,15 +223,18 @@ export class AccountPage {
     try {
       const usuarioActualizado = new UsuarioModel({
         ...u,
-        fotoPerfil: base64 || undefined
+        fotoPerfil: base64 
       });
-
+      
+      console.log('Usuario actualizado con nueva foto:', usuarioActualizado);
+      
       const updated = await firstValueFrom(
         this.usuarioService.update(u.idUsuario, usuarioActualizado)
       );
 
-      // AQUI ES DONDE ESTABA EL FALLO. Ahora usamos updateSessionData
       this.auth.updateSessionData({ fotoPerfil: updated.fotoPerfil });
+      
+      this.usuario.set(updated);
       
       this.mostrarAlerta('¡Listo!', 'Foto actualizada correctamente.');
 
@@ -242,6 +245,7 @@ export class AccountPage {
       loading.dismiss();
     }
   }
+
 
   async guardarCambios() {
     const confirm = await this.alertCtrl.create({

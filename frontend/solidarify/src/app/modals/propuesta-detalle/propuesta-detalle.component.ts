@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, inject } from '@angular/core';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Propuesta } from '../../services/propuesta';
 import { Auth } from '../../services/auth';
@@ -18,6 +19,7 @@ export class PropuestaDetalleComponent implements OnInit {
   private alertCtrl = inject(AlertController);
   private propuestaService = inject(Propuesta);
   public auth = inject(Auth); 
+  private router = inject(Router); 
 
   @Input() propuesta!: PropuestaModel; 
 
@@ -42,7 +44,6 @@ export class PropuestaDetalleComponent implements OnInit {
     return user?.idUsuario === this.propuesta.idOrganizador;
   }
 
-  // --- NUEVOS GETTERS PARA LA LÓGICA DE ONG ---
   get esLaOngSolicitada(): boolean {
     const userId = this.auth.currentUser()?.idUsuario;
     return this.auth.hasRole('ONG') && this.propuesta.idOngAsignada === userId;
@@ -51,7 +52,6 @@ export class PropuestaDetalleComponent implements OnInit {
   get esSolicitudPendiente(): boolean {
     return this.propuesta.estadoPropuesta === 'pendiente_ong';
   }
-  // ---------------------------------------------
 
   get tipoBienNombre(): string {
     const map: {[key: number]: string} = {

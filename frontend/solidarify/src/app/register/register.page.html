@@ -8,161 +8,98 @@
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       
-      <ion-item lines="none" class="ion-margin-bottom">
-        <ion-label position="stacked">Rol *</ion-label>
-        <ion-select formControlName="role" placeholder="Selecciona uno">
-          <ion-select-option value="ORGANIZADOR">Organizador</ion-select-option>
-          <ion-select-option value="ONG">ONG</ion-select-option>
-          <ion-select-option value="USER">Usuario</ion-select-option>
-        </ion-select>
-        <ion-note slot="error" *ngIf="registerForm.get('role')?.hasError('required') && registerForm.get('role')?.touched">
+      <!-- ROL COMO BOTONES MODERNOS (SEGMENT) -->
+      <div class="ion-margin-bottom role-selector-container">
+        <ion-label class="segment-label">Soy un(a):</ion-label>
+        <ion-segment formControlName="role" mode="ios">
+          <ion-segment-button value="ONG">
+            <ion-label>ONG</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="ORGANIZADOR">
+            <ion-label>Organizador</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="USER">
+            <ion-label>Usuario</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+        <div class="custom-error" *ngIf="registerForm.get('role')?.invalid && isSubmitted">
           Debes seleccionar un rol
-        </ion-note>
-      </ion-item>
+        </div>
+      </div>
 
-      <ion-item lines="none" class="ion-margin-bottom">
-        <ion-label position="floating">Nombre *</ion-label>
-        <ion-input formControlName="nombre"></ion-input>
-        <ion-note slot="error" *ngIf="registerForm.get('nombre')?.hasError('required') && registerForm.get('nombre')?.touched">
-          El nombre es obligatorio
-        </ion-note>
-        <ion-note slot="error" *ngIf="registerForm.get('nombre')?.hasError('minlength') && registerForm.get('nombre')?.touched">
-          Mínimo 2 caracteres
-        </ion-note>
-      </ion-item>
+      <!-- CAMPOS GENERALES -->
+      <ion-input class="modern-input" formControlName="nombre" label="Nombre *" labelPlacement="floating" fill="outline"
+        [class.ion-touched]="registerForm.get('nombre')?.touched || isSubmitted"
+        [errorText]="getErrorMessage('nombre')"></ion-input>
 
-      <ion-item lines="none" class="ion-margin-bottom">
-        <ion-label position="floating">Email *</ion-label>
-        <ion-input formControlName="email" type="email"></ion-input>
-        <ion-note slot="error" *ngIf="registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched">
-          El email es obligatorio
-        </ion-note>
-        <ion-note slot="error" *ngIf="registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched">
-          Email no válido
-        </ion-note>
-      </ion-item>
+      <ion-input class="modern-input" formControlName="email" type="email" label="Email *" labelPlacement="floating" fill="outline"
+        [class.ion-touched]="registerForm.get('email')?.touched || isSubmitted"
+        [errorText]="getErrorMessage('email')"></ion-input>
 
-      <ion-item lines="none" class="ion-margin-bottom">
-        <ion-label position="floating">Contraseña *</ion-label>
-        <ion-input formControlName="password" type="password"></ion-input>
-        <ion-note slot="error" *ngIf="registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched">
-          La contraseña es obligatoria
-        </ion-note>
-        <ion-note slot="error" *ngIf="registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched">
-          Mínimo 6 caracteres
-        </ion-note>
-      </ion-item>
+      <ion-input class="modern-input" formControlName="password" type="password" label="Contraseña *" labelPlacement="floating" fill="outline"
+        [class.ion-touched]="registerForm.get('password')?.touched || isSubmitted"
+        [errorText]="getErrorMessage('password')"></ion-input>
 
-      <ion-item lines="none" class="ion-margin-bottom">
-        <ion-label position="floating">Teléfono</ion-label>
-        <ion-input formControlName="telefono" type="tel"></ion-input>
-        <ion-note slot="error" *ngIf="registerForm.get('telefono')?.hasError('pattern') && registerForm.get('telefono')?.touched">
-          Solo números (9-15 dígitos)
-        </ion-note>
-      </ion-item>
+      <!-- Teléfono general opcional -->
+      <ion-input class="modern-input" formControlName="telefono" type="tel" label="Teléfono (opcional)" labelPlacement="floating" fill="outline"
+        [class.ion-touched]="registerForm.get('telefono')?.touched || isSubmitted"
+        [errorText]="getErrorMessage('telefono')"></ion-input>
 
+      <!-- DATOS ORGANIZADOR -->
       <div *ngIf="roleField?.value === 'ORGANIZADOR'" class="role-section">
         <h3>Datos Organizador</h3>
         
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Nombre de la Organización *</ion-label>
-          <ion-input formControlName="orgNombre"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('orgNombre')?.hasError('required') && registerForm.get('orgNombre')?.touched">
-            Requerido
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="orgNombre" label="Nombre de la Organización *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('orgNombre')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('orgNombre')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">CIF *</ion-label>
-          <ion-input formControlName="orgCif"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('orgCif')?.invalid && registerForm.get('orgCif')?.touched">
-            CIF inválido (ej: B12345678)
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="orgCif" label="CIF *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('orgCif')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('orgCif')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Email de la Organización *</ion-label>
-          <ion-input formControlName="orgEmail" type="email"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('orgEmail')?.invalid && registerForm.get('orgEmail')?.touched">
-            Email inválido
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="orgEmail" type="email" label="Email de la Organización *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('orgEmail')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('orgEmail')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Cargo</ion-label>
-          <ion-input formControlName="orgCargo"></ion-input>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="orgCargo" label="Cargo" labelPlacement="floating" fill="outline"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Teléfono Directo</ion-label>
-          <ion-input formControlName="orgTelefonoDirecto" type="tel"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('orgTelefonoDirecto')?.hasError('pattern')">
-            Formato incorrecto
-          </ion-note>
-        </ion-item>
+        <!-- Ahora es obligatorio -->
+        <ion-input class="modern-input" formControlName="orgTelefonoDirecto" type="tel" label="Teléfono Directo *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('orgTelefonoDirecto')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('orgTelefonoDirecto')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Zona Responsable</ion-label>
-          <ion-input formControlName="orgZona"></ion-input>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="orgZona" label="Zona Responsable" labelPlacement="floating" fill="outline"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Observaciones</ion-label>
-          <ion-textarea formControlName="orgObservaciones" rows="3"></ion-textarea>
-        </ion-item>
+        <ion-textarea class="modern-input" formControlName="orgObservaciones" label="Observaciones" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
       </div>
 
+      <!-- DATOS ONG -->
       <div *ngIf="roleField?.value === 'ONG'" class="role-section">
         <h3>Datos ONG</h3>
         
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Nombre Legal *</ion-label>
-          <ion-input formControlName="ongNombreLegal"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('ongNombreLegal')?.hasError('required') && registerForm.get('ongNombreLegal')?.touched">
-            Requerido
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="ongNombreLegal" label="Nombre Legal *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('ongNombreLegal')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('ongNombreLegal')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">CIF *</ion-label>
-          <ion-input formControlName="ongCif"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('ongCif')?.invalid && registerForm.get('ongCif')?.touched">
-            CIF inválido
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="ongCif" label="CIF *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('ongCif')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('ongCif')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Descripción</ion-label>
-          <ion-textarea formControlName="ongDescripcion" rows="3"></ion-textarea>
-        </ion-item>
+        <ion-textarea class="modern-input" formControlName="ongDescripcion" label="Descripción" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Dirección</ion-label>
-          <ion-input formControlName="ongDireccion"></ion-input>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="ongDireccion" label="Dirección" labelPlacement="floating" fill="outline"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Teléfono de Contacto</ion-label>
-          <ion-input formControlName="ongTelefonoContacto" type="tel"></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('ongTelefonoContacto')?.hasError('pattern')">
-            Formato incorrecto
-          </ion-note>
-        </ion-item>
+        <!-- Ahora es obligatorio -->
+        <ion-input class="modern-input" formControlName="ongTelefonoContacto" type="tel" label="Teléfono de Contacto *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('ongTelefonoContacto')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('ongTelefonoContacto')"></ion-input>
 
-        <ion-item lines="none" class="ion-margin-bottom">
-          <ion-label position="floating">Sitio Web</ion-label>
-          <ion-input formControlName="ongWeb" type="url" placeholder="https://..."></ion-input>
-          <ion-note slot="error" *ngIf="registerForm.get('ongWeb')?.hasError('pattern')">
-            Debe empezar por http:// o https://
-          </ion-note>
-        </ion-item>
+        <ion-input class="modern-input" formControlName="ongWeb" type="url" placeholder="https://..." label="Sitio Web" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('ongWeb')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('ongWeb')"></ion-input>
       </div>
 
-      <ion-button 
-        expand="block" 
-        type="submit" 
-        class="ion-margin-top"
-        [disabled]="registerForm.invalid">
+      <ion-button expand="block" type="submit" class="ion-margin-top">
         Registrarse
       </ion-button>
 

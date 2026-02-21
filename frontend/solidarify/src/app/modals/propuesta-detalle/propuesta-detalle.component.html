@@ -49,7 +49,7 @@
   <div class="hero-image-container hero-image">
     <!-- El badge se ajusta visualmente si está pendiente -->
     <div class="badge-estado" 
-         [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada'"
+         [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada' || propuestaEditada.estadoPropuesta === 'asignada'"
          [style.background]="propuestaEditada.estadoPropuesta === 'pendiente_ong' ? '#f59e0b' : ''">
       {{ propuestaEditada.estadoPropuesta === 'pendiente_ong' ? 'Pendiente ONG' : (propuestaEditada.estadoPropuesta | titlecase) }}
     </div>
@@ -84,7 +84,6 @@
 
   <!-- FIN BANNERS DE NOTIFICACIÓN -->
 
-
   <div class="content-container ion-padding">
     
     <div class="header-section">
@@ -110,6 +109,34 @@
         </span>
       </div>
     </div>
+
+    <!-- NUEVO BLOQUE: ONG ASIGNADA (Versión Sencilla) -->
+    <ng-container *ngIf="propuestaEditada.idOngAsignada; else sinOng">
+      <div class="organizador-row ong-row">
+        <ion-avatar slot="start">
+          <img [src]="'https://ui-avatars.com/api/?name=' + (propuestaEditada.ongAsignada?.nombre || 'ONG') + '&background=f59e0b&color=fff'">
+        </ion-avatar>
+        <div class="org-info">
+          <span class="label">Respaldada por la ONG</span>
+          <span class="nombre" style="color: var(--ion-color-primary); font-weight: 600;">
+            {{ propuestaEditada.ongAsignada?.nombre || 'ONG Asignada' }}
+          </span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- BLOQUE SIN ONG -->
+    <ng-template #sinOng>
+      <div class="organizador-row ong-row sin-ong">
+        <ion-icon name="shield-half-outline" color="medium" class="icon-sin-ong"></ion-icon>
+        <div class="org-info">
+          <span class="label" style="margin-bottom: 4px;">Estado de respaldo</span>
+          <span class="nombre" style="color: var(--ion-color-medium); font-weight: 500; font-size: 0.9rem;">
+            Aún no está respaldada por ninguna de nuestras ONGs
+          </span>
+        </div>
+      </div>
+    </ng-template>
 
     <ion-grid class="info-grid ion-no-padding">
       <ion-row>

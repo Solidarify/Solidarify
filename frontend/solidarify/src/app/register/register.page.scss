@@ -1,10 +1,10 @@
 :host {
   --sol-primary: #10b981;       
   --sol-primary-dark: #059669;  
-  --sol-bg-dark: #ecfdf5;      
-  --sol-surface:  #f9fafb;   
+  --sol-bg-dark: #ecfdf5;       
+  --sol-surface:  #ffffff;   
   --sol-text-light: #064e3b;    
-  --sol-text-muted: #064e3b;    
+  --sol-text-muted: #4b5563;    
   --sol-error: #ef4444;         
 }
 
@@ -54,47 +54,72 @@ ion-content {
   }
 }
 
-ion-item {
+/* -- ESTILOS MEJORADOS PARA EL SEGMENT DE ROLES -- */
+.role-selector-container {
+  margin-bottom: 24px;
+  
+  .segment-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--sol-text-light);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  ion-segment {
+    background: #e2e8f0; /* Fondo gris suave para la píldora */
+    border-radius: 12px; /* Más redondeado */
+    padding: 4px; /* Espacio interior para el efecto deslizante */
+  }
+
+  ion-segment-button {
+    --indicator-color: var(--sol-primary); /* El botón activo se vuelve verde */
+    --color: var(--sol-text-muted); /* Color inactivo */
+    --color-checked: #ffffff; /* Texto blanco cuando está activo */
+    --border-radius: 8px;
+    
+    margin: 0 2px;
+    min-height: 40px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    transition: color 0.3s ease;
+  }
+}
+
+.custom-error {
+  color: var(--sol-error);
+  font-size: 12px;
+  margin-top: 6px;
+  padding-left: 16px;
+  font-weight: 500;
+}
+
+/* -- Estilos para los Inputs Modernos de Ionic 8 -- */
+.modern-input {
+  margin-bottom: 20px;
+  
   --background: var(--sol-surface);
   --color: var(--sol-text-light);
-  --border-radius: 12px;
-  --padding-start: 15px;
-  --inner-padding-end: 15px;
+  --placeholder-color: #9ca3af;
+  
+  /* Ajustes del borde outline nativo */
+  --border-radius: 8px;
+  --border-color: #d1d5db;
+  --border-width: 1px;
+  
+  /* Colores de foco y error */
   --highlight-color-focused: var(--sol-primary);
-  
-  margin-bottom: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
+  --highlight-color-invalid: var(--sol-error);
 
-  &.item-has-focus {
-    border-color: var(--sol-primary);
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-  }
-
-  ion-label {
-    color: var(--sol-text-muted) !important;
-    font-weight: 500;
-  }
-  
-  ion-input, ion-select, ion-textarea {
-    --color: var(--sol-text-light);
-    font-weight: 600;
-  }
-
-  ion-select {
-    --placeholder-color: #064e3b;
-  }
-
-  ion-select-option{
-    --color: var(--sol-text-light);
-  }
+  font-weight: 600;
 }
 
 .role-section {
   background: rgba(16, 185, 129, 0.05); 
   border-radius: 16px;
   padding: 20px;
+  padding-bottom: 5px;
   margin-bottom: 20px;
   border: 1px dashed var(--sol-primary-dark);
 
@@ -103,7 +128,7 @@ ion-item {
     font-size: 18px;
     font-weight: 700;
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -126,7 +151,7 @@ ion-button[type="submit"] {
   --border-radius: 30px; 
   --box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
   
-  margin-top: 30px;
+  margin-top: 20px;
   margin-bottom: 20px;
   height: 50px;
   font-weight: 700;

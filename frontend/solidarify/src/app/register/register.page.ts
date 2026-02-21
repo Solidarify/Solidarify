@@ -20,6 +20,7 @@ export class RegisterPage implements OnInit {
   private auth = inject(Auth); 
 
   registerForm!: FormGroup;
+  isSubmitted = false;
 
   constructor() {}
 
@@ -34,13 +35,13 @@ export class RegisterPage implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      telefono: ['', [Validators.pattern(/^[0-9]{9,15}$/)]],
+      telefono: ['', [Validators.pattern(/^[0-9]{9,15}$/)]], // Opcional para usuario normal
 
       orgNombre: [''],
       orgCif: [''],
       orgEmail: ['', [Validators.email]], 
       orgCargo: [''],
-      orgTelefonoDirecto: ['', [Validators.pattern(/^[0-9]{9,15}$/)]],
+      orgTelefonoDirecto: [''], // Se validará dinámicamente
       orgZona: [''],
       orgObservaciones: [''],
 
@@ -48,7 +49,7 @@ export class RegisterPage implements OnInit {
       ongCif: [''],
       ongDescripcion: [''],
       ongDireccion: [''],
-      ongTelefonoContacto: ['', [Validators.pattern(/^[0-9]{9,15}$/)]],
+      ongTelefonoContacto: [''], // Se validará dinámicamente
       ongWeb: ['', [Validators.pattern(/^https?:\/\/.+/)]]
     });
   }
@@ -74,9 +75,12 @@ export class RegisterPage implements OnInit {
 
   private setOrganizadorValidators(): void {
     this.registerForm.get('orgNombre')?.setValidators([Validators.required, Validators.minLength(3)]);
-    this.registerForm.get('orgCif')?.setValidators([Validators.required, Validators.minLength(5)]); // Relajado para pruebas
+    this.registerForm.get('orgCif')?.setValidators([Validators.required, Validators.minLength(5)]); 
     this.registerForm.get('orgEmail')?.setValidators([Validators.required, Validators.email]);
-    this.updateControls(['orgNombre', 'orgCif', 'orgEmail']);
+    // NUEVO: Teléfono directo obligatorio y con patrón estricto
+    this.registerForm.get('orgTelefonoDirecto')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{9,15}$/)]);
+    
+    this.updateControls(['orgNombre', 'orgCif', 'orgEmail', 'orgTelefonoDirecto']);
   }
 
   private clearOrganizadorValidators(): void {
@@ -85,8 +89,11 @@ export class RegisterPage implements OnInit {
 
   private setOngValidators(): void {
     this.registerForm.get('ongNombreLegal')?.setValidators([Validators.required, Validators.minLength(3)]);
-    this.registerForm.get('ongCif')?.setValidators([Validators.required, Validators.minLength(5)]); // Relajado
-    this.updateControls(['ongNombreLegal', 'ongCif']);
+    this.registerForm.get('ongCif')?.setValidators([Validators.required, Validators.minLength(5)]); 
+    // NUEVO: Teléfono ONG obligatorio y con patrón estricto
+    this.registerForm.get('ongTelefonoContacto')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{9,15}$/)]);
+    
+    this.updateControls(['ongNombreLegal', 'ongCif', 'ongTelefonoContacto']);
   }
 
   private clearOngValidators(): void {
@@ -108,9 +115,33 @@ export class RegisterPage implements OnInit {
     return this.registerForm.get('role');
   }
 
+  getErrorMessage(controlName: string): string | undefined {
+    const control = this.registerForm.get(controlName);
+    
+    if (control && control.invalid && (control.touched || this.isSubmitted)) {
+      if (control.hasError('required')) return 'Este campo es obligatorio';
+      if (control.hasError('minlength')) return `Mínimo ${control.getError('minlength').requiredLength} caracteres`;
+      if (control.hasError('email')) return 'Email no válido';
+      if (control.hasError('pattern')) {
+        if (controlName === 'telefono' || controlName === 'orgTelefonoDirecto' || controlName === 'ongTelefonoContacto') {
+          return 'Solo números (9 a 15 dígitos)';
+        }
+        if (controlName === 'ongWeb') {
+          return 'Debe empezar por http:// o https://';
+        }
+        return 'Formato incorrecto';
+      }
+      return 'Dato no válido';
+    }
+    return undefined;
+  }
+
   async onSubmit(): Promise<void> {
+    this.isSubmitted = true;
+    this.registerForm.markAllAsTouched();
+
     if (this.registerForm.invalid) {
-      await this.showAlert('Error', 'Por favor, completa todos los campos requeridos correctamente.');
+      await this.showAlert('Datos incompletos', 'Por favor, revisa los campos marcados en rojo e inténtalo de nuevo.');
       return;
     }
 
@@ -122,8 +153,6 @@ export class RegisterPage implements OnInit {
 
     try {
       const formData = this.prepareFormData();
-      console.log('📦 Enviando:', formData);
-
       this.auth.register(formData).subscribe({
         next: async (res) => {
           await loading.dismiss();
@@ -132,7 +161,6 @@ export class RegisterPage implements OnInit {
         },
         error: async (err) => {
           await loading.dismiss();
-          console.error('Error Registro:', err);
           const msg = err.error?.message || 'Ocurrió un error. Inténtalo de nuevo.';
           await this.showAlert('Error', msg);
         }
@@ -140,7 +168,6 @@ export class RegisterPage implements OnInit {
 
     } catch (error) {
       await loading.dismiss();
-      console.error('Excepción:', error);
     }
   }
 

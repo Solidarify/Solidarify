@@ -64,15 +64,27 @@ export class ListaPropuestasPage implements OnInit {
       switchMap(([filtros, _]) => {
         let request$: Observable<PropuestaModel[]>;
         if (this.mode === 'mine') {
-          const user = this.auth.currentUser();
-          if (!user) {
-            request$ = of([]); 
-          } else {
-            request$ = this.propuestaService.getFiltradas({ ...filtros, organizador: user.idUsuario });
-          }
-        } else {
-          request$ = this.propuestaService.getFiltradas({ ...filtros, estado: 'publicada' });
-        }
+  const user = this.auth.currentUser();
+  if (!user) {
+    request$ = of([]); 
+  } else {
+    if (this.auth.hasRole('ONG')) {
+      request$ = this.propuestaService.getFiltradas({ 
+        ...filtros, 
+        idOngAsignada: user.idUsuario 
+      });
+    } else {
+      request$ = this.propuestaService.getFiltradas({ 
+        ...filtros, 
+        organizador: user.idUsuario 
+      });
+    }
+  }
+} else {
+  request$ = this.propuestaService.getFiltradas({ ...filtros, estado: 'explorar' });
+  
+}
+
 
         return request$.pipe(
           tap(resultados => {
@@ -90,26 +102,29 @@ export class ListaPropuestasPage implements OnInit {
     );
   }
 
-  private configurarPagina() {
-    if (this.mode === 'mine') {
-      if (!this.auth.isAuthenticated()) {
-        this.router.navigate(['/login']);
-        return;
-      }
-      
-      const esOrganizador = this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
-      if (!esOrganizador) {
-        this.router.navigate(['/lista-propuestas', { mode: 'explore' }]);
-        return;
-      }
-      
-      this.pageTitle = 'Mis propuestas';
-      this.filtroForm.patchValue({ estado: '' }, { emitEvent: false });
-    } else {
-      this.pageTitle = 'Explorar propuestas';
-      this.filtroForm.patchValue({ estado: 'publicada' }, { emitEvent: false });
+private configurarPagina() {
+  if (this.mode === 'mine') {
+    if (!this.auth.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
     }
+    
+    const esOrganizador = this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
+    if (!esOrganizador) {
+      this.router.navigate(['/lista-propuestas', { mode: 'explore' }]);
+      return;
+    }
+    
+    this.pageTitle = this.auth.hasRole('ONG') ? 'Mis asignaciones' : 'Mis propuestas';
+    
+    // Si queremos que la ONG vea inicialmente las pendientes, podemos ponerlo aquí
+    // this.filtroForm.patchValue({ estado: this.auth.hasRole('ONG') ? 'pendiente_ong' : '' }, { emitEvent: false });
+    this.filtroForm.patchValue({ estado: '' }, { emitEvent: false });
+  }else {
+    this.pageTitle = 'Explorar propuestas';
+    this.filtroForm.patchValue({ estado: 'explorar' }, { emitEvent: false }); 
   }
+}
 
   async verDetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({

@@ -234,3 +234,28 @@ ion-content {
   -webkit-appearance: none;
   appearance: none;
 }
+
+.propuesta-card {
+
+  &.estado-pendiente {
+    border-left: 4px solid var(--ion-color-warning); // Borde amarillo a la izquierda
+    background: rgba(var(--ion-color-warning-rgb), 0.05); // Fondo ligeramente amarillo
+  }
+}
+
+.badge-pendiente {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ion-color-warning);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 14px;
+  }
+}

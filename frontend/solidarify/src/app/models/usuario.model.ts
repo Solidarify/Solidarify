@@ -4,7 +4,7 @@ export class UsuarioModel {
     email: string;
     passwordHash: string;
     telefono?: string;
-    fotoPerfil?: string;
+    fotoPerfil?: string | null;
     activo: boolean;
     createdAt?: Date;
     updatedAt?: Date;

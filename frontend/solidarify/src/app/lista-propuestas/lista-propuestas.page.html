@@ -54,6 +54,7 @@
       <div 
         *ngFor="let propuesta of propuestasList; trackBy: trackById" 
         class="propuesta-card scale-in"
+        [ngClass]="{'estado-pendiente': propuesta.estadoPropuesta === 'pendiente_ong'}"
         (click)="verDetalle(propuesta)">
         
         <!-- Columna Izquierda: Icono/Imagen -->
@@ -66,6 +67,12 @@
         <div class="card-info">
           <h2 class="card-title">{{ propuesta.titulo }}</h2>
           
+          <!-- AÑADIR ESTE BADGE (Corregido sin duplicar el div anterior) -->
+          <div *ngIf="propuesta.estadoPropuesta === 'pendiente_ong'" class="badge-pendiente">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Pendiente de respuesta
+          </div>
+
           <div class="card-meta">
             <div class="meta-item location">
               <ion-icon name="location-sharp"></ion-icon>
@@ -78,13 +85,13 @@
               {{ propuesta.fechaInicio | date:'d MMM' }} - {{ propuesta.fechaFin | date:'d MMM' }}
             </span>
           </div>
-        </div>
+        </div> <!-- Cierre correcto de card-info -->
 
         <!-- Columna Derecha: Flecha -->
         <div class="card-action">
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
-      </div>
+      </div> <!-- Cierre correcto del ngFor propuesta-card -->
       
       <!-- EMPTY STATE (Si no hay resultados) -->
       <div *ngIf="propuestasList.length === 0" class="empty-state">
@@ -95,9 +102,9 @@
         <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
-    </div>
+    </div> <!-- Cierre correcto de propuestas-list -->
 
-  </ng-container>
+  </ng-container> <!-- Cierre correcto del ng-container -->
 
   <!-- LOADING STATE -->
   <div class="loading-container" *ngIf="loading">

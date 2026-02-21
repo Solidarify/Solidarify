@@ -3,8 +3,7 @@ const { Op } = require('sequelize');
 
 exports.getAll = async (req, res) => {
   try {
-    const { q, tipo_bien_id, lugar, estado, organizador_id } = req.query;
-    
+    const { q, tipobien_id, lugar, estado, organizador_id, ong_asignada } = req.query; 
     const whereClause = {};
 
     if (q) {
@@ -14,9 +13,17 @@ exports.getAll = async (req, res) => {
       ];
     }
     if (lugar) whereClause.lugar = { [Op.like]: `%${lugar}%` };
-    if (estado) whereClause.estadoPropuesta = estado;
+    if (estado) {
+        if (estado === 'explorar') {
+        // Si piden explorar, devolvemos publicadas Y asignadas
+        whereClause.estadoPropuesta = { [Op.in]: ['publicada', 'asignada'] };
+        } else {
+        // Comportamiento normal (ej: 'pendiente_ong', 'borrador')
+        whereClause.estadoPropuesta = estado;
+    }
+}
     if (organizador_id) whereClause.idOrganizador = organizador_id;
-    // if (tipo_bien_id) ...
+    if (ong_asignada) whereClause.idOngAsignada = ong_asignada; 
 
     const propuestas = await Propuesta.findAll({
       where: whereClause,

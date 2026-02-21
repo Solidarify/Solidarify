@@ -1,13 +1,13 @@
 /* --- CORRECCIÓN DE COLORES EN MODO EDICIÓN --- */
 .custom-input {
-  --background: #f1f5f9; /* Un gris muy clarito para el fondo del input */
-  --color: #1e293b;      /* Texto oscuro casi negro */
+  --background: #f1f5f9;
+  --color: #1e293b;
   --placeholder-color: #94a3b8;
   border-radius: 8px;
   margin-top: 8px;
 
   ion-input, ion-textarea, ion-select {
-    color: #1e293b !important; /* Fuerza el texto oscuro */
+    color: #1e293b !important;
     --color: #1e293b !important;
   }
 }
@@ -36,4 +36,202 @@
   &::part(icon) {
     color: #64748b !important;
   }
+}
+
+/* --- SECCIÓN HERO DE LA IMAGEN --- */
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: #e2e8f0;
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  
+  .main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: block;
+  }
+  
+  /* BADGE ESTADO CORREGIDO PARA VISIBILIDAD */
+  .badge-estado {
+    position: absolute;
+    bottom: 20px; 
+    right: 16px;
+    background: #e2e8f0; /* Fondo clarito por defecto */
+    color: #1e293b; /* Texto oscuro para asegurar legibilidad */
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 10;
+    
+    /* Si la propuesta está publicada o asignada, forzamos fondo verde y texto blanco */
+    &.publicada {
+      background: var(--ion-color-success, #2dd36f);
+      color: #ffffff; 
+    }
+  }
+}
+
+/* --- CONTENEDOR PRINCIPAL BLANCO --- */
+.content-container {
+  margin-top: -20px; 
+  position: relative;
+  background: #f4fdf8; 
+  border-radius: 24px 24px 0 0;
+  padding-top: 24px;
+  z-index: 11;
+}
+
+.titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #064e3b;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* --- FILAS DE ORGANIZADOR Y ONG --- */
+.organizador-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #cbd5e1;
+  
+  ion-avatar {
+    width: 45px;
+    height: 45px;
+    margin-right: 12px;
+  }
+  
+  .org-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    
+    .label {
+      font-size: 0.75rem;
+      color: #0f766e;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    
+    .nombre {
+      font-size: 1rem;
+      color: #047857;
+      font-weight: 600;
+    }
+  }
+}
+
+/* --- TARJETA DE ONG ASIGNADA --- */
+.ong-row {
+  background-color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0; 
+  
+  .org-info {
+    flex: 1; 
+  }
+}
+
+/* Variante si no hay ONG */
+.ong-row.sin-ong {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  box-shadow: none;
+  opacity: 0.9;
+  
+  .icon-sin-ong {
+    font-size: 32px;
+    margin-right: 12px;
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+}
+
+/* --- CUADRÍCULA DE INFORMACIÓN (LUGAR, FECHAS) --- */
+.info-grid {
+  margin-bottom: 20px;
+  
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    
+    ion-icon {
+      font-size: 22px;
+      color: #10b981;
+      margin-right: 10px;
+      margin-top: 2px;
+    }
+    
+    div {
+      display: flex;
+      flex-direction: column;
+      
+      .label {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 4px;
+      }
+      
+      .value {
+        font-size: 0.95rem;
+        color: #047857;
+        font-weight: 600;
+      }
+      
+      .note-mini {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin: 2px 0 0 0;
+        font-style: italic;
+      }
+    }
+  }
+}
+
+.separator {
+  margin: 15px 0;
+  border: 0;
+  height: 1px;
+  background: #cbd5e1;
+}
+
+/* --- SECCIÓN DESCRIPCIÓN --- */
+.descripcion-section {
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #064e3b;
+    margin-bottom: 12px;
+  }
+  
+  .descripcion-text {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}
+
+.action-btn {
+  margin: 16px;
+  height: 48px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
