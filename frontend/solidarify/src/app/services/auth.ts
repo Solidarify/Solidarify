@@ -25,7 +25,6 @@ export class Auth {
     this.checkSession();
   }
 
-  // LOGIN REAL
   login(credentials: { email: string, password: string }): Observable<any> {
     return this.http.post<any>(`${this.API_URL}/login`, credentials).pipe(
       tap(response => {
@@ -50,7 +49,6 @@ export class Auth {
   private saveSession(token: string, user: UsuarioModel) {
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-      console.log('Guardando sesión. Roles recibidos:', user.roles); 
 
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
@@ -89,7 +87,6 @@ export class Auth {
       
       localStorage.setItem(this.USER_KEY, JSON.stringify(mergedUser));
       
-      console.log('Sesión local actualizada con los nuevos datos.');
     }
   }
 

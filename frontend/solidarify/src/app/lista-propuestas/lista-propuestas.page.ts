@@ -46,7 +46,6 @@ export class ListaPropuestasPage implements OnInit {
   }
 
   ngOnInit() {
-    console.log('🏁 Inicializando ListaPropuestasPage...');
     
     this.route.queryParamMap.subscribe(params => {
       const modeParam = params.get('mode');
@@ -90,10 +89,8 @@ export class ListaPropuestasPage implements OnInit {
           tap(resultados => {
             this.loading = false;
             this.totalPropuestas = resultados.length;
-            console.log('✅ Resultados encontrados:', resultados.length);
           }),
           catchError(err => {
-            console.error('❌ Error HTTP:', err);
             this.loading = false; 
             return of([]); 
           })
@@ -117,8 +114,6 @@ private configurarPagina() {
     
     this.pageTitle = this.auth.hasRole('ONG') ? 'Mis asignaciones' : 'Mis propuestas';
     
-    // Si queremos que la ONG vea inicialmente las pendientes, podemos ponerlo aquí
-    // this.filtroForm.patchValue({ estado: this.auth.hasRole('ONG') ? 'pendiente_ong' : '' }, { emitEvent: false });
     this.filtroForm.patchValue({ estado: '' }, { emitEvent: false });
   }else {
     this.pageTitle = 'Explorar propuestas';

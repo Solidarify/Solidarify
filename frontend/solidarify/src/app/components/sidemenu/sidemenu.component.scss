@@ -1,18 +1,16 @@
-/* Contenedor principal: Ocupa el 100% y usa Flexbox */
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
   --sol-primary: #10b981;
-  background: #f8fafc; /* Fondo global del menú */
+  background: #f8fafc; 
 }
 
-/* HEADER PERSONALIZADO (No uses ion-toolbar dentro de ion-content si puedes evitarlo) */
 .user-toolbar {
   --background: var(--sol-primary);
   --color: white;
-  --min-height: 70px; /* Más alto para que quepa todo */
-  padding-top: 20px; /* Espacio para status bar */
+  --min-height: 70px; 
+  padding-top: 20px; 
   
   .user-info {
     padding: 10px 20px;
@@ -21,43 +19,32 @@
   }
 }
 
-/* CONTENIDO SCROLLABLE */
 ion-content {
-  --background: transparent; /* Dejamos que se vea el fondo del host */
-  flex: 1; /* Ocupa el espacio restante */
-  
-  /* Truco para que el footer se quede abajo */
+  --background: transparent; 
+  flex: 1; 
   display: flex;
   flex-direction: column;
 }
 
-/* LISTA */
 .menu-list {
   padding-top: 10px;
   background: transparent;
   display: flex;
   flex-direction: column;
-  min-height: 100%; /* Clave para el spacer */
+  min-height: 100%; 
 }
 
-/* ESTILOS DE LOS ÍTEMS (Usando !important para forzar) */
-/* --- ESTILOS DE LOS ÍTEMS (Forzando Hover) --- */
-/* --- ESTILOS DE LOS ÍTEMS --- */
 ion-item {
   --background: transparent !important;
   --padding-start: 16px;
   --inner-padding-end: 16px;
   --min-height: 48px;
-  
-  /* Color base del texto (Gris oscuro, casi negro) */
   --color: #334155 !important;
   color: #334155 !important;
-  
   margin-bottom: 2px;
   border-radius: 8px;
   margin-right: 8px;
   margin-left: 8px;
-  
   font-size: 0.95rem;
   cursor: pointer;
   
@@ -68,28 +55,22 @@ ion-item {
     transition: color 0.2s, transform 0.2s;
   }
 
-  /* --- ESTADO HOVER (Ratón encima) --- */
   &:hover {
-    /* 1. Fondo verde muy suave */
     --background: rgba(16, 185, 129, 0.08) !important;
     background-color: rgba(16, 185, 129, 0.08) !important;
 
-    /* 2. FORZAR TEXTO NEGRO/OSCURO AQUÍ */
-    --color: #1e293b !important; /* Casi negro */
+    --color: #1e293b !important; 
     color: #1e293b !important;
     
-    /* 3. Icono se mueve y se pone verde */
     ion-icon {
       color: var(--sol-primary);
       transform: translateX(3px);
     }
   }
 
-  /* --- ESTADO SELECCIONADO (Activo) --- */
   &.selected {
     --background: rgba(16, 185, 129, 0.12) !important;
     
-    /* Texto verde oscuro en seleccionado */
     --color: #065f46 !important; 
     color: #065f46 !important;
     
@@ -100,15 +81,11 @@ ion-item {
   }
 }
 
-
-
-/* ESPACIADOR */
 .menu-spacer {
-  flex-grow: 1; /* Empuja todo hacia abajo */
+  flex-grow: 1; 
   min-height: 40px;
 }
 
-/* PANEL ADMIN */
 .admin-panel-section {
   background: white;
   margin: 10px 15px;
@@ -133,9 +110,8 @@ ion-item {
   }
 }
 
-/* FOOTER (Logout) */
 .menu-footer {
-  margin-top: auto; /* Seguridad extra */
+  margin-top: auto; 
   padding: 10px 0 20px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
@@ -165,12 +141,10 @@ ion-item-divider[color="light"] {
   }
 }
 
-/* Específico para "Administración" y otros dividers del sidemenu */
 ion-item-divider[color="light"] ion-label {
   font-size: 0.9rem;
   padding: 12px 16px;
   background: linear-gradient(90deg, #f1f6f9, #f8fafc);
-  //border-left: 3px solid var(--ion-color-primary);
   border-radius: 0 8px 8px 0;
   margin: 0;
 }

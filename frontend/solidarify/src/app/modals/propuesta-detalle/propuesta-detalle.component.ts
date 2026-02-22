@@ -2,6 +2,7 @@ import { Component, OnInit, Input, inject } from '@angular/core';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+
 import { Propuesta } from '../../services/propuesta';
 import { Auth } from '../../services/auth';
 import { PropuestaModel } from '../../models/propuesta.model';
@@ -22,6 +23,7 @@ export class PropuestaDetalleComponent implements OnInit {
   private router = inject(Router); 
 
   @Input() propuesta!: PropuestaModel; 
+  @Input() startInEditMode: boolean = false; 
 
   modoEdicion = false;
   propuestaEditada!: PropuestaModel; 
@@ -30,6 +32,10 @@ export class PropuestaDetalleComponent implements OnInit {
 
   ngOnInit() {
     this.propuestaEditada = new PropuestaModel(this.propuesta);
+    
+    if (this.startInEditMode) {
+      this.modoEdicion = true;
+    }
   }
 
   get puedeEditar(): boolean {
@@ -71,7 +77,12 @@ export class PropuestaDetalleComponent implements OnInit {
 
   cancelarEdicion() {
     this.propuestaEditada = new PropuestaModel(this.propuesta);
-    this.modoEdicion = false;
+    
+    if (this.startInEditMode) {
+      this.cerrar();
+    } else {
+      this.modoEdicion = false;
+    }
   }
 
   async guardarCambios() {
@@ -103,7 +114,6 @@ export class PropuestaDetalleComponent implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error actualizando:', error);
       this.mostrarToast('Error al guardar cambios', 'danger');
     }
   }
@@ -147,7 +157,6 @@ export class PropuestaDetalleComponent implements OnInit {
                 this.modalCtrl.dismiss({ refresh: true });
               },
               error: (err) => {
-                console.error("Error respondiendo", err);
                 this.mostrarToast('Ocurrió un error al procesar tu respuesta.', 'danger');
               }
             });

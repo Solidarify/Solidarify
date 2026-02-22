@@ -1,6 +1,5 @@
 <ion-content [fullscreen]="true" class="bg-light">
   
-  <!-- 1. HERO SECTION -->
   <div class="stats-card fade-in-down">
     <div class="stats-content">
       <div class="stat-text">
@@ -23,7 +22,6 @@
     <div class="deco-circle"></div>
   </div>
 
-  <!-- 2. BUSCADOR -->
   <div class="filtros-container fade-in-up">
     <div class="search-bar">
       <ion-icon name="search-outline" class="search-icon"></ion-icon>
@@ -36,30 +34,23 @@
     </div>
   </div>
 
-  <!-- 3. CABECERA -->
   <div class="list-header" *ngIf="!loading">
     <h3>Directorio <span>Solidario</span></h3>
   </div>
 
-  <!-- ============================================== -->
-  <!-- LA CLAVE: Nos suscribimos al observable AQUÍ   -->
-  <!-- ============================================== -->
   <ng-container *ngIf="ongs$ | async as ongsList">
     
-    <!-- 4. LISTA DE ONGS (solo si no está cargando) -->
     <div class="ongs-list" *ngIf="!loading">
       
       <div *ngFor="let ong of ongsList; trackBy: trackById" 
            class="ong-card scale-in"
            (click)="verDetalle(ong)">
         
-        <!-- Estado -->
         <div class="status-stripe" [ngClass]="{
           'verificado': ong.isVerified,
           'pendiente': !ong.isVerified
         }"></div>
 
-        <!-- Icono -->
         <div class="card-icon-box">
           <div class="avatar-circle">
              <span class="initials">{{ (ong.displayName || ong.nombreLegal).substring(0,2) | uppercase }}</span>
@@ -69,7 +60,6 @@
           </div>
         </div>
 
-        <!-- Info -->
         <div class="card-info">
           <h2 class="card-title">{{ ong.displayName || ong.nombreLegal }}</h2>
           
@@ -83,13 +73,11 @@
           </div>
         </div>
 
-        <!-- Flecha -->
         <div class="card-action">
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
       </div>
 
-      <!-- EMPTY STATE -->
       <div *ngIf="ongsList.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon name="business-outline"></ion-icon>
@@ -102,7 +90,6 @@
 
   </ng-container>
 
-  <!-- LOADING -->
   <div class="loading-container" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Conectando con ONGs...</p>

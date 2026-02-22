@@ -1,9 +1,7 @@
-/* --- FONDO GENERAL --- */
 ion-content {
   --background: #f8fafc;
 }
 
-/* --- ESTADO NO USER --- */
 .no-user-state {
   height: 80vh;
   display: flex; flex-direction: column;
@@ -28,7 +26,6 @@ ion-content {
   }
 }
 
-/* --- LOADING --- */
 .loading-overlay {
   height: 100vh;
   display: flex; flex-direction: column;
@@ -37,10 +34,8 @@ ion-content {
   p { margin-top: 15px; font-weight: 500; opacity: 0.9; }
 }
 
-/* --- PERFIL HEADER (HERO) - VERSIÓN CORREGIDA --- */
 .profile-header {
   position: relative;
-  /* Margen inferior para que el contenido no solape al nombre del usuario */
   margin-bottom: 120px; 
 
   .header-bg {
@@ -50,7 +45,6 @@ ion-content {
     position: relative;
     overflow: hidden;
     
-    /* Patrón decorativo */
     &::after {
       content: ''; position: absolute;
       top: -50%; left: -50%; width: 200%; height: 200%;
@@ -62,7 +56,6 @@ ion-content {
 
   .user-summary {
     position: absolute;
-    /* Posición calculada para centrar el avatar entre verde y blanco */
     top: 130px; 
     left: 0; right: 0;
     text-align: center;
@@ -82,7 +75,6 @@ ion-content {
         object-fit: cover;
       }
 
-      /* BADGE DE EDICIÓN (LÁPIZ) QUE FALTABA */
       .edit-badge {
         position: absolute;
         bottom: 5px; right: 5px;
@@ -120,9 +112,7 @@ ion-content {
   }
 }
 
-/* --- TARJETAS DE DATOS --- */
 .cards-container {
-  /* Padding top ajustado para que empiece DEBAJO del resumen del usuario */
   padding: 40px 20px 120px; 
   display: flex; flex-direction: column; gap: 20px;
   position: relative;
@@ -190,7 +180,6 @@ ion-content {
   }
 }
 
-/* --- BOTONES DE ACCIÓN (Logout) --- */
 .logout-container {
   margin-top: 10px; text-align: center;
   
@@ -202,14 +191,13 @@ ion-content {
   }
 }
 
-/* --- BARRA FLOTANTE DE GUARDAR --- */
 .actions-bar {
   position: fixed; 
   bottom: 40px; 
   left: 20px; right: 20px;
   background: white;
   border-radius: 30px;
-  padding: 10px 15px; /* Padding un poco más ajustado */
+  padding: 10px 15px; 
   box-shadow: 0 15px 40px rgba(0,0,0,0.15);
   display: flex; justify-content: space-between; align-items: center;
   z-index: 100;
@@ -227,13 +215,11 @@ ion-content {
   }
 }
 
-/* --- ANIMACIONES --- */
 .fade-in { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
 
-/* Reset de estilos para inputs dentro de tarjetas */
 .input-item {
   --padding-start: 0;
   --inner-padding-end: 0;
@@ -241,7 +227,6 @@ ion-content {
   --min-height: auto;
   margin-top: 5px;
   
-  /* El estilo visual lo da el input-modern */
   .input-modern {
     --padding-start: 12px;
     --padding-end: 12px;

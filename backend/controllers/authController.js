@@ -6,7 +6,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar usuario con sus roles
     const usuario = await Usuario.findOne({ 
       where: { email },
       include: {
@@ -19,7 +18,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, usuario.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
@@ -50,23 +48,17 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error en login:', error);
     res.status(500).json({ message: 'Error en el servidor' });
   }
 };
 
 exports.register = async (req, res) => {
     try {
-        // 1. Extraemos TODOS los campos (incluidos los opcionales)
         const { 
             nombre, email, password, telefono, role,
-            // Campos de Organizador
             nombreOrganizacion, cif, telefonoDirecto, zonaResponsable,
-            // Campos de ONG
             nombreLegal, descripcion, direccion, web
         } = req.body;
-
-        console.log(`Intentando registrar email ${email} con rol ${role}`);
 
         const existe = await Usuario.findOne({ where: { email } });
         if (existe) {
@@ -75,63 +67,60 @@ exports.register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 2. Creamos el Usuario base
-        const nuevoUsuario = await Usuario.create({
-            nombre,
-            email,
-            password: hashedPassword,
-            telefono
-        });
-
         if (role === 'ADMIN') {
             return res.status(403).json({ message: 'No tienes permiso para registrarte con ese rol.' });
         }
 
-        let rolAsignar;
-        if (role) {
-            rolAsignar = await Rol.findOne({ where: { nombre: role } });
-        }
-        if (!rolAsignar) {
-            rolAsignar = await Rol.findByPk(4); 
-        }
+        await sequelize.transaction(async (t) => {
+            
+            const nuevoUsuario = await Usuario.create({
+                nombre,
+                email,
+                password: hashedPassword,
+                telefono
+            }, { transaction: t });
 
-        if (rolAsignar) {
-            await nuevoUsuario.addRol(rolAsignar);
-            console.log(`Usuario creado con rol ${rolAsignar.nombre}`);
-
-            if (role === 'ORGANIZADOR') {
-                await Organizador.create({
-                    idUsuario: nuevoUsuario.idUsuario,
-                    nombre: nombreOrganizacion || nombre,
-                    cif: cif,
-                    telefonoDirecto: telefonoDirecto || null,
-                    zonaResponsable: zonaResponsable || null
-                });
-                console.log('Datos de Organizador guardados.');
-            } 
-            else if (role === 'ONG') {
-                await PerfilONG.create({
-                    idUsuario: nuevoUsuario.idUsuario,
-                    nombreLegal: nombreLegal || nombre,
-                    cif: cif,
-                    descripcion: descripcion || null,
-                    direccion: direccion || null,
-                    web: web || null,
-                    estadoVerificacion: 'pendiente'
-                });
-                console.log('Datos de ONG guardados.');
+            let rolAsignar;
+            if (role) {
+                rolAsignar = await Rol.findOne({ where: { nombre: role }, transaction: t });
+            }
+            if (!rolAsignar) {
+                rolAsignar = await Rol.findByPk(4, { transaction: t }); 
             }
 
-        } else {
-            console.error('ERROR CRÍTICO: No se pudo asignar ningún rol');
-        }
+            if (rolAsignar) {
+                await nuevoUsuario.addRol(rolAsignar, { transaction: t });
 
+                if (role === 'ORGANIZADOR') {
+                    await Organizador.create({
+                        idUsuario: nuevoUsuario.idUsuario,
+                        nombre: nombreOrganizacion || nombre,
+                        cif: cif,
+                        telefonoDirecto: telefonoDirecto || null,
+                        zonaResponsable: zonaResponsable || null
+                    }, { transaction: t });
+                    
+                } 
+                else if (role === 'ONG') {
+                    await PerfilONG.create({
+                        idUsuario: nuevoUsuario.idUsuario,
+                        nombreLegal: nombreLegal || nombre,
+                        cif: cif,
+                        descripcion: descripcion || null,
+                        direccion: direccion || null,
+                        web: web || null,
+                        estadoVerificacion: 'pendiente'
+                    }, { transaction: t });
+                    
+                }
+
+            } else {
+                throw new Error('No se pudo asignar ningún rol válido al usuario');
+            }
+        });
         res.status(201).json({ message: 'Usuario registrado correctamente' });
 
     } catch (error) {
-        console.error('Error en registro:', error);
         res.status(500).json({ message: 'Error al registrar usuario', error: error.message });
     }
 };
-
-

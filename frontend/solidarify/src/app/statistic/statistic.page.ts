@@ -27,7 +27,6 @@ export class StatisticPage implements OnInit {
   cargando = true;
 
   async ngOnInit() {
-    console.log('📊 Dashboard Admin iniciado');
     await this.cargarEstadisticas();
   }
 
@@ -53,7 +52,6 @@ export class StatisticPage implements OnInit {
         totalOrganizadores: organizadores.length
       };
     } catch (error) {
-      console.error('Error estadísticas:', error);
     } finally {
       this.cargando = false;
     }

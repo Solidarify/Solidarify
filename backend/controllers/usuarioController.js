@@ -5,8 +5,7 @@ exports.updateProfile = async (req, res) => {
     const { id } = req.params; 
     const { nombre, email, telefono, fotoPerfil } = req.body;
 
-    // Validar que el usuario que edita sea el mismo del token (seguridad básica)
-    // if (req.userData.id != id) return res.status(403).json({ message: 'No autorizado' });
+    if (req.userData.id != id && req.userData.rol !== 'ADMIN') return res.status(403).json({ message: 'No autorizado' });
 
     const usuario = await Usuario.findByPk(id);
     if (!usuario) {
@@ -29,7 +28,6 @@ exports.updateProfile = async (req, res) => {
     res.json(usuarioResponse);
 
   } catch (error) {
-    console.error('Error actualizando perfil:', error);
     res.status(500).json({ message: 'Error al actualizar perfil' });
   }
 };
@@ -58,7 +56,6 @@ exports.getAll = async (req, res) => {
         });
         res.json(usuarios);
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Error al obtener usuarios' });
     }
 };

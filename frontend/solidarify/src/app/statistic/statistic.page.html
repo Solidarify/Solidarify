@@ -1,14 +1,11 @@
 <ion-content [fullscreen]="true" class="bg-light">
-  <!-- HEADER SOLIDARIFY -->
   <div class="header-section ion-padding">
     <div class="saludo">
-      <!-- Ahora muestra el rol real del usuario logueado en vez de decir siempre Administrador -->
       <p>Panel <strong>{{ auth.currentUser()?.roles?.[0] || 'Usuario' }}</strong> 👋</p>
       <h1>Estadísticas <br><span class="highlight">Globales</span></h1>
     </div>
   </div>
 
-  <!-- IMPACT CARD PRINCIPAL -->
   <div class="stats-container ion-padding-horizontal">
     <div class="impact-card">
       
@@ -37,7 +34,6 @@
     </div>
   </div>
 
-  <!-- GRID COMPLETO 6 COL -->
   <div class="section-title ion-padding-top ion-padding-horizontal">
     <h3>Todas las métricas</h3>
   </div>

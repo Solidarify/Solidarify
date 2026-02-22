@@ -2,8 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
-
-// Servicios y Modelos
 import { Propuesta } from '../services/propuesta';
 import { Auth } from '../services/auth';
 import { PropuestaModel } from '../models/propuesta.model';
@@ -37,7 +35,6 @@ export class HomePage implements OnInit {
   constructor() {}
 
   async ngOnInit() {
-    console.log('🏠 HomePage iniciada');
     await this.cargarUrgentes();
     if (this.isLoggedIn()) {
       await this.cargarEstadisticas();
@@ -73,7 +70,6 @@ export class HomePage implements OnInit {
       this.stats.ayudasCompletadas = misPropuestas.filter(p => p.estadoPropuesta === 'completada').length;
 
     } catch (error) {
-      console.error('Error cargando estadísticas:', error);
     }
   }
 
@@ -94,7 +90,6 @@ export class HomePage implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error cargando urgentes:', error);
     } finally {
       this.cargando = false;
     }
@@ -107,8 +102,6 @@ export class HomePage implements OnInit {
     const diff = Math.ceil((fin - hoy) / (1000 * 3600 * 24));
     return diff > 0 ? diff : 0;
   }
-
-  // --- NAVEGACIÓN Y MODALES ---
 
   async irADetalle(propuesta: PropuestaModel) {
     const modal = await this.modalCtrl.create({
@@ -126,7 +119,6 @@ export class HomePage implements OnInit {
   }
 
   navigateTo(route: string): void {
-    console.log('🚀 Navegando a:', route);
     
     switch(route) {
       case '/crear-propuesta':
@@ -159,7 +151,6 @@ export class HomePage implements OnInit {
           return;
         }
         this.router.navigate([route]).catch(err => {
-           console.error("Error navegando a lista-ongs. ¿Existe la ruta en app-routing.module.ts?", err);
         });
         break;
         
@@ -190,7 +181,6 @@ export class HomePage implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // --- PERMISOS (GETTERS) ---
   get canCreateProposal(): boolean {
     return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
   }

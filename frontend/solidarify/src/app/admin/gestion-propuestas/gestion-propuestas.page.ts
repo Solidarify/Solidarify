@@ -1,10 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { ActionSheetController, AlertController, ToastController } from '@ionic/angular';
+import { ActionSheetController, AlertController, ModalController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs'; 
-
 import { Propuesta } from '../../services/propuesta';
 import { PropuestaModel } from '../../models/propuesta.model';
+import { PropuestaDetalleComponent } from '../../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
   selector: 'app-gestion-propuestas',
@@ -14,11 +14,11 @@ import { PropuestaModel } from '../../models/propuesta.model';
 })
 export class GestionPropuestasPage implements OnInit {
 
-  // INYECCIÓN DE DEPENDENCIAS
   private propuestasService = inject(Propuesta);
   private actionSheetCtrl = inject(ActionSheetController);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
+  private modalCtrl = inject(ModalController); 
   private router = inject(Router);
 
   // ESTADO
@@ -37,20 +37,17 @@ export class GestionPropuestasPage implements OnInit {
     try {
       this.propuestas = await firstValueFrom(this.propuestasService.getAllAdmin());
     } catch (error) {
-      console.error('Error cargando propuestas:', error);
       this.mostrarToast('Error al cargar datos', 'danger');
     } finally {
       this.loading = false;
     }
   }
 
-  // --- FILTRADO EN MEMORIA ---
   get propuestasFiltradas() {
     if (this.filtroEstado === 'todos') return this.propuestas;
     return this.propuestas.filter(p => p.estadoPropuesta === this.filtroEstado);
   }
 
-  // --- ACCIONES PRINCIPALES ---
   async gestionar(propuesta: PropuestaModel) {
     const esBorrador = propuesta.estadoPropuesta === 'borrador';
 
@@ -61,8 +58,7 @@ export class GestionPropuestasPage implements OnInit {
           text: '✏️ Editar Propuesta',
           icon: 'create',
           handler: () => {
-            // Navegar a editar con el ID
-            this.router.navigate(['/crear-propuesta', { id: propuesta.idPropuesta }]);
+            this.abrirModalEdicion(propuesta);
           }
         },
         {
@@ -90,22 +86,38 @@ export class GestionPropuestasPage implements OnInit {
     await actionSheet.present();
   }
 
-  // --- LÓGICA DE NEGOCIO ---
+  async abrirModalEdicion(propuesta: PropuestaModel) {
+    const modal = await this.modalCtrl.create({
+      component: PropuestaDetalleComponent,
+      componentProps: {
+        propuesta: propuesta,
+        startInEditMode: true
+      },
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+      cssClass: 'propuesta-modal-sheet'
+    });
 
-  // 1. Cambiar Estado (Publicar/Borrador)
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    
+    if (data && data.refresh) {
+      this.cargarPropuestas();
+    }
+  }
+
   async cambiarEstado(propuesta: PropuestaModel, nuevoEstado: string) {
     try {
       await firstValueFrom(this.propuestasService.cambiarEstadoAdmin(propuesta.idPropuesta || 0, nuevoEstado));
       
       this.mostrarToast(`Estado cambiado a: ${nuevoEstado.toUpperCase()}`, 'success');
-      this.cargarPropuestas(); // Refrescar lista
-
+      this.cargarPropuestas();
     } catch (error) {
       this.mostrarToast('Error al cambiar estado', 'danger');
     }
   }
 
-  // 2. Asignación Manual
   async abrirAsignacionManual(propuesta: PropuestaModel) {
     const alert = await this.alertCtrl.create({
       header: 'Asignación Forzada',
@@ -124,7 +136,7 @@ export class GestionPropuestasPage implements OnInit {
           handler: async (data) => {
             if (!data.ongId) {
               this.mostrarToast('Debes escribir un ID válido', 'warning');
-              return false; // No cerrar alerta
+              return false; 
             }
             return this.ejecutarAsignacion(propuesta, Number(data.ongId));
           }
@@ -144,7 +156,6 @@ export class GestionPropuestasPage implements OnInit {
     }
   }
 
-  // 3. Eliminar
   async confirmarBorrado(propuesta: PropuestaModel) {
     const alert = await this.alertCtrl.create({
       header: '¿Eliminar propuesta?',

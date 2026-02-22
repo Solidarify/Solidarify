@@ -15,10 +15,8 @@ exports.getAll = async (req, res) => {
     if (lugar) whereClause.lugar = { [Op.like]: `%${lugar}%` };
     if (estado) {
         if (estado === 'explorar') {
-        // Si piden explorar, devolvemos publicadas Y asignadas
         whereClause.estadoPropuesta = { [Op.in]: ['publicada', 'asignada'] };
         } else {
-        // Comportamiento normal (ej: 'pendiente_ong', 'borrador')
         whereClause.estadoPropuesta = estado;
     }
 }
@@ -36,7 +34,6 @@ exports.getAll = async (req, res) => {
 
     res.json(propuestas);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al obtener propuestas' });
   }
 };
@@ -73,7 +70,6 @@ exports.getById = async (req, res) => {
   }
 };
 
-// backend/controllers/propuestaController.js
 
 exports.create = async (req, res) => {
   try {
@@ -99,7 +95,6 @@ exports.create = async (req, res) => {
     res.status(201).json(nuevaPropuesta);
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al crear la propuesta' });
   }
 };
@@ -185,7 +180,6 @@ exports.solicitarOng = async (req, res) => {
 
     res.json({ message: 'Solicitud enviada a la ONG', propuesta });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al solicitar ONG' });
   }
 };
@@ -222,7 +216,6 @@ exports.responderSolicitudOng = async (req, res) => {
         propuesta 
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Error al responder a la solicitud' });
   }
 };

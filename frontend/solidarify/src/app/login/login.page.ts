@@ -53,12 +53,10 @@ export class LoginPage implements OnInit {
     this.auth.login({email, password}).subscribe({
       next: async (response) => {
         await loading.dismiss();
-        console.log('Login exitoso:', response);
         this.router.navigate(['/home'], { replaceUrl: true });
       },
       error: async (err) => {
         await loading.dismiss();
-        console.error('Login error:', err);
         const alert = await this.alertCtrl.create({
           header: 'Fallo de acceso',
           message: 'Email o contraseña incorrectos.',

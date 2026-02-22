@@ -1,4 +1,3 @@
-/* Fondo General */
 .bg-light {
   --background: #f8fafc;
 }
@@ -7,14 +6,12 @@
   background: transparent !important;
 }
 
-/* Toolbar de Filtros */
 .filter-toolbar {
   --background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 5px;
 }
 
-/* Badge del Header */
 .total-badge {
   font-size: 0.9rem;
   padding: 6px 10px;
@@ -23,7 +20,6 @@
   color: var(--ion-color-primary);
 }
 
-/* --- TARJETA ONG (Diseño Pro) --- */
 .ong-card {
   border-radius: 16px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
@@ -37,19 +33,17 @@
     transform: scale(0.99);
   }
 
-  /* Barra lateral de color según estado */
   .card-status-bar {
     position: absolute;
     top: 0; bottom: 0; left: 0;
     width: 6px;
-    background: #cbd5e1; /* Default */
+    background: #cbd5e1; 
   }
 
   &.verificado .card-status-bar { background: var(--ion-color-success); }
   &.pendiente .card-status-bar { background: var(--ion-color-warning); }
   &.rechazado .card-status-bar { background: var(--ion-color-danger); }
 
-  /* Header de la tarjeta */
   .card-header {
     --background: white;
     padding-top: 15px;
@@ -77,7 +71,6 @@
     }
   }
 
-  /* Badge de Estado Personalizado */
   .status-badge {
     font-size: 0.75rem;
     font-weight: 700;
@@ -91,7 +84,6 @@
     &.rechazado { background: #fee2e2; color: #991b1b; }
   }
 
-  /* Contenido y Grid de Info */
   ion-card-content {
     padding-bottom: 15px;
   }
@@ -127,7 +119,6 @@
     margin: 15px 0;
   }
 
-  /* Acciones y Footer */
   .actions {
     display: flex;
     justify-content: space-between;
@@ -140,7 +131,6 @@
   }
 }
 
-/* --- EMPTY STATE (Estado Vacío) --- */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -163,7 +153,6 @@
   p { margin: 10px 0 0; color: #64748b; }
 }
 
-/* Animaciones */
 .bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .slide-in { animation: slideUp 0.4s ease-out; }
 

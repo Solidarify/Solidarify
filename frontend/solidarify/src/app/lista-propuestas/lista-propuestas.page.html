@@ -1,6 +1,5 @@
 <ion-content [fullscreen]="true" class="bg-light">
   
-  <!-- 1. HERO SECTION (Tarjeta de Estadísticas) -->
   <div class="stats-card fade-in-down">
     <div class="stats-content">
       <div class="stat-text">
@@ -12,7 +11,6 @@
         </p>
       </div>
       
-      <!-- Botón de refrescar sutil -->
       <ion-button 
         *ngIf="!esUsuario" 
         fill="clear" 
@@ -22,11 +20,9 @@
       </ion-button>
     </div>
 
-    <!-- Decoración de fondo -->
     <div class="deco-circle"></div>
   </div>
 
-  <!-- 2. BARRA DE BÚSQUEDA FLOTANTE -->
   <div class="filtros-container fade-in-up">
     <div class="search-bar">
       <ion-icon name="search-outline" class="search-icon"></ion-icon>
@@ -39,35 +35,28 @@
     </div>
   </div>
 
-  <!-- 3. CABECERA DE LISTA -->
   <div class="list-header" *ngIf="!loading">
     <h3>Explorar <span>({{ totalPropuestas }})</span></h3>
   </div>
 
-  <!-- NOS SUSCRIBIMOS UNA SOLA VEZ AL OBSERVABLE -->
   <ng-container *ngIf="propuestas$ | async as propuestasList">
     
-    <!-- 4. LISTA DE PROPUESTAS (Diseño Tarjeta Moderna) -->
     <div class="propuestas-list" *ngIf="!loading">
       
-      <!-- ITEM DE PROPUESTA -->
       <div 
         *ngFor="let propuesta of propuestasList; trackBy: trackById" 
         class="propuesta-card scale-in"
         [ngClass]="{'estado-pendiente': propuesta.estadoPropuesta === 'pendiente_ong'}"
         (click)="verDetalle(propuesta)">
         
-        <!-- Columna Izquierda: Icono/Imagen -->
         <div class="card-icon-box">
           <img *ngIf="propuesta.imagen" [src]="propuesta.imagen" alt="img" class="card-img">
           <ion-icon *ngIf="!propuesta.imagen" name="gift-outline"></ion-icon>
         </div>
 
-        <!-- Columna Central: Info -->
         <div class="card-info">
           <h2 class="card-title">{{ propuesta.titulo }}</h2>
           
-          <!-- AÑADIR ESTE BADGE (Corregido sin duplicar el div anterior) -->
           <div *ngIf="propuesta.estadoPropuesta === 'pendiente_ong'" class="badge-pendiente">
             <ion-icon name="alert-circle-outline"></ion-icon>
             Pendiente de respuesta
@@ -85,15 +74,12 @@
               {{ propuesta.fechaInicio | date:'d MMM' }} - {{ propuesta.fechaFin | date:'d MMM' }}
             </span>
           </div>
-        </div> <!-- Cierre correcto de card-info -->
+        </div> 
 
-        <!-- Columna Derecha: Flecha -->
         <div class="card-action">
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
-      </div> <!-- Cierre correcto del ngFor propuesta-card -->
-      
-      <!-- EMPTY STATE (Si no hay resultados) -->
+      </div>
       <div *ngIf="propuestasList.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon name="search"></ion-icon>
@@ -102,11 +88,10 @@
         <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
       </div>
 
-    </div> <!-- Cierre correcto de propuestas-list -->
+    </div> <
 
-  </ng-container> <!-- Cierre correcto del ng-container -->
-
-  <!-- LOADING STATE -->
+  </ng-container>
+  
   <div class="loading-container" *ngIf="loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Buscando causas solidarias...</p>

@@ -54,7 +54,6 @@ ion-content {
   }
 }
 
-/* -- ESTILOS MEJORADOS PARA EL SEGMENT DE ROLES -- */
 .role-selector-container {
   margin-bottom: 24px;
   
@@ -67,15 +66,15 @@ ion-content {
   }
 
   ion-segment {
-    background: #e2e8f0; /* Fondo gris suave para la píldora */
-    border-radius: 12px; /* Más redondeado */
-    padding: 4px; /* Espacio interior para el efecto deslizante */
+    background: #e2e8f0; 
+    border-radius: 12px;
+    padding: 4px; 
   }
 
   ion-segment-button {
-    --indicator-color: var(--sol-primary); /* El botón activo se vuelve verde */
-    --color: var(--sol-text-muted); /* Color inactivo */
-    --color-checked: #ffffff; /* Texto blanco cuando está activo */
+    --indicator-color: var(--sol-primary);
+    --color: var(--sol-text-muted);
+    --color-checked: #ffffff;
     --border-radius: 8px;
     
     margin: 0 2px;
@@ -95,7 +94,6 @@ ion-content {
   font-weight: 500;
 }
 
-/* -- Estilos para los Inputs Modernos de Ionic 8 -- */
 .modern-input {
   margin-bottom: 20px;
   
@@ -103,12 +101,10 @@ ion-content {
   --color: var(--sol-text-light);
   --placeholder-color: #9ca3af;
   
-  /* Ajustes del borde outline nativo */
   --border-radius: 8px;
   --border-color: #d1d5db;
   --border-width: 1px;
   
-  /* Colores de foco y error */
   --highlight-color-focused: var(--sol-primary);
   --highlight-color-invalid: var(--sol-error);
 

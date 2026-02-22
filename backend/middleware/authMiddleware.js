@@ -11,7 +11,6 @@ module.exports = (req, res, next) => {
     if (token.startsWith("Bearer ")) {
       token = token.slice(7, token.length).trim();
     }
-console.log("Secreto usado:", process.env.JWT_SECRET);
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     
@@ -24,7 +23,6 @@ console.log("Secreto usado:", process.env.JWT_SECRET);
     next();
 
   } catch (error) {
-    console.log("Error en Auth Middleware:", error.message);
     res.status(401).json({ message: "Auth fallida: Token inválido" });
   }
 };

@@ -25,15 +25,12 @@ export class AppComponent {
       this.currentUser = user;
       this.isLoggedIn = !!user;
       
-      console.log('🔄 Estado sesión:', user ? user.nombre : 'Invitado');
-      
       if (!user) {
         this.menuCtrl.close();
       }
     });
   }
 
-  // Métodos para el Header
   showLogin() { 
     this.router.navigate(['/login']);
   }

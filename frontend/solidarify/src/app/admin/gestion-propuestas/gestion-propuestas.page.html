@@ -6,7 +6,6 @@
     <ion-title>Gestión de Propuestas</ion-title>
   </ion-toolbar>
 
-  <!-- BARRA DE FILTROS -->
   <ion-toolbar class="filter-toolbar">
     <ion-segment [(ngModel)]="filtroEstado" scrollable mode="ios" value="todos">
       <ion-segment-button value="todos">
@@ -18,7 +17,6 @@
       <ion-segment-button value="borrador">
         <ion-label>Borrador 📝</ion-label>
       </ion-segment-button>
-      <!-- Ajusta este valor según lo que devuelva tu backend (ej: 'en_proceso' o 'asignada') -->
       <ion-segment-button value="en_proceso">
         <ion-label>En Proceso 🤝</ion-label>
       </ion-segment-button>
@@ -30,13 +28,11 @@
   
   <div class="ion-padding bg-transparent">
 
-    <!-- LOADING -->
     <div *ngIf="loading" class="ion-text-center ion-padding">
       <ion-spinner name="crescent"></ion-spinner>
       <p class="ion-text-muted">Cargando propuestas...</p>
     </div>
 
-    <!-- EMPTY STATE -->
     <div *ngIf="!loading && propuestasFiltradas.length === 0" class="empty-state bounce-in">
       <div class="icon-circle">
         <ion-icon name="file-tray-outline"></ion-icon>
@@ -45,20 +41,17 @@
       <p>No hay propuestas en estado <strong>{{ filtroEstado | uppercase }}</strong>.</p>
     </div>
 
-    <!-- LISTA DE TARJETAS PRO -->
     <ng-container *ngIf="!loading">
       <ion-card *ngFor="let p of propuestasFiltradas" 
                 class="propuesta-card slide-in" 
                 [ngClass]="p.estadoPropuesta">
         
-        <div class="card-status-bar"></div> <!-- Barra lateral de color -->
+        <div class="card-status-bar"></div> 
 
-        <!-- Badge Flotante -->
         <div class="status-badge" [ngClass]="p.estadoPropuesta">
           {{ p.estadoPropuesta | titlecase }}
         </div>
 
-        <!-- Cabecera -->
         <ion-item lines="none" class="card-header-item">
           <ion-thumbnail slot="start">
             <img [src]="p.imagen || 'https://placehold.co/100x100?text=Sin+Foto'" alt="propuesta">
@@ -72,21 +65,17 @@
 
         <ion-card-content>
           
-          <!-- Grid de Información -->
           <div class="info-grid">
-            <!-- ID Propuesta -->
             <div class="info-item">
               <ion-icon name="finger-print-outline" color="medium"></ion-icon>
               <span>ID: <strong>{{ p.idPropuesta }}</strong></span>
             </div>
 
-            <!-- Organizador -->
             <div class="info-item">
               <ion-icon name="person-outline" color="primary"></ion-icon>
               <span>Org: <strong>#{{ p.idOrganizador }}</strong></span>
             </div>
 
-            <!-- Ubicación -->
             <div class="info-item" *ngIf="p.lugar">
               <ion-icon name="location-outline" color="secondary"></ion-icon>
               <span>{{ p.lugar }}</span>
@@ -95,7 +84,6 @@
 
           <hr class="divider">
 
-          <!-- Footer y Acciones -->
           <div class="actions">
             <div class="date-info">
               <ion-icon name="calendar-outline"></ion-icon>

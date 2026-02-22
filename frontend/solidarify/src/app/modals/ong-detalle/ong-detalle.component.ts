@@ -26,7 +26,7 @@ export class OngDetalleComponent implements OnInit {
     private perfilOngService: PerfilOng,
     private alertCtrl: AlertController,
     private Propuesta: Propuesta,
-    public auth: Auth // <-- CAMBIADO DE private A public
+    public auth: Auth 
   ) {}
 
   ngOnInit() {
@@ -35,7 +35,7 @@ export class OngDetalleComponent implements OnInit {
   }
 
   activarEdicion() {
-    if (!this.isAdmin) { return; }   // seguridad en front
+    if (!this.isAdmin) { return; } 
     this.modoEdicion = true;
   }
 
@@ -45,7 +45,7 @@ export class OngDetalleComponent implements OnInit {
   }
 
   async guardarCambios() {
-    if (!this.isAdmin) { return; }   // evitar updates si no es ADMIN
+    if (!this.isAdmin) { return; }   
 
     const alert = await this.alertCtrl.create({
       header: '¿Guardar cambios?',
@@ -77,7 +77,6 @@ export class OngDetalleComponent implements OnInit {
               this.modalCtrl.dismiss({ ong: this.ongEditada });
 
             } catch (error) {
-              console.error('Error actualizando ONG:', error);
               const toast = await this.toastCtrl.create({
                 message: 'Error al guardar cambios',
                 duration: 2000,
@@ -98,7 +97,6 @@ export class OngDetalleComponent implements OnInit {
   }
 
   async contactar() {
-    // Todos los usuarios pueden usar "contactar" (ver teléfono / web)
     const toast = await this.toastCtrl.create({
       message: `Contacto: ${this.ong.telefonoContacto || 'Sin teléfono'}${this.ong.web ? ' · ' + this.ong.web : ''}`,
       duration: 2500,
@@ -112,8 +110,6 @@ export class OngDetalleComponent implements OnInit {
   async solicitarApoyo() {
     const organizadorId = this.auth.currentUser()?.idUsuario;
     
-    // IMPORTANTE: Asegúrate de que el método "getFiltradas" funciona correctamente y 
-    // devuelve las propuestas de este organizador que no tienen ONG asignada aún.
     this.Propuesta.getFiltradas({ organizador: organizadorId, estado: 'publicada' }).subscribe(async (misPropuestasBuscandoOng) => {
        
        if (misPropuestasBuscandoOng.length === 0) {
@@ -155,7 +151,6 @@ export class OngDetalleComponent implements OnInit {
   private enviarPeticionAlBackend(idPropuesta: number) {
      this.Propuesta.solicitarVinculacionOng(idPropuesta, this.ong.idUsuario!).subscribe({
         next: async () => {
-           console.log("Solicitud enviada");
            const toast = await this.toastCtrl.create({
              message: 'Solicitud enviada a la ONG correctamente',
              duration: 2500,
@@ -165,7 +160,6 @@ export class OngDetalleComponent implements OnInit {
            this.modalCtrl.dismiss({ refresh: true }); 
         },
         error: async (err) => {
-           console.error("Error", err);
            const toast = await this.toastCtrl.create({
              message: 'Error al enviar la solicitud',
              duration: 2000,

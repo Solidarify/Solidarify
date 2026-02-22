@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, tap, catchError } from 'rxjs/operators';
-
 import { Auth } from '../services/auth';
 import { PerfilOng } from '../services/perfil-ong';
 import { PerfilONGModel } from '../models/perfil-ong.model';
@@ -38,7 +37,6 @@ export class ListaOngsPage implements OnInit {
   }
 
   ngOnInit() {
-    console.log('🏁 Inicializando ListaOngsPage...');
     this.loading = true;
 
     this.ongs$ = combineLatest([
@@ -50,7 +48,6 @@ export class ListaOngsPage implements OnInit {
       this.refreshTrigger$
     ]).pipe(
       tap(([termino, _]) => {
-        console.log('⚡ Buscando ONG:', termino);
         this.loading = true;
       }),
       switchMap(([termino, _]) => {
@@ -61,12 +58,10 @@ export class ListaOngsPage implements OnInit {
         }
       }),
       tap(resultados => {
-        console.log('✅ ONGs encontradas:', resultados.length);
         this.totalOngs = resultados.length;
         this.loading = false;
       }),
       catchError(err => {
-        console.error('❌ Error cargando ONGs:', err);
         this.loading = false;
         return of([]);
       })
@@ -102,7 +97,6 @@ export class ListaOngsPage implements OnInit {
     const { data } = await modal.onDidDismiss();
     
     if (data?.refresh || data?.ong) {
-      console.log('🔄 Recargando lista tras cambios...');
       this.refreshTrigger$.next();
     }
   }

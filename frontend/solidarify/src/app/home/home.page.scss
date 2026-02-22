@@ -211,10 +211,6 @@
   }
 }
 
-/* ========================================= */
-/* SCROLL HORIZONTAL Y TARJETAS URGENTES     */
-/* ========================================= */
-
 .urgent-scroll {
   display: flex;
   overflow-x: auto;
@@ -337,10 +333,6 @@
     background: white;
   }
 }
-
-/* ========================================= */
-/* LANDING PAGE                              */
-/* ========================================= */
 
 .background-mesh {
   position: fixed;
@@ -558,10 +550,6 @@
 @keyframes rotateIn { from { opacity: 0; transform: rotate(-10deg) scale(0.8); } to { opacity: 1; transform: rotate(-3deg) scale(1); } }
 @keyframes bounceIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-/* ========================================= */
-/* TARJETAS DE ROLES (LANDING)               */
-/* ========================================= */
 
 .role-explanation {
   display: flex;

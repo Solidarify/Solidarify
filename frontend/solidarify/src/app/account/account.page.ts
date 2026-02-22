@@ -61,7 +61,6 @@ export class AccountPage {
 
       const promises: Promise<any>[] = [];
 
-      // CARGA ONG
       if (this.auth.hasRole('ONG')) {
         promises.push(
           firstValueFrom(this.ongService.getById(user.idUsuario))
@@ -92,7 +91,6 @@ export class AccountPage {
       this.resetEdicion();
 
     } catch (e) {
-      console.error('Error carga reactiva:', e);
     } finally {
       this.loading.set(false);
     }
@@ -189,7 +187,6 @@ export class AccountPage {
       }
 
     } catch (error) {
-      console.error('Error capturando imagen:', error);
       if (String(error).indexOf('User cancelled') === -1) {
           this.mostrarAlerta('Error', 'No se pudo capturar la imagen.');
       }
@@ -226,7 +223,6 @@ export class AccountPage {
         fotoPerfil: base64 
       });
       
-      console.log('Usuario actualizado con nueva foto:', usuarioActualizado);
       
       const updated = await firstValueFrom(
         this.usuarioService.update(u.idUsuario, usuarioActualizado)
@@ -239,7 +235,6 @@ export class AccountPage {
       this.mostrarAlerta('¡Listo!', 'Foto actualizada correctamente.');
 
     } catch (error) {
-      console.error('Error guardando foto:', error);
       this.mostrarAlerta('Error', 'No se pudo guardar la foto.');
     } finally {
       loading.dismiss();
@@ -299,7 +294,6 @@ export class AccountPage {
       this.mostrarAlerta('¡Guardado!', 'Datos actualizados correctamente.');
 
     } catch (error) {
-      console.error('Error guardando:', error);
       this.mostrarAlerta('Error', 'Revisa que todos los campos obligatorios (como el CIF) estén rellenos.');
     } finally {
       loading.dismiss();

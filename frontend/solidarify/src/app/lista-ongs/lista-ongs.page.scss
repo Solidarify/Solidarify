@@ -41,7 +41,6 @@ ion-content {
     --padding-start: 0; --padding-end: 0;
   }
 
-  /* Círculo decorativo */
   .deco-circle {
     position: absolute;
     top: -30px; right: -30px;
@@ -51,7 +50,6 @@ ion-content {
   }
 }
 
-/* --- BUSCADOR FLOTANTE --- */
 .filtros-container {
   padding: 0 20px;
   margin-top: -35px;
@@ -68,7 +66,7 @@ ion-content {
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 
     .search-icon {
-      color: #3b82f6; /* Azul a juego con el hero */
+      color: #3b82f6; 
       font-size: 22px;
       margin-right: 10px;
     }
@@ -88,7 +86,6 @@ ion-content {
   }
 }
 
-/* --- CABECERA --- */
 .list-header {
   padding: 0 24px;
   margin-bottom: 12px;
@@ -103,7 +100,6 @@ ion-content {
   }
 }
 
-/* --- LISTA DE ONGS --- */
 .ongs-list {
   padding: 0 20px 40px;
 }
@@ -122,7 +118,6 @@ ion-content {
   
   &:active { transform: scale(0.98); }
 
-  /* Barra lateral de estado */
   .status-stripe {
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -132,15 +127,14 @@ ion-content {
     &.pendiente { background: #f59e0b; }
   }
 
-  /* Icono/Avatar */
   .card-icon-box {
     position: relative;
     margin-right: 16px;
-    padding-left: 8px; /* Espacio para la barra de color */
+    padding-left: 8px; 
 
     .avatar-circle {
       width: 56px; height: 56px;
-      background: #eff6ff; /* Azul muy claro */
+      background: #eff6ff; 
       color: #3b82f6;
       border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
@@ -162,7 +156,6 @@ ion-content {
     }
   }
 
-  /* Info */
   .card-info {
     flex: 1;
     min-width: 0;
@@ -203,7 +196,6 @@ ion-content {
   }
 }
 
-/* --- EMPTY STATE --- */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -219,7 +211,6 @@ ion-content {
   }
 }
 
-/* --- LOADING --- */
 .loading-container {
   height: 40vh;
   display: flex; flex-direction: column;
@@ -228,7 +219,6 @@ ion-content {
   p { color: #94a3b8; margin-top: 15px; font-size: 0.9rem; }
 }
 
-/* --- ANIMACIONES --- */
 .scale-in { animation: scaleIn 0.3s ease-out; }
 .fade-in-down { animation: fadeInDown 0.5s ease-out; }
 .fade-in-up { animation: fadeInUp 0.5s ease-out; }
@@ -238,7 +228,6 @@ ion-content {
 @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 
-/* --- LOADING --- */
 .loading-container {
   height: 40vh;
   display: flex; 
@@ -253,7 +242,6 @@ ion-content {
   }
 }
 
-/* Ajuste Input Nativo */
 .native-input {
   -webkit-appearance: none;
   appearance: none;

@@ -11,7 +11,6 @@
 
     <form [formGroup]="propuestaForm" (ngSubmit)="onSubmit()">
       
-      <!-- TÍTULO -->
       <div class="input-group">
         <ion-label class="custom-label">Título de la propuesta</ion-label>
         <ion-item lines="none" class="custom-input" 
@@ -27,7 +26,6 @@
         </div>
       </div>
 
-      <!-- DESCRIPCIÓN -->
       <div class="input-group">
         <ion-label class="custom-label">Descripción detallada</ion-label>
         <ion-item lines="none" class="custom-input area-input"
@@ -43,7 +41,6 @@
         </div>
       </div>
 
-      <!-- TIPO DE AYUDA -->
       <div class="input-group">
         <ion-label class="custom-label">Tipo de ayuda</ion-label>
         <ion-item lines="none" class="custom-input"
@@ -60,7 +57,6 @@
         </div>
       </div>
 
-      <!-- UBICACIÓN -->
       <div class="input-group">
         <ion-label class="custom-label">Ubicación</ion-label>
         <ion-item lines="none" class="custom-input"
@@ -71,14 +67,19 @@
         <div class="error-msg" *ngIf="f['lugar'].hasError('required') && f['lugar'].touched">
           <ion-icon name="alert-circle-outline"></ion-icon> Indica dónde se realizará
         </div>
+         <div class="error-msg" *ngIf="f['lugar'].hasError('minlength') && f['lugar'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Mínimo 5 caracteres
+        </div>
       </div>
 
-      <!-- FECHAS (CORREGIDO) -->
       <div class="date-row">
-        <!-- FECHA INICIO -->
         <div class="date-col">
           <ion-label class="custom-label">Fecha Inicio</ion-label>
           <ion-datetime-button datetime="datetime-inicio"></ion-datetime-button>
+          
+          <div class="error-msg" *ngIf="f['fechaInicio'].hasError('required') && f['fechaInicio'].touched">
+            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
+          </div>
           
           <ion-modal [keepContentsMounted]="true">
             <ng-template>
@@ -94,17 +95,16 @@
               </ion-datetime>
             </ng-template>
           </ion-modal>
-
-          <div class="error-msg" *ngIf="f['fechaInicio'].hasError('required') && f['fechaInicio'].touched">
-            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
-          </div>
         </div>
         
-        <!-- FECHA FIN -->
         <div class="date-col">
           <ion-label class="custom-label">Fecha Fin</ion-label>
           <ion-datetime-button datetime="datetime-fin"></ion-datetime-button>
           
+          <div class="error-msg" *ngIf="f['fechaFin'].hasError('required') && f['fechaFin'].touched">
+            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
+          </div>
+
           <ion-modal [keepContentsMounted]="true">
             <ng-template>
               <ion-datetime 
@@ -118,14 +118,9 @@
               </ion-datetime>
             </ng-template>
           </ion-modal>
-
-          <div class="error-msg" *ngIf="f['fechaFin'].hasError('required') && f['fechaFin'].touched">
-            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
-          </div>
         </div>
       </div>
 
-      <!-- ESTADO -->
       <div class="input-group">
         <ion-label class="custom-label">Estado inicial</ion-label>
         <ion-item lines="none" class="custom-input">
@@ -137,7 +132,6 @@
         </ion-item>
       </div>
 
-      <!-- BOTÓN SUBMIT -->
       <ion-button class="submit-btn" expand="block" type="submit" [disabled]="propuestaForm.invalid">
         <span>PUBLICAR PROPUESTA</span>
       </ion-button>

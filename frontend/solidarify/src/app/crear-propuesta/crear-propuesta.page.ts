@@ -3,12 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
-
-// SERVICIOS
 import { Auth } from '../services/auth';
 import { Propuesta } from '../services/propuesta';
-
-// MODELOS
 import { UsuarioModel } from '../models/usuario.model';
 import { PropuestaModel } from '../models/propuesta.model';
 
@@ -20,7 +16,6 @@ import { PropuestaModel } from '../models/propuesta.model';
 })
 export class CrearPropuestaPage implements OnInit {
 
-  // INYECCIÓN
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private alertCtrl = inject(AlertController);
@@ -63,8 +58,6 @@ export class CrearPropuestaPage implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
-    // if (!this.auth.hasRole('ORGANIZADOR') && !this.auth.hasRole('ONG')) { ... }
 
     const user = this.auth.currentUser();
     if (user) {
@@ -147,7 +140,6 @@ export class CrearPropuestaPage implements OnInit {
       this.router.navigate(['/lista-propuestas']); 
 
     } catch (error) {
-      console.error('Error creando propuesta:', error);
       this.mostrarAlerta('Error', 'No se pudo crear la propuesta. Inténtalo de nuevo.');
     } finally {
       loading.dismiss();

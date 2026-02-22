@@ -35,13 +35,13 @@ export class RegisterPage implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      telefono: ['', [Validators.pattern(/^[0-9]{9,15}$/)]], // Opcional para usuario normal
+      telefono: ['', [Validators.pattern(/^[0-9]{9,15}$/)]], 
 
       orgNombre: [''],
       orgCif: [''],
       orgEmail: ['', [Validators.email]], 
       orgCargo: [''],
-      orgTelefonoDirecto: [''], // Se validará dinámicamente
+      orgTelefonoDirecto: [''],
       orgZona: [''],
       orgObservaciones: [''],
 
@@ -49,7 +49,7 @@ export class RegisterPage implements OnInit {
       ongCif: [''],
       ongDescripcion: [''],
       ongDireccion: [''],
-      ongTelefonoContacto: [''], // Se validará dinámicamente
+      ongTelefonoContacto: [''], 
       ongWeb: ['', [Validators.pattern(/^https?:\/\/.+/)]]
     });
   }
@@ -77,7 +77,6 @@ export class RegisterPage implements OnInit {
     this.registerForm.get('orgNombre')?.setValidators([Validators.required, Validators.minLength(3)]);
     this.registerForm.get('orgCif')?.setValidators([Validators.required, Validators.minLength(5)]); 
     this.registerForm.get('orgEmail')?.setValidators([Validators.required, Validators.email]);
-    // NUEVO: Teléfono directo obligatorio y con patrón estricto
     this.registerForm.get('orgTelefonoDirecto')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{9,15}$/)]);
     
     this.updateControls(['orgNombre', 'orgCif', 'orgEmail', 'orgTelefonoDirecto']);
@@ -90,7 +89,6 @@ export class RegisterPage implements OnInit {
   private setOngValidators(): void {
     this.registerForm.get('ongNombreLegal')?.setValidators([Validators.required, Validators.minLength(3)]);
     this.registerForm.get('ongCif')?.setValidators([Validators.required, Validators.minLength(5)]); 
-    // NUEVO: Teléfono ONG obligatorio y con patrón estricto
     this.registerForm.get('ongTelefonoContacto')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{9,15}$/)]);
     
     this.updateControls(['ongNombreLegal', 'ongCif', 'ongTelefonoContacto']);

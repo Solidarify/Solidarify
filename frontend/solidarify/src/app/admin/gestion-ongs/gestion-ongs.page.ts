@@ -33,7 +33,6 @@ export class GestionOngsPage implements OnInit {
     try {
       this.ongs = await firstValueFrom(this.ongService.getAll());
     } catch (error) {
-      console.error('Error cargando ONGs', error);
       this.mostrarToast('Error al cargar datos', 'danger');
     } finally {
       this.cargando = false;

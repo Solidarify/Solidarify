@@ -8,7 +8,6 @@
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       
-      <!-- ROL COMO BOTONES MODERNOS (SEGMENT) -->
       <div class="ion-margin-bottom role-selector-container">
         <ion-label class="segment-label">Soy un(a):</ion-label>
         <ion-segment formControlName="role" mode="ios">
@@ -18,94 +17,90 @@
           <ion-segment-button value="ORGANIZADOR">
             <ion-label>Organizador</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="USER">
-            <ion-label>Usuario</ion-label>
-          </ion-segment-button>
         </ion-segment>
         <div class="custom-error" *ngIf="registerForm.get('role')?.invalid && isSubmitted">
           Debes seleccionar un rol
         </div>
       </div>
 
-      <!-- CAMPOS GENERALES -->
-      <ion-input class="modern-input" formControlName="nombre" label="Nombre *" labelPlacement="floating" fill="outline"
-        [class.ion-touched]="registerForm.get('nombre')?.touched || isSubmitted"
-        [errorText]="getErrorMessage('nombre')"></ion-input>
+      <div class="form-fields" *ngIf="registerForm.get('role')?.value">
 
-      <ion-input class="modern-input" formControlName="email" type="email" label="Email *" labelPlacement="floating" fill="outline"
-        [class.ion-touched]="registerForm.get('email')?.touched || isSubmitted"
-        [errorText]="getErrorMessage('email')"></ion-input>
+        <ion-input class="modern-input" formControlName="nombre" label="Nombre *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('nombre')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('nombre')"></ion-input>
 
-      <ion-input class="modern-input" formControlName="password" type="password" label="Contraseña *" labelPlacement="floating" fill="outline"
-        [class.ion-touched]="registerForm.get('password')?.touched || isSubmitted"
-        [errorText]="getErrorMessage('password')"></ion-input>
+        <ion-input class="modern-input" formControlName="email" type="email" label="Email *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('email')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('email')"></ion-input>
 
-      <!-- Teléfono general opcional -->
-      <ion-input class="modern-input" formControlName="telefono" type="tel" label="Teléfono (opcional)" labelPlacement="floating" fill="outline"
-        [class.ion-touched]="registerForm.get('telefono')?.touched || isSubmitted"
-        [errorText]="getErrorMessage('telefono')"></ion-input>
+        <ion-input class="modern-input" formControlName="password" type="password" label="Contraseña *" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('password')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('password')"></ion-input>
 
-      <!-- DATOS ORGANIZADOR -->
-      <div *ngIf="roleField?.value === 'ORGANIZADOR'" class="role-section">
-        <h3>Datos Organizador</h3>
-        
-        <ion-input class="modern-input" formControlName="orgNombre" label="Nombre de la Organización *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('orgNombre')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('orgNombre')"></ion-input>
+        <ion-input class="modern-input" formControlName="telefono" type="tel" label="Teléfono (opcional)" labelPlacement="floating" fill="outline"
+          [class.ion-touched]="registerForm.get('telefono')?.touched || isSubmitted"
+          [errorText]="getErrorMessage('telefono')"></ion-input>
 
-        <ion-input class="modern-input" formControlName="orgCif" label="CIF *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('orgCif')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('orgCif')"></ion-input>
+        <div *ngIf="roleField?.value === 'ORGANIZADOR'" class="role-section slide-in">
+          <h3>Datos Organizador</h3>
+          
+          <ion-input class="modern-input" formControlName="orgNombre" label="Nombre de la Organización *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('orgNombre')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('orgNombre')"></ion-input>
 
-        <ion-input class="modern-input" formControlName="orgEmail" type="email" label="Email de la Organización *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('orgEmail')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('orgEmail')"></ion-input>
+          <ion-input class="modern-input" formControlName="orgCif" label="CIF *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('orgCif')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('orgCif')"></ion-input>
 
-        <ion-input class="modern-input" formControlName="orgCargo" label="Cargo" labelPlacement="floating" fill="outline"></ion-input>
+          <ion-input class="modern-input" formControlName="orgEmail" type="email" label="Email de la Organización *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('orgEmail')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('orgEmail')"></ion-input>
 
-        <!-- Ahora es obligatorio -->
-        <ion-input class="modern-input" formControlName="orgTelefonoDirecto" type="tel" label="Teléfono Directo *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('orgTelefonoDirecto')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('orgTelefonoDirecto')"></ion-input>
+          <ion-input class="modern-input" formControlName="orgCargo" label="Cargo" labelPlacement="floating" fill="outline"></ion-input>
 
-        <ion-input class="modern-input" formControlName="orgZona" label="Zona Responsable" labelPlacement="floating" fill="outline"></ion-input>
+          <ion-input class="modern-input" formControlName="orgTelefonoDirecto" type="tel" label="Teléfono Directo *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('orgTelefonoDirecto')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('orgTelefonoDirecto')"></ion-input>
 
-        <ion-textarea class="modern-input" formControlName="orgObservaciones" label="Observaciones" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
-      </div>
+          <ion-input class="modern-input" formControlName="orgZona" label="Zona Responsable" labelPlacement="floating" fill="outline"></ion-input>
 
-      <!-- DATOS ONG -->
-      <div *ngIf="roleField?.value === 'ONG'" class="role-section">
-        <h3>Datos ONG</h3>
-        
-        <ion-input class="modern-input" formControlName="ongNombreLegal" label="Nombre Legal *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('ongNombreLegal')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('ongNombreLegal')"></ion-input>
+          <ion-textarea class="modern-input" formControlName="orgObservaciones" label="Observaciones" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
+        </div>
 
-        <ion-input class="modern-input" formControlName="ongCif" label="CIF *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('ongCif')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('ongCif')"></ion-input>
+        <div *ngIf="roleField?.value === 'ONG'" class="role-section slide-in">
+          <h3>Datos ONG</h3>
+          
+          <ion-input class="modern-input" formControlName="ongNombreLegal" label="Nombre Legal *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('ongNombreLegal')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('ongNombreLegal')"></ion-input>
 
-        <ion-textarea class="modern-input" formControlName="ongDescripcion" label="Descripción" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
+          <ion-input class="modern-input" formControlName="ongCif" label="CIF *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('ongCif')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('ongCif')"></ion-input>
 
-        <ion-input class="modern-input" formControlName="ongDireccion" label="Dirección" labelPlacement="floating" fill="outline"></ion-input>
+          <ion-textarea class="modern-input" formControlName="ongDescripcion" label="Descripción" labelPlacement="floating" fill="outline" rows="3"></ion-textarea>
 
-        <!-- Ahora es obligatorio -->
-        <ion-input class="modern-input" formControlName="ongTelefonoContacto" type="tel" label="Teléfono de Contacto *" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('ongTelefonoContacto')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('ongTelefonoContacto')"></ion-input>
+          <ion-input class="modern-input" formControlName="ongDireccion" label="Dirección" labelPlacement="floating" fill="outline"></ion-input>
 
-        <ion-input class="modern-input" formControlName="ongWeb" type="url" placeholder="https://..." label="Sitio Web" labelPlacement="floating" fill="outline"
-          [class.ion-touched]="registerForm.get('ongWeb')?.touched || isSubmitted"
-          [errorText]="getErrorMessage('ongWeb')"></ion-input>
-      </div>
+          <ion-input class="modern-input" formControlName="ongTelefonoContacto" type="tel" label="Teléfono de Contacto *" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('ongTelefonoContacto')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('ongTelefonoContacto')"></ion-input>
 
-      <ion-button expand="block" type="submit" class="ion-margin-top">
-        Registrarse
-      </ion-button>
+          <ion-input class="modern-input" formControlName="ongWeb" type="url" placeholder="https://..." label="Sitio Web" labelPlacement="floating" fill="outline"
+            [class.ion-touched]="registerForm.get('ongWeb')?.touched || isSubmitted"
+            [errorText]="getErrorMessage('ongWeb')"></ion-input>
+        </div>
 
-      <div class="login-link ion-text-center ion-margin-top">
-        <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia Sesión</a></p>
-      </div>
+        <ion-button expand="block" type="submit" class="ion-margin-top slide-in">
+          Registrarse
+        </ion-button>
+
+        <div class="login-link ion-text-center ion-margin-top slide-in">
+          <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia Sesión</a></p>
+        </div>
+
+      </div> 
+
     </form>
   </div>
 </ion-content>

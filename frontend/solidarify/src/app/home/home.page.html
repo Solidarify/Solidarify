@@ -1,11 +1,7 @@
 <ion-content [fullscreen]="true" class="bg-light">
   
-  <!-- ========================================== -->
-  <!-- VISTA 1: USUARIO LOGUEADO (DASHBOARD)    -->
-  <!-- ========================================== -->
   <ng-container *ngIf="isLoggedIn(); else landingTemplate">
     
-    <!-- HEADER MEJORADO -->
     <div class="header-section ion-padding">
       <div class="saludo-header">
         <div class="saludo-texto">
@@ -18,7 +14,6 @@
         </ion-avatar>
       </div>
       
-      <!-- NUEVO PANEL DE IMPACTO (Sustituye a la barra azul anterior) -->
       <div class="impact-dashboard mt-3">
         <div class="impact-header">
           <h3>Tu Impacto Solidario</h3>
@@ -26,7 +21,6 @@
         </div>
 
         <div class="impact-stats-grid">
-          <!-- Tarjeta 1: Completadas -->
           <div class="stat-box completed">
             <div class="stat-icon-wrapper bg-success-light">
               <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
@@ -37,7 +31,6 @@
             </div>
           </div>
 
-          <!-- Tarjeta 2: En curso -->
           <div class="stat-box in-progress">
             <div class="stat-icon-wrapper bg-primary-light">
               <ion-icon name="sync-circle" color="primary"></ion-icon>
@@ -49,7 +42,6 @@
           </div>
         </div>
 
-        <!-- Barra de progreso hacia el siguiente nivel -->
         <div class="progress-section mt-2">
           <div class="progress-labels">
             <span>Progreso de nivel</span>
@@ -60,7 +52,6 @@
       </div>
     </div>
 
-    <!-- CARRUSEL DE URGENTES -->
     <div class="section-title ion-padding-top ion-padding-horizontal">
       <h3>📢 Urgente esta semana</h3>
       <span class="see-all" routerLink="/lista-propuestas">Ver todo</span>
@@ -68,7 +59,6 @@
 
     <div class="urgent-scroll">
       
-      <!-- Skeleton Loading -->
       <ng-container *ngIf="cargando">
         <div class="urgent-card skeleton" *ngFor="let i of [1,2,3]">
           <ion-skeleton-text animated style="width: 140px; height: 100px; border-radius: 12px; margin-bottom: 8px;"></ion-skeleton-text>
@@ -79,13 +69,11 @@
         </div>
       </ng-container>
 
-      <!-- Estado Vacío -->
       <div class="empty-state" *ngIf="!cargando && propuestasUrgentes.length === 0">
         <p>🎉 ¡Todo tranquilo!</p>
         <small>No hay urgencias próximas (7 días)</small>
       </div>
 
-      <!-- Lista Real -->
       <div class="urgent-card" 
            *ngFor="let prop of propuestasUrgentes" 
            (click)="irADetalle(prop)">
@@ -109,14 +97,12 @@
 
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
     <div class="section-title ion-padding-top ion-padding-horizontal">
       <h3>Explorar</h3>
     </div>
 
     <ion-grid class="menu-grid">
       <ion-row>
-        <!-- CREAR (Solo organizadores/admin) -->
         <ion-col size="6">
           <div class="menu-card primary" (click)="navigateTo('/crear-propuesta')">
             <div class="icon-circle">
@@ -126,7 +112,6 @@
           </div>
         </ion-col>
         
-        <!-- BUSCAR (Todos) -->
         <ion-col size="6">
           <div class="menu-card secondary" (click)="navigateTo('/lista-propuestas/explore')">
             <div class="icon-circle">
@@ -136,7 +121,6 @@
           </div>
         </ion-col>
         
-        <!-- ONGS (Todos) -->
         <ion-col size="6">
           <div class="menu-card tertiary" (click)="navigateTo('/lista-ongs')">
             <div class="icon-circle">
@@ -146,7 +130,6 @@
           </div>
         </ion-col>
         
-        <!-- MI ACTIVIDAD / MIS PROPUESTAS -->
         <ion-col size="6">
           <div class="menu-card dark" (click)="navigateTo('/statistic')">
             <div class="icon-circle">
@@ -160,12 +143,8 @@
 
   </ng-container>
 
-  <!-- ========================================== -->
-  <!-- VISTA 2: LANDING PAGE (VISITANTES)       -->
-  <!-- ========================================== -->
   <ng-template #landingTemplate>
     
-    <!-- FONDO ANIMADO -->
     <div class="background-mesh">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
@@ -174,7 +153,6 @@
 
     <div class="landing-content">
 
-      <!-- HERO -->
       <div class="hero-premium">
         <div class="badge-pill bounce-in">
           📍 Encuentra dónde ayudar cerca de ti
@@ -202,20 +180,17 @@
         </div>
       </div>
 
-      <!-- TICKER ANIMADO -->
       <div class="marquee-container rotate-in">
         <div class="marquee-content">
           <span>🥫 Recogida de Alimentos (Plaza Mayor, 10:00)</span>
           <span>🎒 Material Escolar (Colegio San José, Jueves)</span>
           <span>🧥 Ropa de Invierno (Centro Cívico, Sábado)</span>
           <span>🧸 Juguetes Navidad (Parque Oeste, Domingo)</span>
-          <!-- Repetición para efecto infinito -->
           <span>🥫 Recogida de Alimentos (Plaza Mayor, 10:00)</span>
           <span>🎒 Material Escolar (Colegio San José, Jueves)</span>
         </div>
       </div>
 
-      <!-- ROLES -->
       <div class="role-explanation">
         <h2 class="section-title">¿Cómo participas tú?</h2>
         
@@ -253,7 +228,6 @@
         </div>
       </div>
 
-      <!-- VENTAJAS FLOTANTES -->
       <div class="glass-grid">
         <div class="glass-card float-slow">
           <div class="emoji">📍</div>
@@ -268,7 +242,6 @@
         </div>
       </div>
 
-      <!-- CTA FINAL -->
       <div class="final-cta-box">
         <h3>¿Organizas una recogida?</h3>
         <p>Publícala gratis en 2 minutos y consigue más participación.</p>

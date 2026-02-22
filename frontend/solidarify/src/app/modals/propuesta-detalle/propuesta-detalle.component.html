@@ -47,7 +47,6 @@
   </div>
 
   <div class="hero-image-container hero-image">
-    <!-- El badge se ajusta visualmente si está pendiente -->
     <div class="badge-estado" 
          [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada' || propuestaEditada.estadoPropuesta === 'asignada'"
          [style.background]="propuestaEditada.estadoPropuesta === 'pendiente_ong' ? '#f59e0b' : ''">
@@ -58,9 +57,6 @@
          class="main-img">
   </div>
 
-  <!-- BANNERS DE NOTIFICACIÓN SOBRE SOLICITUDES DE ONG -->
-  
-  <!-- A) Aviso para la ONG que debe aceptar o rechazar -->
   <div class="ion-padding" *ngIf="esLaOngSolicitada && esSolicitudPendiente" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; margin: 15px;">
     <div style="display: flex; align-items: flex-start; gap: 10px;">
       <ion-icon name="alert-circle" style="color: #f59e0b; font-size: 24px; margin-top: 2px;"></ion-icon>
@@ -71,7 +67,6 @@
     </div>
   </div>
 
-  <!-- B) Aviso para el Organizador de que está esperando respuesta -->
   <div class="ion-padding" *ngIf="esMiPropuesta && esSolicitudPendiente" style="background-color: #e0f2fe; border-left: 4px solid #3b82f6; margin: 15px;">
     <div style="display: flex; align-items: flex-start; gap: 10px;">
       <ion-icon name="time-outline" style="color: #3b82f6; font-size: 24px; margin-top: 2px;"></ion-icon>
@@ -82,7 +77,6 @@
     </div>
   </div>
 
-  <!-- FIN BANNERS DE NOTIFICACIÓN -->
 
   <div class="content-container ion-padding">
     
@@ -110,7 +104,6 @@
       </div>
     </div>
 
-    <!-- NUEVO BLOQUE: ONG ASIGNADA (Versión Sencilla) -->
     <ng-container *ngIf="propuestaEditada.idOngAsignada; else sinOng">
       <div class="organizador-row ong-row">
         <ion-avatar slot="start">
@@ -125,7 +118,6 @@
       </div>
     </ng-container>
 
-    <!-- BLOQUE SIN ONG -->
     <ng-template #sinOng>
       <div class="organizador-row ong-row sin-ong">
         <ion-icon name="shield-half-outline" color="medium" class="icon-sin-ong"></ion-icon>
@@ -220,11 +212,9 @@
   </div>
 </ion-content>
 
-<!-- FOOTER -->
 <ion-footer class="ion-no-border" *ngIf="!modoEdicion">
   <ion-toolbar>
     
-    <!-- SI LA ONG ESTÁ VIENDO UNA SOLICITUD PENDIENTE: Muestra botones de decisión -->
     <div style="display: flex; gap: 10px; padding: 5px 15px;" *ngIf="esLaOngSolicitada && esSolicitudPendiente">
       <ion-button expand="block" shape="round" color="danger" fill="outline" style="flex: 1;" (click)="responderSolicitud(false)">
         Rechazar
@@ -234,7 +224,6 @@
       </ion-button>
     </div>
 
-    <!-- DE LO CONTRARIO: Muestra el botón normal de contacto -->
     <ion-button 
       *ngIf="!(esLaOngSolicitada && esSolicitudPendiente)"
       expand="block" 

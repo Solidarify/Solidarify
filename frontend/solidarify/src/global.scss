@@ -154,7 +154,7 @@ ion-content {
     
     ion-input, ion-select {
       font-size: 15px;
-      --placeholder-color: #064e3b; //#064e3b 10b981
+      --placeholder-color: #064e3b; 
       --placeholder-opacity: 0.8;
     }
 
@@ -170,7 +170,6 @@ ion-content {
   }
 }
 
-// Fechas
 .date-row {
   display: flex;
   gap: 16px;
@@ -191,7 +190,7 @@ ion-content {
       &::part(native) {
         background: white;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        color: #064e3b; //#064e3b 10b981
+        color: #064e3b;
         border-radius: 8px;
         padding: 12px;
         width: 100%;
@@ -253,7 +252,6 @@ ion-modal {
   margin-top: 20px !important;
 }
 
-//Lista-Propuestas / explore
 .stats-card {
   margin: 16px;
   border-radius: 20px;
@@ -559,7 +557,6 @@ ion-modal {
   color: black;
 }
 
-//Estilos al modificar campos
 .input-hero, .input-edit, .textarea-edit {
   width: 100% !important;
   min-height: 44px;
@@ -743,7 +740,6 @@ ion-modal ion-content ion-item.titulo-propuesta {
   
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   
-  /* En modo edición/focus */
   &:focus-within {
     --border-color: var(--ion-color-primary) !important;
     box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15) !important;
@@ -751,12 +747,10 @@ ion-modal ion-content ion-item.titulo-propuesta {
 
 }
 
-/* Input interno de PROPUESTAS*/
 ion-modal ion-content ion-item.titulo-propuesta ion-input {
   --color: #1f2937 !important;
 }
 
-/* Ion-Item titulo modal fondo de ONGs*/
 ion-modal ion-content ion-item.titulo-ong {
   --background: #ffffff !important;
   --color: #1f2937 !important;
@@ -771,25 +765,21 @@ ion-modal ion-content ion-item.titulo-ong {
   
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   
-  /* En modo edición/focus */
   &:focus-within {
     --border-color: var(--ion-color-primary) !important;
     box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15) !important;
   }
 }
 
-/* Input interno de ONGs */
 ion-modal ion-content ion-item.titulo-ong ion-input {
   --color: #000000 !important;
 }
 
-// Header de modal
 ion-modal ion-header ion-toolbar {
   --background: #1f2937 !important; 
   --color: #ffffff !important;
 }
 
-// Footer de modal
 ion-modal ion-footer ion-toolbar {
   --background: #1f2937 !important;
   --color: #ffffff !important;
@@ -799,7 +789,6 @@ ion-modal ion-footer ion-button[color="primary"] {
   --ion-color-contrast: #1f2937 !important;
 }
 
-/* Sección URL de imagen - Propuesta Detalle */
 .image-url-section {
   background: white;
   margin: 16px;
@@ -840,7 +829,6 @@ ion-modal ion-footer ion-button[color="primary"] {
   }
 }
 
-/* Ajustar hero-image para que respire mejor */
 .hero-image-container {
   margin-top: 8px;
 }
@@ -860,39 +848,33 @@ ion-modal ion-footer ion-button[color="primary"] {
 }
 
 
-/* ============ ION-SELECT POPOVER PERSONALIZADO ============ */
-
 ion-popover ion-select-popover,
 ion-select-interface {
-  --background: #1f2937 !important;  /* Fondo oscuro del menú */
+  --background: #1f2937 !important;  
 }
 
 .select-interface-option {
-  --background: #374151 !important;  /* Fondo CLARO de cada opción */
-  --color: #10b981 !important;       /* Letras VERDE */
+  --background: #374151 !important;  
+  --color: #10b981 !important;       
   --padding-start: 20px !important;
   --padding-end: 20px !important;
   --min-height: 44px !important;
 }
 
-/* Hover de opciones */
 .select-interface-option:hover {
-  --background: #4b5563 !important;  /* Más claro en hover */
+  --background: #4b5563 !important;  
 }
 
-/* Opción seleccionada */
 .select-interface-option.select-interface-option-selected {
-  --background: #10b981 !important;  /* Verde cuando seleccionada */
+  --background: #10b981 !important; 
   --color: white !important;
 }
 
-/* Header del select */
 .select-interface-header {
   --background: #1f2937 !important;
   --color: #10b981 !important;
 }
 
-/* Checkmark */
 .select-interface-option ion-icon[name="checkmark"] {
   color: white !important;
 }

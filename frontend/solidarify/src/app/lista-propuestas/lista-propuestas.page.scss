@@ -1,13 +1,11 @@
-/* --- FONDO GENERAL --- */
 ion-content {
-  --background: #f8fafc; /* Gris muy claro */
+  --background: #f8fafc; 
 }
 
-/* --- HERO & STATS (Verde) --- */
 .stats-card {
   background: linear-gradient(135deg, #10b981 0%, #047857 100%);
   border-radius: 0 0 30px 30px;
-  padding: 20px 24px 60px; /* Espacio extra para el buscador flotante */
+  padding: 20px 24px 60px; 
   color: white;
   position: relative;
   margin: 0;
@@ -26,7 +24,7 @@ ion-content {
     font-weight: 800;
     line-height: 1;
     letter-spacing: -1px;
-    color: white; /* Asegurar blanco */
+    color: white;
   }
   
   .stat-label {
@@ -46,10 +44,9 @@ ion-content {
   }
 }
 
-/* --- BUSCADOR FLOTANTE --- */
 .filtros-container {
   padding: 0 20px;
-  margin-top: -35px; /* Sube sobre el hero */
+  margin-top: -35px;
   position: relative;
   z-index: 10;
   margin-bottom: 25px;
@@ -74,7 +71,7 @@ ion-content {
       width: 100%;
       height: 44px;
       font-size: 1rem;
-      color: #334155; /* Texto oscuro para lo que escribes */
+      color: #334155; 
       outline: none;
 
       &::placeholder {
@@ -84,7 +81,6 @@ ion-content {
   }
 }
 
-/* --- CABECERA DE LISTA --- */
 .list-header {
   padding: 0 24px;
   margin-bottom: 12px;
@@ -92,37 +88,35 @@ ion-content {
   h3 {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1e293b; /* Título oscuro */
+    color: #1e293b; 
     margin: 0;
     
     span { color: #10b981; }
   }
 }
 
-/* --- LISTA DE PROPUESTAS --- */
 .propuestas-list {
   padding: 0 20px 40px;
 }
 
 .propuesta-card {
-  background: white; /* Fondo blanco puro */
+  background: white; 
   border-radius: 20px;
   padding: 16px;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* Sombra suave */
-  border: 1px solid rgba(0,0,0,0.02); /* Borde sutil */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+  border: 1px solid rgba(0,0,0,0.02); 
   position: relative;
   transition: transform 0.2s;
   
   &:active { transform: scale(0.98); }
 
-  /* Icono/Imagen Izquierda */
   .card-icon-box {
     width: 60px; height: 60px;
     border-radius: 16px;
-    background: #ecfdf5; /* Fondo verde muy claro */
+    background: #ecfdf5;
     display: flex; align-items: center; justify-content: center;
     margin-right: 16px;
     overflow: hidden;
@@ -135,23 +129,20 @@ ion-content {
     }
   }
 
-  /* Info Central */
   .card-info {
     flex: 1;
     min-width: 0;
 
-    /* TÍTULO: Color Oscuro Fuerte */
     .card-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: #1e293b !important; /* FORZAMOS COLOR OSCURO */
+      color: #1e293b !important; 
       margin: 0 0 6px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* UBICACIÓN: Color Gris Medio */
     .card-meta {
       display: flex; align-items: center; gap: 10px;
       margin-bottom: 8px;
@@ -159,17 +150,16 @@ ion-content {
       .meta-item {
         display: flex; align-items: center; gap: 4px;
         font-size: 0.85rem; 
-        color: #64748b !important; /* Gris legible */
+        color: #64748b !important;
         
         ion-icon { color: #94a3b8; font-size: 14px; }
       }
     }
 
-    /* FECHA: Badge Gris Claro */
     .card-tags {
       .tag-date {
         background: #f1f5f9;
-        color: #475569; /* Texto gris oscuro */
+        color: #475569; 
         font-size: 0.75rem;
         font-weight: 700;
         padding: 4px 8px;
@@ -179,7 +169,6 @@ ion-content {
     }
   }
 
-  /* Flecha Derecha */
   .card-action {
     color: #cbd5e1;
     font-size: 20px;
@@ -187,7 +176,6 @@ ion-content {
   }
 }
 
-/* --- EMPTY STATE --- */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -197,13 +185,12 @@ ion-content {
   }
   
   p {
-    color: #94a3b8; /* Gris suave */
+    color: #94a3b8; 
     font-size: 1rem;
     margin-bottom: 10px;
   }
 }
 
-/* --- ANIMACIONES --- */
 .scale-in { animation: scaleIn 0.3s ease-out; }
 .fade-in-down { animation: fadeInDown 0.5s ease-out; }
 .fade-in-up { animation: fadeInUp 0.5s ease-out; }
@@ -213,7 +200,6 @@ ion-content {
 @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 
-/* --- LOADING --- */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -228,9 +214,7 @@ ion-content {
   }
 }
 
-/* Ajuste Input Nativo */
 .native-input {
-  /* Quitar estilos por defecto del navegador */
   -webkit-appearance: none;
   appearance: none;
 }
@@ -238,8 +222,8 @@ ion-content {
 .propuesta-card {
 
   &.estado-pendiente {
-    border-left: 4px solid var(--ion-color-warning); // Borde amarillo a la izquierda
-    background: rgba(var(--ion-color-warning-rgb), 0.05); // Fondo ligeramente amarillo
+    border-left: 4px solid var(--ion-color-warning); 
+    background: rgba(var(--ion-color-warning-rgb), 0.05); 
   }
 }
 
