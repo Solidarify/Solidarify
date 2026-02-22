@@ -1,6 +1,52 @@
 const { Usuario, PerfilONG, Organizador } = require('../models');
 
 exports.updateProfile = async (req, res) => {
+  console.log('=== UPDATE PROFILE ===');
+  console.log('ID param:', req.params.id);
+  console.log('req.userData:', req.userData);
+  
+  try {
+    const { id } = req.params; 
+    const { nombre, email, telefono, fotoPerfil } = req.body;
+
+    const userIdLogueado = req.userData.userId;
+    const rolesUsuario = Array.isArray(req.userData.roles) ? req.userData.roles : [req.userData.roles || ''];
+    
+    console.log('User ID logueado:', userIdLogueado);
+    console.log('Roles usuario:', rolesUsuario);
+    console.log('Puede editar?', userIdLogueado == id || rolesUsuario.includes('ADMIN'));
+
+    if (parseInt(userIdLogueado) !== parseInt(id) && !rolesUsuario.includes('ADMIN')) {
+      console.log('🚫 Acceso denegado');
+      return res.status(403).json({ message: 'No autorizado' });
+    }
+
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    if (nombre) usuario.nombre = nombre;
+    if (email) usuario.email = email;
+    if (telefono !== undefined) usuario.telefono = telefono;
+    if (fotoPerfil !== undefined) usuario.fotoPerfil = fotoPerfil;
+    
+    await usuario.save();
+
+    const usuarioResponse = usuario.toJSON();
+    delete usuarioResponse.password;
+
+    console.log('✅ Perfil actualizado');
+    res.json(usuarioResponse);
+
+  } catch (error) {
+    console.error('ERROR updateProfile:', error.message);
+    res.status(500).json({ message: 'Error al actualizar perfil', error: error.message });
+  }
+};
+
+/*
+exports.updateProfile = async (req, res) => {
   try {
     const { id } = req.params; 
     const { nombre, email, telefono, fotoPerfil } = req.body;
@@ -31,6 +77,7 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar perfil' });
   }
 };
+*/
 
 exports.getDetallesRol = async (req, res) => {
   try {
