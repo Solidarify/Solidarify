@@ -59,7 +59,7 @@ exports.register = async (req, res) => {
         const { 
             nombre, email, password, telefono, role,
             nombreOrganizacion, cif, telefonoDirecto, zonaResponsable,
-            nombreLegal, descripcion, direccion, web
+            nombreLegal, descripcion, direccion, telefonoContacto, web
         } = req.body;
 
         const existe = await Usuario.findOne({ where: { email } });
@@ -75,8 +75,6 @@ exports.register = async (req, res) => {
 
         await sequelize.transaction(async (t) => {
           
-            console.log('Transacción iniciada');
-
             const nuevoUsuario = await Usuario.create({
                 nombre,
                 email,
@@ -113,6 +111,7 @@ exports.register = async (req, res) => {
                         descripcion: descripcion || null,
                         direccion: direccion || null,
                         web: web || null,
+                        telefonoContacto: telefonoContacto || null,
                         estadoVerificacion: 'pendiente'
                     }, { transaction: t });
                     

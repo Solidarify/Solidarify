@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const Usuario = require('../models/Usuario');
 
 const PerfilONG = sequelize.define('PerfilONG', {
@@ -28,6 +27,10 @@ const PerfilONG = sequelize.define('PerfilONG', {
     type: DataTypes.STRING,
     field: 'Direccion'
   },
+  telefonoContacto: {
+    type: DataTypes.STRING,
+    field: 'Telefono_Contacto'
+  },
   web: {
     type: DataTypes.STRING,
     field: 'Web'
@@ -37,12 +40,19 @@ const PerfilONG = sequelize.define('PerfilONG', {
     defaultValue: 'pendiente',
     field: 'Estado_Verificacion'
   },
-  
-  isVerified: {
+    isVerified: {
     type: DataTypes.BOOLEAN,
     get() {
       return this.getDataValue('estadoVerificacion') === 'verificado';
     }
+  },
+  fechaVerificacion: {
+    type: DataTypes.DATE,
+    field: 'Fecha_Verificacion'
+  },
+  idAdminVerificador: {
+    type: DataTypes.INTEGER,
+    field: 'Id_Admin_Verificador'
   }
 }, {
   tableName: 'PerfilONG',
@@ -50,3 +60,4 @@ const PerfilONG = sequelize.define('PerfilONG', {
 });
 
 module.exports = PerfilONG;
+

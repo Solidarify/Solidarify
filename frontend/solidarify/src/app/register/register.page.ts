@@ -194,6 +194,7 @@ export class RegisterPage implements OnInit {
         cif: this.registerForm.value.ongCif,
         descripcion: this.registerForm.value.ongDescripcion,
         direccion: this.registerForm.value.ongDireccion,
+        telefonoContacto: this.registerForm.value.ongTelefonoContacto,
         web: this.registerForm.value.ongWeb
       };
     }

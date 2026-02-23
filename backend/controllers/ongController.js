@@ -30,9 +30,24 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.update = async (req, res) => {
+  try {
+    const ong = await PerfilONG.findByPk(req.params.id);
+    if (!ong) return res.status(404).json({ message: 'ONG no encontrada' });
+
+    const { nombreLegal, cif, descripcion, direccion, telefonoContacto, web } = req.body;
+
+    await ong.update({ nombreLegal, cif, descripcion, direccion, telefonoContacto, web });
+
+    res.json(ong);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar ONG', error: error.message });
+  }
+};
+
 exports.createOrUpdate = async (req, res) => {
   try {
-    const { idUsuario, nombreLegal, cif, descripcion, direccion, web } = req.body;
+    const { idUsuario, nombreLegal, cif, descripcion, direccion, telefonoContacto, web } = req.body; // ✅
 
     const [ong] = await PerfilONG.upsert({
       idUsuario,
@@ -40,15 +55,17 @@ exports.createOrUpdate = async (req, res) => {
       cif,
       descripcion,
       direccion,
+      telefonoContacto, 
       web,
-      isVerified: false 
+      estadoVerificacion: 'pendiente'
     });
 
     res.json(ong);
   } catch (error) {
-    res.status(500).json({ message: 'Error al guardar ONG' });
+    res.status(500).json({ message: 'Error al guardar ONG', error: error.message });
   }
 };
+
 
 exports.verificar = async (req, res) => {
   try {

@@ -29,7 +29,7 @@ sequelize.authenticate()
     console.log('✅ Conexión a Base de Datos exitosa.');
     // force: false para NO borrar datos.
     // alter: true actualiza tablas si cambias modelos
-    return sequelize.sync({ force: false, alter: false });
+    return sequelize.sync({ force: false, alter: true });
   })
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => {
