@@ -30,15 +30,16 @@
 </ion-header>
 
 <ion-content class="ion-padding-bottom">
-  
+
   <div class="image-url-section ion-padding-horizontal ion-margin-top" *ngIf="modoEdicion">
     <div class="section-header">
       <ion-icon name="image-outline" color="primary"></ion-icon>
       <ion-label color="primary">Imagen de portada</ion-label>
     </div>
     <ion-item class="custom-input">
-      <ion-input labelPlacement="stacked"
-        [(ngModel)]="propuestaEditada.imagen" 
+      <ion-input
+        labelPlacement="stacked"
+        [(ngModel)]="propuestaEditada.imagen"
         placeholder="https://ejemplo.com/foto.jpg"
         type="url"
         clearInput="true">
@@ -47,17 +48,19 @@
   </div>
 
   <div class="hero-image-container hero-image">
-    <div class="badge-estado" 
+    <div class="badge-estado"
          [class.publicada]="propuestaEditada.estadoPropuesta === 'publicada' || propuestaEditada.estadoPropuesta === 'asignada'"
          [style.background]="propuestaEditada.estadoPropuesta === 'pendiente_ong' ? '#f59e0b' : ''">
       {{ propuestaEditada.estadoPropuesta === 'pendiente_ong' ? 'Pendiente ONG' : (propuestaEditada.estadoPropuesta | titlecase) }}
     </div>
-    <img [src]="propuestaEditada.imagen || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Solidarify'" 
-         alt="Imagen de la propuesta" 
+    <img [src]="propuestaEditada.imagen || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Solidarify'"
+         alt="Imagen de la propuesta"
          class="main-img">
   </div>
 
-  <div class="ion-padding" *ngIf="esLaOngSolicitada && esSolicitudPendiente" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; margin: 15px;">
+  <div class="ion-padding" 
+       *ngIf="esLaOngSolicitada && esSolicitudPendiente" 
+       style="background-color: #fef3c7; border-left: 4px solid #f59e0b; margin: 15px;">
     <div style="display: flex; align-items: flex-start; gap: 10px;">
       <ion-icon name="alert-circle" style="color: #f59e0b; font-size: 24px; margin-top: 2px;"></ion-icon>
       <div>
@@ -67,7 +70,9 @@
     </div>
   </div>
 
-  <div class="ion-padding" *ngIf="esMiPropuesta && esSolicitudPendiente" style="background-color: #e0f2fe; border-left: 4px solid #3b82f6; margin: 15px;">
+  <div class="ion-padding" 
+       *ngIf="esMiPropuesta && esSolicitudPendiente" 
+       style="background-color: #e0f2fe; border-left: 4px solid #3b82f6; margin: 15px;">
     <div style="display: flex; align-items: flex-start; gap: 10px;">
       <ion-icon name="time-outline" style="color: #3b82f6; font-size: 24px; margin-top: 2px;"></ion-icon>
       <div>
@@ -77,9 +82,8 @@
     </div>
   </div>
 
-
   <div class="content-container ion-padding">
-    
+
     <div class="header-section">
       <ng-container *ngIf="modoEdicion; else verTitulo">
         <ion-item class="custom-input ion-margin-bottom">
@@ -91,23 +95,43 @@
         <h1 class="titulo">{{ propuestaEditada.titulo }}</h1>
       </ng-template>
     </div>
-    
+
     <div class="organizador-row">
       <ion-avatar slot="start">
-        <img [src]="'https://ui-avatars.com/api/?name=Org+' + propuesta.idOrganizador + '&background=0D8ABC&color=fff'">
+        <ion-skeleton-text *ngIf="cargandoOrganizador" animated></ion-skeleton-text>
+
+        <img *ngIf="!cargandoOrganizador && imagenOrganizador"
+             [src]="imagenOrganizador"
+             alt="Foto Organizador"
+             style="object-fit: cover; width: 100%; height: 100%; border-radius: 50%;"
+             (error)="imagenOrganizador = null"> 
+
+        <img *ngIf="!cargandoOrganizador && !imagenOrganizador"
+             [src]="'https://ui-avatars.com/api/?name=' + nombreOrganizador + '&background=0D8ABC&color=fff&bold=true&size=128'"
+             alt="Avatar Organizador">
       </ion-avatar>
+
       <div class="org-info">
         <span class="label">Organizado por</span>
         <span class="nombre">
-          {{ esMiPropuesta ? 'Tú (Organizador)' : 'Organizador #' + propuestaEditada.idOrganizador }}
+          <ng-container *ngIf="esMiPropuesta">({{ nombreOrganizador }})</ng-container>
+
+          <ng-container *ngIf="!esMiPropuesta && cargandoOrganizador">
+            <ion-skeleton-text animated style="width: 120px; height: 14px; border-radius: 4px; margin-top: 4px;"></ion-skeleton-text>
+          </ng-container>
+
+          <ng-container *ngIf="!esMiPropuesta && !cargandoOrganizador">
+            {{ nombreOrganizador }}
+          </ng-container>
         </span>
       </div>
     </div>
 
+
     <ng-container *ngIf="propuestaEditada.idOngAsignada; else sinOng">
       <div class="organizador-row ong-row">
         <ion-avatar slot="start">
-          <img [src]="'https://ui-avatars.com/api/?name=' + (propuestaEditada.ongAsignada?.nombre || 'ONG') + '&background=f59e0b&color=fff'">
+          <img [src]="'https://ui-avatars.com/api/?name=' + (propuestaEditada.ongAsignada?.nombre || 'ONG') + '&background=f59e0b&color=fff&bold=true&size=128'">
         </ion-avatar>
         <div class="org-info">
           <span class="label">Respaldada por la ONG</span>
@@ -146,13 +170,12 @@
             </div>
           </div>
         </ion-col>
-        
+
         <ion-col size="6">
           <div class="info-item">
             <ion-icon name="cube-outline" color="primary"></ion-icon>
             <div>
               <span class="label">Tipo de Ayuda</span>
-              
               <ng-container *ngIf="modoEdicion; else verTipo">
                 <ion-select interface="popover" [(ngModel)]="propuestaEditada.idTipoBien" class="select-inline">
                   <ion-select-option [value]="1">Alimentos</ion-select-option>
@@ -163,14 +186,13 @@
                   <ion-select-option [value]="10">Otros</ion-select-option>
                 </ion-select>
               </ng-container>
-              
               <ng-template #verTipo>
                 <span class="value">{{ tipoBienNombre }}</span>
               </ng-template>
             </div>
           </div>
         </ion-col>
-        
+
         <ion-col size="12">
           <div class="info-item">
             <ion-icon name="calendar-outline" color="primary"></ion-icon>
@@ -190,18 +212,16 @@
 
     <div class="descripcion-section">
       <h3>Sobre esta campaña</h3>
-      
       <ng-container *ngIf="modoEdicion; else verDesc">
         <ion-item class="custom-input area-item">
-          <ion-textarea 
-            [(ngModel)]="propuestaEditada.descripcion" 
-            rows="6" 
+          <ion-textarea
+            [(ngModel)]="propuestaEditada.descripcion"
+            rows="6"
             placeholder="Describe detalladamente en qué consiste la ayuda..."
             autoGrow="true">
           </ion-textarea>
         </ion-item>
       </ng-container>
-
       <ng-template #verDesc>
         <p class="descripcion-text">
           {{ propuestaEditada.descripcion || 'No hay descripción disponible para esta propuesta.' }}
@@ -214,7 +234,7 @@
 
 <ion-footer class="ion-no-border" *ngIf="!modoEdicion">
   <ion-toolbar>
-    
+
     <div style="display: flex; gap: 10px; padding: 5px 15px;" *ngIf="esLaOngSolicitada && esSolicitudPendiente">
       <ion-button expand="block" shape="round" color="danger" fill="outline" style="flex: 1;" (click)="responderSolicitud(false)">
         Rechazar
@@ -224,21 +244,21 @@
       </ion-button>
     </div>
 
-    <ion-button 
+    <ion-button
       *ngIf="!(esLaOngSolicitada && esSolicitudPendiente)"
-      expand="block" 
-      shape="round" 
-      class="ion-margin action-btn" 
-      (click)="contactar()" 
-      [disabled]="esMiPropuesta || esSolicitudPendiente" 
+      expand="block"
+      shape="round"
+      class="ion-margin action-btn"
+      (click)="contactar()"
+      [disabled]="esMiPropuesta || esSolicitudPendiente"
       [color]="esMiPropuesta ? 'medium' : 'primary'">
-      
+
       <span *ngIf="!esMiPropuesta && !esSolicitudPendiente">Contactar / Participar</span>
       <span *ngIf="esMiPropuesta">Esta es tu propuesta</span>
       <span *ngIf="!esMiPropuesta && esSolicitudPendiente">Campaña en espera de ONG</span>
-      
+
       <ion-icon name="chatbubble-ellipses-outline" slot="end"></ion-icon>
-    </ion-button> 
+    </ion-button>
 
   </ion-toolbar>
 </ion-footer>

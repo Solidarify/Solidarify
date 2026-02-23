@@ -106,3 +106,39 @@ exports.getAll = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener usuarios' });
     }
 };
+
+
+exports.getById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario = await Usuario.findByPk(id, {
+      attributes: ['idUsuario', 'nombre', 'email', 'telefono', 'fotoPerfil']
+    });
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {    const { id } = req.params;
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+    await usuario.destroy();
+    res.json({ message: 'Usuario eliminado' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+exports.getUserLogoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json({ fotoPerfil: usuario.fotoPerfil });
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor' });
+  } 
+};

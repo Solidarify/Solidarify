@@ -3,6 +3,7 @@ import { AlertController, ToastController, ActionSheetController } from '@ionic/
 import { firstValueFrom } from 'rxjs';
 
 import { PerfilOng } from '../../services/perfil-ong'; 
+import { Usuario } from 'src/app/services/usuario';
 import { PerfilONGModel } from '../../models/perfil-ong.model';
 
 @Component({
@@ -17,6 +18,7 @@ export class GestionOngsPage implements OnInit {
   private toastCtrl = inject(ToastController);
   private actionSheetCtrl = inject(ActionSheetController);
   private ongService = inject(PerfilOng); 
+  private userService = inject(Usuario);
 
   ongs: PerfilONGModel[] = []; 
   filtroEstado: string = 'todos';
@@ -54,13 +56,13 @@ export class GestionOngsPage implements OnInit {
           handler: () => this.ejecutarCambioEstado(ong, true) 
         },
         {
-          text: '❌ Rechazar Solicitud',
+          text: '⚠️ Establecer como Pendiente',
           icon: 'close-circle',
           role: 'destructive',
           handler: () => this.ejecutarCambioEstado(ong, false) 
         },
         {
-          text: '🗑️ Eliminar Registro',
+          text: '🗑️ Eliminar ONG',
           icon: 'trash',
           role: 'destructive',
           handler: () => this.confirmarBorrado(ong)
@@ -104,7 +106,8 @@ export class GestionOngsPage implements OnInit {
         cssClass: 'alert-button-confirm',
         handler: async () => {
             try {
-              await firstValueFrom(this.ongService.delete(ong.idUsuario ?? 0));
+              console.log(`Intentando eliminar ONG con ID ${ong.idUsuario}`);
+              await firstValueFrom(this.userService.delete(ong.idUsuario ?? 0));
               this.mostrarToast('ONG eliminada', 'success');
               this.cargarOngs();
             } catch (e) {
