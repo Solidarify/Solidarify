@@ -36,3 +36,40 @@
     color: #64748b !important;
   }
 }
+
+.info-grid {
+  margin-bottom: 20px;
+  
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    
+    ion-icon {
+      font-size: 22px;
+      color: #10b981;
+      margin-right: 12px;
+      margin-top: 4px;
+    }
+    
+    div {
+      flex: 1;
+      
+      ion-input.input-inline {
+        margin-top: 4px;
+        align-self: stretch;
+      }
+    }
+  }
+}
+
+.info-grid .info-item div ion-input {
+  --color: #000000 !important; 
+  color: #000000 !important; 
+  
+  --placeholder-color: #4b5563 !important;
+}
+
+.info-grid .info-item .label {
+  color: #000000 !important;
+}

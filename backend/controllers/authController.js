@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Usuario, Rol, Organizador, PerfilONG, UsuarioRol } = require('../models');
 
+const sequelize = require('../config/database');
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -72,7 +74,9 @@ exports.register = async (req, res) => {
         }
 
         await sequelize.transaction(async (t) => {
-            
+          
+            console.log('Transacción iniciada');
+
             const nuevoUsuario = await Usuario.create({
                 nombre,
                 email,

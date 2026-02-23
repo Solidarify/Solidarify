@@ -53,7 +53,6 @@ exports.getPublicas = async (req, res) => {
   }
 };
 
-// Obtener una por ID
 exports.getById = async (req, res) => {
   try {
     const propuesta = await Propuesta.findByPk(req.params.id, {
@@ -70,7 +69,71 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.create = async (req, res) => {
+  console.log('=== CREATE PROPUESTA ===');
+  console.log('Datos recibidos:', req.body);
+  console.log('User ID organizador:', req.userData?.userId);
+  
+  try {
+    const { titulo, descripcion, idTipoBien, lugar, fechaInicio, fechaFin, estadoPropuesta, imagen } = req.body;
+    const idOrganizador = req.userData.userId; 
 
+    console.log('Valores extraídos:');
+    console.log('- titulo:', titulo);
+    console.log('- idTipoBien:', idTipoBien);
+    console.log('- idOrganizador:', idOrganizador);
+
+    if (!idOrganizador) {
+      return res.status(400).json({ message: 'No se pudo identificar al organizador.' });
+    }
+
+    if (!titulo || !descripcion || !idTipoBien || !lugar || !fechaInicio || !fechaFin) {
+      console.log('❌ ERROR: Faltan campos obligatorios');
+      return res.status(400).json({ 
+        message: 'Faltan campos obligatorios: título, descripción, tipo de bien, lugar, fechas' 
+      });
+    }
+
+    const fechaInicioDate = new Date(fechaInicio);
+    const fechaFinDate = new Date(fechaFin);
+    if (fechaInicioDate >= fechaFinDate) {
+      return res.status(400).json({ message: 'La fecha de inicio debe ser anterior a la fecha de fin' });
+    }
+
+    console.log('✅ Todos los datos OK, creando propuesta...');
+
+    const nuevaPropuesta = await Propuesta.create({
+      titulo,
+      descripcion,
+      idTipoBien: idTipoBien,
+      lugar,
+      fechaInicio,
+      fechaFin,
+      estadoPropuesta: estadoPropuesta || 'publicada',
+      fechaPublicacion: new Date(),
+      idOrganizador: idOrganizador,
+      imagen: imagen || null
+    });
+
+    console.log('✅ Propuesta CREADA con idTipoBien:', nuevaPropuesta.toJSON().idTipoBien);
+    
+    const propuestaCompleta = await Propuesta.findByPk(nuevaPropuesta.idPropuesta, {
+      include: [
+        { model: Usuario, as: 'organizador', attributes: ['nombre'] },
+        { model: Usuario, as: 'ongAsignada', attributes: ['nombre'] }
+      ]
+    });
+
+    res.status(201).json(propuestaCompleta);
+
+  } catch (error) {
+    console.error('❌ ERROR createPropuesta:', error.message);
+    res.status(500).json({ message: 'Error al crear la propuesta', error: error.message });
+  }
+};
+
+
+/*
 exports.create = async (req, res) => {
   try {
     const { titulo, descripcion, tipoBien, lugar, fechaInicio, fechaFin, estadoPropuesta } = req.body;
@@ -98,6 +161,106 @@ exports.create = async (req, res) => {
     res.status(500).json({ message: 'Error al crear la propuesta' });
   }
 };
+*/
+
+exports.update = async (req, res) => {
+  console.log('=== UPDATE PROPUESTA ===');
+  console.log('ID:', req.params.id);
+  console.log('Datos recibidos:', req.body);
+  
+  try {
+    const propuesta = await Propuesta.findByPk(req.params.id, {
+      include: [
+        { model: Usuario, as: 'organizador', attributes: ['nombre'] },
+        { model: Usuario, as: 'ongAsignada', attributes: ['nombre'] }
+      ]
+    });
+    
+    if (!propuesta) {
+      console.log('Propuesta NO encontrada');
+      return res.status(404).json({ message: 'Propuesta no encontrada' });
+    }
+    
+    console.log('Propuesta encontrada:', propuesta.toJSON());
+
+    const camposActualizables = {
+      titulo: req.body.titulo,
+      descripcion: req.body.descripcion,
+      idTipoBien: req.body.idTipoBien || req.body.tipoBien,
+      lugar: req.body.lugar,
+      fechaInicio: req.body.fechaInicio,
+      fechaFin: req.body.fechaFin,
+      estadoPropuesta: req.body.estadoPropuesta,
+      imagen: req.body.imagen,
+      idOngAsignada: req.body.idOngAsignada || null
+    };
+
+    console.log('Campos a actualizar:', camposActualizables);
+
+    await propuesta.update(camposActualizables);
+    
+    const propuestaActualizada = await Propuesta.findByPk(req.params.id, {
+      include: [
+        { model: Usuario, as: 'organizador', attributes: ['nombre'] },
+        { model: Usuario, as: 'ongAsignada', attributes: ['nombre'] }
+      ]
+    });
+    
+    console.log('✅ Propuesta actualizada:', propuestaActualizada.toJSON());
+    res.json(propuestaActualizada);
+    
+  } catch (error) {
+    console.error('ERROR updatePropuesta:', error.message);
+    console.error('Stack completo:', error.stack);
+    res.status(500).json({ message: 'Error al actualizar propuesta', error: error.message });
+  }
+};
+
+
+/*
+exports.update = async (req, res) => {
+  console.log('=== UPDATE PROPUESTA ===');
+  console.log('ID:', req.params.id);
+  console.log('Datos recibidos:', req.body);
+  
+  try {
+    const propuesta = await Propuesta.findByPk(req.params.id, {
+      include: [
+        { model: Usuario, as: 'organizador', attributes: ['nombre'] },
+        { model: Usuario, as: 'ongAsignada', attributes: ['nombre'] }
+      ]
+    });
+    
+    if (!propuesta) {
+      console.log('Propuesta NO encontrada');
+      return res.status(404).json({ message: 'Propuesta no encontrada' });
+    }
+    
+    console.log('Propuesta encontrada:', propuesta.toJSON());
+
+    const camposActualizables = {
+      titulo: req.body.titulo,
+      descripcion: req.body.descripcion,
+      idTipoBien: req.body.tipoBien,
+      lugar: req.body.lugar,
+      fechaInicio: req.body.fechaInicio,
+      fechaFin: req.body.fechaFin,
+      estadoPropuesta: req.body.estadoPropuesta
+    };
+
+    console.log('Campos a actualizar:', camposActualizables);
+
+    await propuesta.update(camposActualizables);
+    
+    console.log('Propuesta actualizada correctamente');
+    res.json(propuesta);
+    
+  } catch (error) {
+    console.error('ERROR updatePropuesta:', error.message);
+    console.error('Stack completo:', error.stack);
+    res.status(500).json({ message: 'Error al actualizar propuesta', error: error.message });
+  }
+};
 
 
 exports.update = async (req, res) => {
@@ -115,6 +278,7 @@ exports.update = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar' });
   }
 };
+*/
 
 exports.delete = async (req, res) => {
   try {

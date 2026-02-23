@@ -161,6 +161,50 @@
   .info-item {
     display: flex;
     align-items: flex-start;
+    margin-bottom: 16px;
+    
+    ion-icon {
+      font-size: 22px;
+      color: #10b981;
+      margin-right: 12px;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    
+    div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      
+      .label {
+        font-size: 13px;
+        color: #064e3b;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      
+      ion-input.input-inline,
+      ion-select.select-inline {
+        align-self: stretch;
+      }
+      
+      .value {
+        font-size: 15px;
+        color: #10b981;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+/*
+.info-grid {
+  margin-bottom: 20px;
+  
+  .info-item {
+    display: flex;
+    align-items: flex-start;
     margin-bottom: 20px;
     
     ion-icon {
@@ -195,6 +239,7 @@
     }
   }
 }
+*/
 
 .separator {
   margin: 15px 0;
