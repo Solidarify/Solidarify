@@ -30,17 +30,18 @@ export class CrearPropuestaPage implements OnInit {
   fechaMinima: string = new Date().toISOString();
 
   tiposBienes = [
-    { id: 1, nombre: 'Alimentos no perecederos' },
-    { id: 2, nombre: 'Ropa y calzado' },
-    { id: 3, nombre: 'Juguetes' },
-    { id: 4, nombre: 'Material escolar' },
-    { id: 5, nombre: 'Productos de higiene' },
-    { id: 6, nombre: 'Medicamentos' },
-    { id: 7, nombre: 'Muebles' },
-    { id: 8, nombre: 'Libros' },
-    { id: 9, nombre: 'Electrodomésticos' },
-    { id: 10, nombre: 'Otros' }
+    { id: 1, nombre: 'Alimentos', descripcion: 'Comida no perecedera y agua' },
+    { id: 2, nombre: 'Material Escolar', descripcion: 'Libros, mochilas y papelería' },
+    { id: 3, nombre: 'Ropa', descripcion: 'Prendas de vestir para todas las edades' },
+    { id: 4, nombre: 'Medicamentos', descripcion: 'Suministros de primeros auxilios y medicinas' },
+    { id: 5, nombre: 'Muebles', descripcion: 'Mobiliario para hogares desfavorecidos' },
+    { id: 6, nombre: 'Electrodomésticos', descripcion: 'Aparatos de primera necesidad' },
+    { id: 7, nombre: 'Juguetes', descripcion: 'Juguetes nuevos o en buen estado para niños' },
+    { id: 8, nombre: 'Higiene', descripcion: 'Productos de limpieza personal y para el hogar' },
+    { id: 9, nombre: 'Tecnología', descripcion: 'Ordenadores y tablets para brecha digital' },
+    { id: 10, nombre: 'Material Deportivo', descripcion: 'Equipamiento para deporte inclusivo' }
   ];
+
 
   estadosPropuesta = [
     { value: 'borrador', label: 'Borrador (solo tú lo verás)' },

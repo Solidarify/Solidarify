@@ -104,13 +104,17 @@ private async cargarNombreOrganizador() {
   }
 
   get tipoBienNombre(): string {
-    const map: {[key: number]: string} = {
+     const map: {[key: number]: string} = {
       1: 'Alimentos',
-      2: 'Ropa',
-      3: 'Juguetes',
-      4: 'Material Escolar',
-      5: 'Higiene',
-      10: 'Otros'
+      2: 'Material Escolar',
+      3: 'Ropa',
+      4: 'Medicamentos',
+      5: 'Muebles',
+      6: 'Electrodomésticos',
+      7: 'Juguetes',
+      8: 'Higiene',
+      9: 'Tecnología',
+      10: 'Material Deportivo'
     };
     return map[this.propuestaEditada.idTipoBien] || 'Varios';
   }
