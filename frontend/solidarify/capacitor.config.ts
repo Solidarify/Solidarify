@@ -1,20 +1,23 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter', // Tu ID de paquete
+  appId: 'io.ionic.starter', 
   appName: 'Solidarify',
   webDir: 'www',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     allowNavigation: [
       '192.168.1.*',
-      'tu-api-en-produccion.com' 
-    ]
+      'tu-api-en-produccion.com'
+
+    ],
+    cleartext: true
   },
   plugins: {
     CapacitorHttp: {
       enabled: true, 
     },
+  
   },
 };
 
