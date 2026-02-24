@@ -132,37 +132,6 @@ exports.create = async (req, res) => {
   }
 };
 
-
-/*
-exports.create = async (req, res) => {
-  try {
-    const { titulo, descripcion, tipoBien, lugar, fechaInicio, fechaFin, estadoPropuesta } = req.body;
-    const idOrganizador = req.userData.userId; 
-
-    if (!idOrganizador) {
-      return res.status(400).json({ message: 'No se pudo identificar al organizador.' });
-    }
-
-    const nuevaPropuesta = await Propuesta.create({
-      titulo,
-      descripcion,
-      idTipoBien: tipoBien,
-      lugar,
-      fechaInicio,
-      fechaFin,
-      estadoPropuesta,
-      fechaPublicacion: new Date(),
-      idOrganizador: idOrganizador 
-    });
-
-    res.status(201).json(nuevaPropuesta);
-
-  } catch (error) {
-    res.status(500).json({ message: 'Error al crear la propuesta' });
-  }
-};
-*/
-
 exports.update = async (req, res) => {
   console.log('=== UPDATE PROPUESTA ===');
   console.log('ID:', req.params.id);
@@ -215,70 +184,6 @@ exports.update = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar propuesta', error: error.message });
   }
 };
-
-
-/*
-exports.update = async (req, res) => {
-  console.log('=== UPDATE PROPUESTA ===');
-  console.log('ID:', req.params.id);
-  console.log('Datos recibidos:', req.body);
-  
-  try {
-    const propuesta = await Propuesta.findByPk(req.params.id, {
-      include: [
-        { model: Usuario, as: 'organizador', attributes: ['nombre'] },
-        { model: Usuario, as: 'ongAsignada', attributes: ['nombre'] }
-      ]
-    });
-    
-    if (!propuesta) {
-      console.log('Propuesta NO encontrada');
-      return res.status(404).json({ message: 'Propuesta no encontrada' });
-    }
-    
-    console.log('Propuesta encontrada:', propuesta.toJSON());
-
-    const camposActualizables = {
-      titulo: req.body.titulo,
-      descripcion: req.body.descripcion,
-      idTipoBien: req.body.tipoBien,
-      lugar: req.body.lugar,
-      fechaInicio: req.body.fechaInicio,
-      fechaFin: req.body.fechaFin,
-      estadoPropuesta: req.body.estadoPropuesta
-    };
-
-    console.log('Campos a actualizar:', camposActualizables);
-
-    await propuesta.update(camposActualizables);
-    
-    console.log('Propuesta actualizada correctamente');
-    res.json(propuesta);
-    
-  } catch (error) {
-    console.error('ERROR updatePropuesta:', error.message);
-    console.error('Stack completo:', error.stack);
-    res.status(500).json({ message: 'Error al actualizar propuesta', error: error.message });
-  }
-};
-
-
-exports.update = async (req, res) => {
-  try {
-    const [updated] = await Propuesta.update(req.body, {
-      where: { idPropuesta: req.params.id }
-    });
-
-    if (updated) {
-      const updatedPropuesta = await Propuesta.findByPk(req.params.id);
-      return res.json(updatedPropuesta);
-    }
-    throw new Error('Propuesta no encontrada');
-  } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar' });
-  }
-};
-*/
 
 exports.delete = async (req, res) => {
   try {

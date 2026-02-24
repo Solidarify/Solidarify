@@ -12,7 +12,6 @@ import { Auth } from '../services/auth';
 })
 export class RegisterPage implements OnInit {
   
-  // INYECCIONES
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private alertCtrl = inject(AlertController);
