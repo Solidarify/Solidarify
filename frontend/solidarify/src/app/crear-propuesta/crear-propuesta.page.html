@@ -1,0 +1,141 @@
+<ion-content class="ion-padding">
+  <div class="crear-propuesta-content">
+    
+    <div class="header-section">
+      <div class="icon-wrapper">
+        <ion-icon name="add"></ion-icon>
+      </div>
+      <h1>Nueva Iniciativa</h1>
+      <p>Completa los detalles para comenzar a ayudar</p>
+    </div>
+
+    <form [formGroup]="propuestaForm" (ngSubmit)="onSubmit()">
+      
+      <div class="input-group">
+        <ion-label class="custom-label">Título de la propuesta</ion-label>
+        <ion-item lines="none" class="custom-input" 
+                  [class.error-border]="f['titulo'].invalid && f['titulo'].touched">
+          <ion-input formControlName="titulo" placeholder="Ej. Recogida de alimentos"></ion-input>
+        </ion-item>
+        
+        <div class="error-msg" *ngIf="f['titulo'].hasError('required') && f['titulo'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> El título es obligatorio
+        </div>
+        <div class="error-msg" *ngIf="f['titulo'].hasError('minlength') && f['titulo'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Mínimo 5 caracteres
+        </div>
+      </div>
+
+      <div class="input-group">
+        <ion-label class="custom-label">Descripción detallada</ion-label>
+        <ion-item lines="none" class="custom-input area-input"
+                  [class.error-border]="f['descripcion'].invalid && f['descripcion'].touched">
+          <ion-textarea formControlName="descripcion" rows="4" placeholder="Describe qué se necesita..."></ion-textarea>
+        </ion-item>
+
+        <div class="error-msg" *ngIf="f['descripcion'].hasError('required') && f['descripcion'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> La descripción es obligatoria
+        </div>
+        <div class="error-msg" *ngIf="f['descripcion'].hasError('minlength') && f['descripcion'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Mínimo 20 caracteres
+        </div>
+      </div>
+
+      <div class="input-group">
+        <ion-label class="custom-label">Tipo de ayuda</ion-label>
+        <ion-item lines="none" class="custom-input"
+                  [class.error-border]="f['tipoBien'].invalid && f['tipoBien'].touched">
+          <ion-select formControlName="tipoBien" interface="popover" placeholder="Selecciona una categoría">
+            <ion-select-option *ngFor="let tipo of tiposBienes" [value]="tipo.id">
+              {{ tipo.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        
+        <div class="error-msg" *ngIf="f['tipoBien'].hasError('required') && f['tipoBien'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Selecciona un tipo de ayuda
+        </div>
+      </div>
+
+      <div class="input-group">
+        <ion-label class="custom-label">Ubicación</ion-label>
+        <ion-item lines="none" class="custom-input"
+                  [class.error-border]="f['lugar'].invalid && f['lugar'].touched">
+          <ion-input formControlName="lugar" placeholder="Ciudad, Barrio o Dirección"></ion-input>
+        </ion-item>
+
+        <div class="error-msg" *ngIf="f['lugar'].hasError('required') && f['lugar'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Indica dónde se realizará
+        </div>
+         <div class="error-msg" *ngIf="f['lugar'].hasError('minlength') && f['lugar'].touched">
+          <ion-icon name="alert-circle-outline"></ion-icon> Mínimo 5 caracteres
+        </div>
+      </div>
+
+      <div class="date-row">
+        <div class="date-col">
+          <ion-label class="custom-label">Fecha Inicio</ion-label>
+          <ion-datetime-button datetime="datetime-inicio"></ion-datetime-button>
+          
+          <div class="error-msg" *ngIf="f['fechaInicio'].hasError('required') && f['fechaInicio'].touched">
+            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
+          </div>
+          
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime 
+                id="datetime-inicio" 
+                presentation="date"
+                [showDefaultButtons]="true"
+                doneText="Confirmar"
+                cancelText="Cancelar"
+                [min]="fechaMinima"
+                (ionChange)="onFechaInicioChange($event)"
+                formControlName="fechaInicio">
+              </ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </div>
+        
+        <div class="date-col">
+          <ion-label class="custom-label">Fecha Fin</ion-label>
+          <ion-datetime-button datetime="datetime-fin"></ion-datetime-button>
+          
+          <div class="error-msg" *ngIf="f['fechaFin'].hasError('required') && f['fechaFin'].touched">
+            <ion-icon name="alert-circle-outline"></ion-icon> Requerido
+          </div>
+
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime 
+                id="datetime-fin" 
+                presentation="date"
+                [showDefaultButtons]="true"
+                doneText="Confirmar"
+                cancelText="Cancelar"
+                [min]="fechaMinima"
+                formControlName="fechaFin"> 
+              </ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <ion-label class="custom-label">Estado inicial</ion-label>
+        <ion-item lines="none" class="custom-input">
+          <ion-select formControlName="estadoPropuesta" interface="popover">
+            <ion-select-option *ngFor="let estado of estadosPropuesta" [value]="estado.value">
+              {{ estado.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <ion-button class="submit-btn" expand="block" type="submit" [disabled]="propuestaForm.invalid">
+        <span>PUBLICAR PROPUESTA</span>
+      </ion-button>
+
+    </form>
+  </div>
+</ion-content>

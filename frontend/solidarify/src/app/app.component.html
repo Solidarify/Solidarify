@@ -1,3 +1,23 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-menu contentId="main-content" type="overlay" side="start" *ngIf="isLoggedIn">
+    <app-sidemenu 
+      [currentUser]="currentUser" 
+      [isLoggedIn]="isLoggedIn"
+      (onLogout)="logout()">
+    </app-sidemenu>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    
+    <app-header 
+      [isLoggedIn]="isLoggedIn"
+      [currentUser]="currentUser"
+      (onShowLogin)="showLogin()"
+      (onShowRegister)="showRegister()"
+      (onLogout)="logout()">
+    </app-header>
+
+    <ion-router-outlet></ion-router-outlet>
+    
+  </div>
 </ion-app>

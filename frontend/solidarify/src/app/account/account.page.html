@@ -1,0 +1,166 @@
+<ion-content [fullscreen]="true" class="bg-gradient">
+  
+  <div *ngIf="loading()" class="loading-overlay">
+    <ion-spinner name="bubbles" color="light"></ion-spinner>
+    <p>Cargando tu espacio...</p>
+  </div>
+
+  <div *ngIf="!loading() && !usuario()" class="no-user-state">
+    <div class="icon-circle">
+      <ion-icon name="person"></ion-icon>
+    </div>
+    <h3>¡Hola, desconocido!</h3>
+    <p>Inicia sesión para gestionar tu perfil y unirte a causas solidarias.</p>
+    <ion-button routerLink="/login" class="btn-login" shape="round">
+      Iniciar Sesión
+      <ion-icon name="arrow-forward" slot="end"></ion-icon>
+    </ion-button>
+  </div>
+
+  <div *ngIf="!loading() && usuario()" class="profile-wrapper fade-in">
+    
+    <div class="profile-header">
+      <div class="header-bg"></div>
+      
+      <div class="user-summary">
+        <div class="avatar-container" (click)="cambiarFoto()">
+          <img [src]="avatarUrl" alt="Avatar" class="avatar-img" />
+          <div class="edit-badge">
+            <ion-icon name="camera"></ion-icon>
+          </div>
+        </div>
+        
+        <h1 class="user-name">{{ usuario()?.nombre }}</h1>
+        <p class="user-role" *ngIf="rolesVisuales.length > 0">
+          {{ rolesVisuales[0] | titlecase }} 
+          <span class="status-dot"></span> Activo
+        </p>
+      </div>
+    </div>
+
+    <div class="cards-container">
+      
+      <div class="glass-card">
+        <div class="card-header">
+          <ion-icon name="person-circle-outline" class="card-icon"></ion-icon>
+          <h3>Información Personal</h3>
+          
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="activarEdicion()" 
+            *ngIf="!modoEdicion">
+            <ion-icon name="create-outline" slot="icon-only" color="medium"></ion-icon>
+          </ion-button>
+        </div>
+        
+        <div class="info-list" *ngIf="usuarioEditado">
+          
+          <div class="info-row">
+            <div class="label">Nombre completo</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.nombre }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.nombre" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="info-row">
+            <div class="label">Correo electrónico</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.email }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.email" type="email" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="info-row">
+            <div class="label">Teléfono</div>
+            <div *ngIf="!modoEdicion" class="value">{{ usuario()?.telefono || 'Sin especificar' }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+              <ion-input [(ngModel)]="usuarioEditado.telefono" type="tel" placeholder="+34..." class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card ong-card" *ngIf="esONG() && perfilONG() && perfilONGEditado">
+        <div class="card-header">
+          <ion-icon name="heart-circle-outline" class="card-icon"></ion-icon>
+          <h3>Datos de la ONG</h3>
+          <div class="verified-tag" [class.verified]="perfilONG()?.isVerified">
+            {{ perfilONG()?.isVerified ? 'Verificada' : 'Pendiente' }}
+          </div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <div class="label">Organización</div>
+            <div *ngIf="!modoEdicion" class="value">{{ perfilONG()?.nombreLegal }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.nombreLegal" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="info-row">
+            <div class="label">CIF</div>
+            <div *ngIf="!modoEdicion" class="value mono">{{ perfilONG()?.cif }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.cif" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+          
+          <div class="info-row full">
+            <div class="label">Sitio Web</div>
+            <div *ngIf="!modoEdicion" class="value link">{{ perfilONG()?.web || '-' }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="perfilONGEditado.web" placeholder="https://..." class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </div>
+
+       <div class="glass-card org-card" *ngIf="esOrganizador() && organizador() && organizadorEditado">
+        <div class="card-header">
+          <ion-icon name="briefcase-outline" class="card-icon"></ion-icon>
+          <h3>Datos Organizador</h3>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <div class="label">Entidad</div>
+            <div *ngIf="!modoEdicion" class="value">{{ organizador()?.nombre }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="organizadorEditado.nombre" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="info-row">
+            <div class="label">Zona</div>
+            <div *ngIf="!modoEdicion" class="value">{{ organizador()?.zonaResponsable }}</div>
+            <ion-item *ngIf="modoEdicion" class="input-item" lines="none">
+               <ion-input [(ngModel)]="organizadorEditado.zonaResponsable" class="input-modern"></ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="logout-container" *ngIf="!modoEdicion">
+        <ion-button fill="outline" color="danger" class="btn-logout" (click)="logout()">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Cerrar Sesión
+        </ion-button>
+      </div>
+
+    </div>
+
+    <div class="actions-bar" *ngIf="modoEdicion">
+      <ion-button fill="clear" color="dark" (click)="cancelarEdicion()">
+        Cancelar
+      </ion-button>
+      <ion-button color="dark" shape="round" (click)="guardarCambios()" class="save-btn">
+        Guardar
+      </ion-button>
+    </div>
+
+  </div>
+
+</ion-content>

@@ -1,0 +1,33 @@
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; 
+  overflow: hidden; 
+}
+
+ion-menu {
+  --width: 300px;
+  height: 100%;
+}
+
+.ion-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+app-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  flex-shrink: 0; 
+}
+
+ion-router-outlet {
+  flex: 1; 
+  overflow: auto; 
+  position: relative;
+  contain: layout size style;
+}

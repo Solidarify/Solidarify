@@ -1,0 +1,105 @@
+<ion-content [fullscreen]="true" class="bg-light">
+  <div class="header-section ion-padding">
+    <div class="saludo">
+      <p>Panel <strong>{{ auth.currentUser()?.roles?.[0] || 'Usuario' }}</strong> 👋</p>
+      <h1>Estadísticas <br><span class="highlight">Globales</span></h1>
+    </div>
+  </div>
+
+  <div class="stats-container ion-padding-horizontal">
+    <div class="impact-card">
+      
+      <div class="stat-item">
+        <span class="number" *ngIf="!cargando">{{ stats.totalPropuestas }}</span>
+        <ion-skeleton-text *ngIf="cargando" animated style="width:40px; height:24px; margin: 0 auto;"></ion-skeleton-text>
+        <span class="label">Propuestas</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="stat-item">
+        <span class="number" *ngIf="!cargando">{{ stats.totalUsuarios }}</span>
+        <ion-skeleton-text *ngIf="cargando" animated style="width:40px; height:24px; margin: 0 auto;"></ion-skeleton-text>
+        <span class="label">Usuarios</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="stat-item">
+        <span class="number" *ngIf="!cargando">{{ stats.ongsVerificadas }}</span>
+        <ion-skeleton-text *ngIf="cargando" animated style="width:40px; height:24px; margin: 0 auto;"></ion-skeleton-text>
+        <span class="label">ONGs ✓</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-title ion-padding-top ion-padding-horizontal">
+    <h3>Todas las métricas</h3>
+  </div>
+
+  <ion-grid class="menu-grid">
+    <ion-row>
+      <ion-col size="6">
+        <div class="menu-card primary">
+          <div class="icon-circle"><ion-icon name="people"></ion-icon></div>
+          <h5>Usuarios<br>Total</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.totalUsuarios }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card secondary">
+          <div class="icon-circle"><ion-icon name="document-text"></ion-icon></div>
+          <h5>Propuestas<br>Totales</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.totalPropuestas }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card success">
+          <div class="icon-circle"><ion-icon name="earth"></ion-icon></div>
+          <h5>Públicas<br>Activas</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.propuestasPublicas }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card danger">
+          <div class="icon-circle"><ion-icon name="business"></ion-icon></div>
+          <h5>ONGs<br>Registradas</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.totalOngs }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card warning">
+          <div class="icon-circle"><ion-icon name="checkmark-circle"></ion-icon></div>
+          <h5>Verificadas</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.ongsVerificadas }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="menu-card dark">
+          <div class="icon-circle"><ion-icon name="home"></ion-icon></div>
+          <h5>Organizadores</h5>
+          <div class="stat-number">
+             <span *ngIf="!cargando">{{ stats.totalOrganizadores }}</span>
+             <ion-skeleton-text *ngIf="cargando" animated style="width:30px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

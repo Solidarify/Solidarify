@@ -1,148 +1,213 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-
-type AuthMode = 'none' | 'login' | 'register';
-type UserRole = 'ONG' | 'ORGANIZADOR' | '';
+import { AlertController, ModalController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
+import { Propuesta } from '../services/propuesta';
+import { Auth } from '../services/auth';
+import { PropuestaModel } from '../models/propuesta.model';
+import { PropuestaDetalleComponent } from '../modals/propuesta-detalle/propuesta-detalle.component';
 
 @Component({
   selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
-  standalone: false,
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
+  standalone: false
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  
+  private modalCtrl = inject(ModalController);
+  private auth = inject(Auth);
+  private router = inject(Router);
+  private alertCtrl = inject(AlertController);
+  private propuestaService = inject(Propuesta);
 
-  authMode: AuthMode = 'none';
-  selectedRole: UserRole = '';
-  isLoggedIn = false;
-  currentUser: { role: UserRole; nombre: string } | null = null;
+  currentUser = this.auth.currentUser; 
+  isLoggedIn = this.auth.isAuthenticated; 
 
-  loginForm = { 
-    email: '',      // Usuario.Email VARCHAR(150)
-    password: ''    // Usuario.Password_Hash VARCHAR(255)
+  propuestasUrgentes: PropuestaModel[] = [];
+  cargando = true;
+
+  stats = {
+    ayudasCompletadas: 0,
+    ayudasEnCurso: 0
   };
 
-  registerForm = {
-    //Usuario
-    nombre: '',           // Usuario.Nombre VARCHAR(100)
-    email: '',            // Usuario.Email VARCHAR(150) UNIQUE
-    password: '',         // Usuario.Password_Hash VARCHAR(255)
-    telefono: '',         // Usuario.Telefono VARCHAR(20)
+  constructor() {}
 
-    //Organizador
-    orgNombre: '',        // Organizador.Nombre VARCHAR(150)
-    orgCif: '',           // Organizador.CIF VARCHAR(20) UNIQUE
-    orgEmail: '',         // Organizador.Email VARCHAR(150)
-    orgCargo: '',         // Organizador.Cargo VARCHAR(100)
-    orgZona: '',          // Organizador.Zona_Responsable VARCHAR(100)
-
-    //PerfilONG
-    ongNombreLegal: '',   // PerfilONG.Nombre_Legal VARCHAR(150)
-    ongCif: '',           // PerfilONG.CIF VARCHAR(20) UNIQUE
-    ongWeb: '',           // PerfilONG.Web VARCHAR(200)
-  };
-
-  constructor(private router: Router) { }
-
-  navigateTo(route: string) {
-    this.router.navigate([route]);
-  }
-
-  showLogin() {
-    this.authMode = 'login';
-    this.selectedRole = '';
-  }
-
-  showRegister() {
-    this.authMode = 'register';
-    this.selectedRole = '';
-  }
-
-  closeForm() {
-    this.authMode = 'none';
-    this.selectedRole = '';
-    this.resetForms();
-  }
-
-  onRoleChange(ev: any) {
-    this.selectedRole = ev.detail.value;
-  }
-
-  submitLogin() {
-    if (!this.selectedRole || !this.loginForm.email || !this.loginForm.password) return;
-
-    console.log('LOGIN BD →', {
-      table: 'Usuario',
-      Email: this.loginForm.email,
-      Rol: this.selectedRole // Id_Rol: 2=ORGANIZADOR, 3=ONG
-    });
-
-    this.isLoggedIn = true;
-
-    this.currentUser = {
-      role: this.selectedRole,
-      nombre: this.loginForm.email.split('@')[0]
-    };
-
-    this.closeForm();
-  }
-
-  submitRegister() {
-    if (!this.selectedRole || !this.registerForm.nombre || !this.registerForm.email) return;
-
-    const usuarioData = {
-      table: 'Usuario',
-      Nombre: this.registerForm.nombre,
-      Email: this.registerForm.email,
-      Password_Hash: 'hash_' + this.registerForm.password,
-      Telefono: this.registerForm.telefono || null
-    };
-
-    let perfilData = null;
-
-    if (this.selectedRole === 'ORGANIZADOR') {
-      perfilData = {
-        table: 'Organizador',
-        Nombre: this.registerForm.orgNombre,
-        CIF: this.registerForm.orgCif,
-        Email: this.registerForm.orgEmail,
-        Cargo: this.registerForm.orgCargo,
-        Zona_Responsable: this.registerForm.orgZona
-      };
-
-    } else if (this.selectedRole === 'ONG') {
-      perfilData = {
-        table: 'PerfilONG',
-        Nombre_Legal: this.registerForm.ongNombreLegal,
-        CIF: this.registerForm.ongCif,
-        Web: this.registerForm.ongWeb
-      };
+  async ngOnInit() {
+    await this.cargarUrgentes();
+    if (this.isLoggedIn()) {
+      await this.cargarEstadisticas();
     }
+  }
 
-    console.log('REGISTER BD →', { usuarioData, perfilData });
-
-    this.isLoggedIn = true;
-
-    this.currentUser = {
-      role: this.selectedRole,
-      nombre: this.registerForm.nombre
-    };
+  get avatarUrl(): string {
+    const u = this.currentUser();
     
-    this.closeForm();
+    if (u?.fotoPerfil) {
+      return u.fotoPerfil.startsWith('data:image') 
+        ? u.fotoPerfil 
+        : `data:image/jpeg;base64,${u.fotoPerfil}`;
+    }
+    
+    return u 
+      ? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=10b981&color=fff`
+      : '';
+  }
+
+  async cargarEstadisticas() {
+    const user = this.currentUser();
+    if (!user) return;
+
+    try {
+      const todas = await firstValueFrom(this.propuestaService.getAll());
+      
+      const misPropuestas = todas.filter(p => 
+        p.idOrganizador === user.idUsuario || p.idOngAsignada === user.idUsuario
+      );
+
+      this.stats.ayudasEnCurso = misPropuestas.filter(p => p.estadoPropuesta !== 'completada' && p.estadoPropuesta !== 'cancelada').length;
+      this.stats.ayudasCompletadas = misPropuestas.filter(p => p.estadoPropuesta === 'completada').length;
+
+    } catch (error) {
+    }
+  }
+
+  async cargarUrgentes() {
+    this.cargando = true;
+    try {
+      const todas = await firstValueFrom(this.propuestaService.getAll());
+      
+      const hoy = new Date();
+      const enSieteDias = new Date();
+      enSieteDias.setDate(hoy.getDate() + 7);
+
+      this.propuestasUrgentes = todas.filter(p => {
+        const fechaFin = new Date(p.fechaFin);
+        return p.estadoPropuesta === 'publicada' && 
+               fechaFin >= hoy && 
+               fechaFin <= enSieteDias;
+      });
+
+    } catch (error) {
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  getDiasRestantes(fechaFin: Date | string | undefined): number {
+    if (!fechaFin) return 0;
+    const fin = new Date(fechaFin).getTime();
+    const hoy = new Date().getTime();
+    const diff = Math.ceil((fin - hoy) / (1000 * 3600 * 24));
+    return diff > 0 ? diff : 0;
+  }
+
+  async irADetalle(propuesta: PropuestaModel) {
+    const modal = await this.modalCtrl.create({
+      component: PropuestaDetalleComponent,
+      componentProps: { propuesta } 
+    });
+    
+    await modal.present();
+    
+    const { data } = await modal.onWillDismiss();
+    if (data?.refresh) {
+      this.cargarUrgentes();
+      if (this.isLoggedIn()) this.cargarEstadisticas(); 
+    }
+  }
+
+  navigateTo(route: string): void {
+    
+    switch(route) {
+      case '/crear-propuesta':
+        if (!this.canCreateProposal) { 
+          this.showPermissionAlert('crear');
+          return;
+        }
+        this.router.navigate([route]);
+        break;
+
+      case '/lista-propuestas/explore':
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+        break;
+
+      case '/lista-propuestas/mine':
+        this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+        break;
+        
+      case '/lista-propuestas':
+        if (this.canViewMyProposals) {
+          this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'mine' } });
+        } else {
+          this.router.navigate(['/lista-propuestas'], { queryParams: { mode: 'explore' } });
+        }
+        break;
+
+      case '/lista-ongs':
+        if (!this.canViewOngs) {
+          this.showPermissionAlert('ongs' as any); 
+          return;
+        }
+        this.router.navigate([route]).catch(err => {
+        });
+        break;
+        
+       case '/estadisticas':
+        if (!this.isLoggedIn()) {
+          this.showPermissionAlert('perfil');
+          return;
+        }
+        this.router.navigate(['/statistics']);
+        break;
+      case '/account':
+        if (!this.isLoggedIn()) { 
+          this.showPermissionAlert('perfil');
+          this.router.navigate(['/login']);
+          return; 
+        }
+        this.router.navigate([route]);
+        break;
+
+      default:
+        this.router.navigate([route]);
+        break;
+    }
   }
 
   logout() {
-    this.isLoggedIn = false;
-    this.currentUser = null;
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
-  private resetForms() {
-    this.loginForm = { email: '', password: '' };
-    this.registerForm = {
-      nombre: '', email: '', password: '', telefono: '',
-      orgNombre: '', orgCif: '', orgEmail: '', orgCargo: '', orgZona: '',
-      ongNombreLegal: '', ongCif: '', ongWeb: ''
-    };
+  get canCreateProposal(): boolean {
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ADMIN');
   }
 
+  get canViewMyProposals(): boolean {
+    return this.auth.hasRole('ORGANIZADOR') || this.auth.hasRole('ONG') || this.auth.hasRole('ADMIN');
+  }
+
+  get canViewOngs(): boolean {
+    return true; 
+  }
+
+  private async showPermissionAlert(option: 'crear' | 'mis' | 'perfil'): Promise<void> {
+    const roles = this.currentUser()?.roles?.join(', ') || 'Invitado';
+    let message = '';
+    
+    switch(option) {
+      case 'crear': message = `❌ Solo **ORGANIZADORES** y **ADMINS** pueden crear propuestas.`; break;
+      case 'mis': message = `❌ Solo **ORGANIZADORES**, **ONGs** y **ADMINS** tienen panel propio.`; break;
+      case 'perfil': message = `❌ Debes iniciar sesión para ver tu perfil.`; break;
+    }
+    
+    const alert = await this.alertCtrl.create({
+      header: 'Acceso restringido',
+      message: `${message}\n\nTu rol actual: **${roles}**`,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
 }

@@ -1,0 +1,102 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de ONGs</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar class="filter-toolbar">
+    <ion-segment [(ngModel)]="filtroEstado" mode="ios" value="todos" scrollable>
+      <ion-segment-button value="todos">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pendiente">
+        <ion-label>Pendientes ⚠️</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="verificado">
+        <ion-label>Verificadas ✅</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-light">
+  
+  <div class="ion-padding bg-transparent">
+    
+    <div *ngIf="cargando" class="ion-text-center ion-padding">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p class="ion-text-muted">Cargando datos...</p>
+    </div>
+
+    <div *ngIf="!cargando && ongsFiltradas.length === 0" class="empty-state bounce-in">
+      <div class="icon-circle">
+        <ion-icon name="folder-open-outline"></ion-icon>
+      </div>
+      <h3>Sin resultados</h3>
+      <p>No hay ONGs con estado <strong>{{ filtroEstado | uppercase }}</strong>.</p>
+    </div>
+
+    <ng-container *ngIf="!cargando">
+      <ion-card *ngFor="let ong of ongsFiltradas" 
+                class="ong-card slide-in" 
+                [ngClass]="ong.estadoVerificacion">
+        
+        <div class="card-status-bar"></div>
+
+        <ion-item lines="none" class="card-header">
+          <ion-avatar slot="start" class="avatar-shadow">
+            <img [src]="'https://ui-avatars.com/api/?name=' + (ong.nombreLegal || 'ONG') + '&background=random&size=128'" 
+                 alt="Logo ONG">
+          </ion-avatar>
+          
+          <ion-label>
+            <h2 class="ong-title">{{ ong.nombreLegal }}</h2>
+            <p class="ong-cif">CIF: {{ ong.cif }}</p>
+          </ion-label>
+          
+          <div class="status-badge" [ngClass]="ong.estadoVerificacion">
+            {{ ong.estadoVerificacion | titlecase }}
+          </div>
+        </ion-item>
+
+        <ion-card-content>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <ion-icon name="call" color="primary"></ion-icon>
+              <span>{{ ong.telefonoContacto || 'Sin teléfono' }}</span>
+            </div>
+            
+            <div class="info-item">
+              <ion-icon name="globe" color="primary"></ion-icon>
+              <ng-container *ngIf="ong.web; else noWeb">
+                <a [href]="ong.web" target="_blank">Visitar web</a>
+              </ng-container>
+              <ng-template #noWeb>
+                <span class="text-muted">Sin web</span>
+              </ng-template>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="actions">
+            <span class="date-info">
+              <ion-icon name="calendar-outline" style="vertical-align: text-bottom;"></ion-icon> 
+              Registro: {{ ong.createdAt | date:'shortDate' }}
+            </span>
+            
+            <ion-button fill="solid" size="small" shape="round" color="dark" (click)="gestionarOng(ong)">
+              <ion-icon name="settings-sharp" slot="start"></ion-icon>
+              Gestionar
+            </ion-button>
+          </div>
+
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+
+  </div>
+</ion-content>

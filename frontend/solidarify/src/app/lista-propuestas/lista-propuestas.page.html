@@ -1,0 +1,100 @@
+<ion-content [fullscreen]="true" class="bg-light">
+  
+  <div class="stats-card fade-in-down">
+    <div class="stats-content">
+      <div class="stat-text">
+        <div class="stat-number">
+          {{ totalPropuestas }}
+        </div>
+        <p class="stat-label">
+          {{ esUsuario ? 'Propuestas Activas' : pageTitle }}
+        </p>
+      </div>
+      
+      <ion-button 
+        *ngIf="!esUsuario" 
+        fill="clear" 
+        class="refresh-btn" 
+        (click)="limpiarFiltros()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="deco-circle"></div>
+  </div>
+
+  <div class="filtros-container fade-in-up">
+    <div class="search-bar">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input 
+        type="text" 
+        [formControl]="searchControl" 
+        placeholder="¿Qué quieres donar hoy?" 
+        class="native-input"
+      />
+    </div>
+  </div>
+
+  <div class="list-header" *ngIf="!loading">
+    <h3>Explorar <span>({{ totalPropuestas }})</span></h3>
+  </div>
+
+  <ng-container *ngIf="propuestas$ | async as propuestasList">
+    
+    <div class="propuestas-list" *ngIf="!loading">
+      
+      <div 
+        *ngFor="let propuesta of propuestasList; trackBy: trackById" 
+        class="propuesta-card scale-in"
+        [ngClass]="{'estado-pendiente': propuesta.estadoPropuesta === 'pendiente_ong'}"
+        (click)="verDetalle(propuesta)">
+        
+        <div class="card-icon-box">
+          <img *ngIf="propuesta.imagen" [src]="propuesta.imagen" alt="img" class="card-img">
+          <ion-icon *ngIf="!propuesta.imagen" name="gift-outline"></ion-icon>
+        </div>
+
+        <div class="card-info">
+          <h2 class="card-title">{{ propuesta.titulo }}</h2>
+          
+          <div *ngIf="propuesta.estadoPropuesta === 'pendiente_ong'" class="badge-pendiente">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Pendiente de respuesta
+          </div>
+
+          <div class="card-meta">
+            <div class="meta-item location">
+              <ion-icon name="location-sharp"></ion-icon>
+              <span>{{ propuesta.lugar || 'Ubicación pendiente' }}</span>
+            </div>
+          </div>
+
+          <div class="card-tags">
+            <span class="tag-date">
+              {{ propuesta.fechaInicio | date:'d MMM' }} - {{ propuesta.fechaFin | date:'d MMM' }}
+            </span>
+          </div>
+        </div> 
+
+        <div class="card-action">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+      </div>
+      <div *ngIf="propuestasList.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="search"></ion-icon>
+        </div>
+        <p>No encontramos propuestas con ese criterio.</p>
+        <ion-button fill="clear" color="primary" (click)="limpiarFiltros()">Ver todas</ion-button>
+      </div>
+
+    </div> <
+
+  </ng-container>
+  
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Buscando causas solidarias...</p>
+  </div>
+
+</ion-content>

@@ -1,0 +1,105 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Propuestas</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar class="filter-toolbar">
+    <ion-segment [(ngModel)]="filtroEstado" scrollable mode="ios" value="todos">
+      <ion-segment-button value="todos">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="publicada">
+        <ion-label>Activas 🚀</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="borrador">
+        <ion-label>Borrador 📝</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="en_proceso">
+        <ion-label>En Proceso 🤝</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-light">
+  
+  <div class="ion-padding bg-transparent">
+
+    <div *ngIf="loading" class="ion-text-center ion-padding">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p class="ion-text-muted">Cargando propuestas...</p>
+    </div>
+
+    <div *ngIf="!loading && propuestasFiltradas.length === 0" class="empty-state bounce-in">
+      <div class="icon-circle">
+        <ion-icon name="file-tray-outline"></ion-icon>
+      </div>
+      <h3>Sin Propuestas</h3>
+      <p>No hay propuestas en estado <strong>{{ filtroEstado | uppercase }}</strong>.</p>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <ion-card *ngFor="let p of propuestasFiltradas" 
+                class="propuesta-card slide-in" 
+                [ngClass]="p.estadoPropuesta">
+        
+        <div class="card-status-bar"></div> 
+
+        <div class="status-badge" [ngClass]="p.estadoPropuesta">
+          {{ p.estadoPropuesta | titlecase }}
+        </div>
+
+        <ion-item lines="none" class="card-header-item">
+          <ion-thumbnail slot="start">
+            <img [src]="p.imagen || 'https://placehold.co/100x100?text=Sin+Foto'" alt="propuesta">
+          </ion-thumbnail>
+          
+          <ion-label class="ion-text-wrap">
+            <h2 class="propuesta-title">{{ p.titulo }}</h2>
+            <p class="propuesta-desc">{{ p.descripcion }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-card-content>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <ion-icon name="finger-print-outline" color="medium"></ion-icon>
+              <span>ID: <strong>{{ p.idPropuesta }}</strong></span>
+            </div>
+
+            <div class="info-item">
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              <span>Org: <strong>#{{ p.idOrganizador }}</strong></span>
+            </div>
+
+            <div class="info-item" *ngIf="p.lugar">
+              <ion-icon name="location-outline" color="secondary"></ion-icon>
+              <span>{{ p.lugar }}</span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="actions">
+            <div class="date-info">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ p.fechaInicio | date:'shortDate' }}
+            </div>
+            
+            <ion-button fill="solid" size="small" shape="round" color="dark" (click)="gestionar(p)">
+              <ion-icon name="settings-sharp" slot="start"></ion-icon>
+              Administrar
+            </ion-button>
+          </div>
+
+        </ion-card-content>
+
+      </ion-card>
+    </ng-container>
+
+  </div>
+</ion-content>

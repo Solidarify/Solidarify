@@ -1,0 +1,63 @@
+<ion-content class="ion-padding" fullscreen="true">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="heart-circle" class="login-logo"></ion-icon>
+      <h1>Bienvenido a Solidarify</h1>
+    </div>
+    
+    <div class="login-card">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <ion-item lines="full" class="ion-margin-bottom">
+          <ion-label position="floating">Email *</ion-label>
+          <ion-input 
+            formControlName="email" 
+            type="email" 
+            placeholder="ej: usuario@solidarify.com">
+          </ion-input>
+          <ion-note slot="error" *ngIf="emailField?.hasError('required') && emailField?.touched">
+            El email es obligatorio
+          </ion-note>
+          <ion-note slot="error" *ngIf="emailField?.hasError('email') && emailField?.touched">
+            Formato de email inválido
+          </ion-note>
+        </ion-item>
+
+        <ion-item lines="full" class="ion-margin-bottom">
+          <ion-label position="floating">Contraseña *</ion-label>
+          <ion-input 
+            formControlName="password" 
+            type="password"
+            placeholder="******">
+          </ion-input>
+          <ion-note slot="error" *ngIf="passwordField?.hasError('required') && passwordField?.touched">
+            La contraseña es obligatoria
+          </ion-note>
+          <ion-note slot="error" *ngIf="passwordField?.hasError('minlength') && passwordField?.touched">
+            Mínimo 3 caracteres
+          </ion-note>
+        </ion-item>
+
+        <ion-button 
+          expand="block" 
+          type="submit" 
+          color="primary" 
+          class="ion-margin-top submit-btn"
+          [disabled]="loginForm.invalid">
+          Entrar
+        </ion-button>
+
+      </form>
+
+      <ion-button 
+        expand="block" 
+        fill="clear" 
+        color="medium"
+        routerLink="/register"
+        class="ion-margin-top">
+        ¿Nueva cuenta? Regístrate
+      </ion-button>
+
+    </div>
+  </div>
+</ion-content>
