@@ -3,7 +3,7 @@
 # Guía de ejecución
 
 Previo: Debe haber creado la base de datos con nombre "solidarify", usando las sentencias SQL facilitadas en el documento
-llamado "Diagrama Relacional y Modelo Físico".
+llamado "Diagrama Relacional y Modelo Físico" y en la carpeta "bbdd.sql" (todos los usuarios tienen como contraseña 123456).
 
 1.- Clonar el proyecto a partir de la rama "main".
 
